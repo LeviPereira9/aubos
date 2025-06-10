@@ -46,7 +46,8 @@ public class SecurityJwtFilter extends OncePerRequestFilter {
             String token = this.recoverToken(request);
 
             if(token == null) {
-                throw CustomForbiddenActionException.noToken();
+                filterChain.doFilter(request, response);
+                return;
             }
 
             String subject = tokenService.validateToken(token);

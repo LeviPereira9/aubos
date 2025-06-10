@@ -1,5 +1,7 @@
 package lp.boble.aubos.security;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.exception.handler.FilterExceptionHandler;
 import lp.boble.aubos.security.apikey.SecurityApiKeyFilter;
@@ -7,6 +9,7 @@ import lp.boble.aubos.security.jwt.SecurityJwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,7 +24,24 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@SecurityScheme(name = SecurityConfigurations.SECURITY, type= SecuritySchemeType.HTTP, bearerFormat = "JWT", scheme =
+        "bearer")
 public class SecurityConfigurations {
+
+    public static final String SECURITY = "bearerAuth";
+
+    private static final String[] WHITE_LIST_URLS = {
+            "/v2/api-docs",
+            "/v3/api-docs",
+            "/v3/api-docs/**",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui/**",
+            "/webjars/**",
+            "/swagger-ui.html"
+    };
 
     private final SecurityJwtFilter securityJwtFilter;
     private final SecurityApiKeyFilter securityApiKeyFilter;
@@ -49,6 +69,7 @@ public class SecurityConfigurations {
                         authorize -> authorize
                                 .requestMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/user/login").permitAll()
+                                .requestMatchers(WHITE_LIST_URLS).permitAll()
                                 .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(filterExceptionHandler))

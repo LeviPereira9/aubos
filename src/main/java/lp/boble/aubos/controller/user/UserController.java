@@ -110,6 +110,7 @@ public class UserController {
     }
 
     @PutMapping("/{username}")
+
     public ResponseEntity<SuccessResponse<UserResponse>>
     updateUser(@PathVariable String username,
                @RequestBody UserUpdateRequest updateRequest){
