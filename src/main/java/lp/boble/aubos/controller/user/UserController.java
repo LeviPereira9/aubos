@@ -1,7 +1,17 @@
 package lp.boble.aubos.controller.user;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.docSnippets.SelfOrModError;
+import lp.boble.aubos.config.docSnippets.UsernameErrors;
 import lp.boble.aubos.dto.user.*;
+import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
@@ -10,12 +20,33 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(
+        name = "User",
+        description = "Endpoint de gerenciamento do usuário, incluindo registro, login, atualização, exclusão e busca de usuários."
+)
 @RestController
 @RequestMapping("${api.prefix}/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
+    @Operation(
+            summary = "Cria um novo usuário",
+            description = "Cria um novo usuário e retorna o Token para Login"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário criado com sucesso"),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Username/Email já estão cadastrados",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Username/Email fornecidos são inválidos",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @PostMapping("/register")
     public ResponseEntity<SuccessResponse<UserAuthResponse>>
     registerUser(@RequestBody UserRegisterRequest registerRequest) {
@@ -33,6 +64,18 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(
+            summary = "Entrar na conta",
+            description = "Retorna um Token para acesso"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário logado com sucesso"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Login/Senha fornecido é inválido",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @PostMapping("/login")
     public ResponseEntity<SuccessResponse<UserAuthResponse>>
     login(@RequestBody UserLoginRequest loginRequest) {
@@ -51,6 +94,16 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Buscar um usuário pelo username",
+            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação",
+            security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso"),
+    })
+    @SelfOrModError
+    @UsernameErrors
     @GetMapping("/{username}")
     public ResponseEntity<SuccessResponse<UserResponse>>
     getUserInfo(@PathVariable String username){
@@ -69,6 +122,15 @@ public class UserController {
     }
 
 
+    @Operation(
+            summary = "Buscar usuário por username",
+            description = "Qualquer usuário pode fazer esta ação, retorna apenas informações não sensíveis de usuários",
+            security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso.")
+    })
+    @UsernameErrors
     @GetMapping("/{username}/details")
     public ResponseEntity<SuccessResponse<UserShortResponse>>
     getUserShortInfo(@PathVariable String username){
@@ -85,6 +147,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
+    @Operation(
+            summary = "Listar usernames e displaynames pelo termo de busca",
+            description = "Qualquer usuário pode fazer esta ação, retorna usernames e seus status caso compartilhem do termo de busca semelhantes ao username ou displayname",
+            security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usernames encontrados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Termo inválido", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     @GetMapping("/search")
     public ResponseEntity<PageResponse<UserAutocompleteProjection>>
     getAutocompleteUser(
@@ -97,6 +168,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
+    @Operation(
+            summary = "Listar usuários pelo termo de busca",
+            description = "Qualquer usuário pode fazer esta ação, retorna usuários que compartilhem do termo de busca semelhantes ao username ou displayname",
+            security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuários encontrados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Termo inválido", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     @GetMapping("/suggestions")
     public ResponseEntity<PageResponse<UserSuggestionProjection>>
     getSuggestionsUser(
@@ -109,8 +189,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
+    @Operation(
+            summary = "Atualizar usuário",
+            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação",
+            security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
+    @SelfOrModError
+    @UsernameErrors
     @PutMapping("/{username}")
-
     public ResponseEntity<SuccessResponse<UserResponse>>
     updateUser(@PathVariable String username,
                @RequestBody UserUpdateRequest updateRequest){
@@ -128,6 +215,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
+
+    @Operation(
+            summary = "Soft delete",
+            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação",
+            security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso")
+    @SelfOrModError
+    @UsernameErrors
     @DeleteMapping("/{username}")
     public ResponseEntity<SuccessResponse<Void>>
     deleteUser(@PathVariable String username){
