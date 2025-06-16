@@ -16,9 +16,9 @@ mvn clean install
 
 Importar como projeto Maven. Baixar e atualizar dependências. Run classe principal com Java Application.
 
-Aplicação ficará disponível em: 
+A documentação interativa da API (Swagger UI) pode ser acessada em:
 
-http://localhost:8080/
+[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 ## Contribuição
 
