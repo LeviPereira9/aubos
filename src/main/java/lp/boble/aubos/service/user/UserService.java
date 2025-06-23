@@ -25,58 +25,11 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final AuthenticationManager authenticationManager;
-    private final TokenService tokenService;
     private final UserMapper userMapper;
     private final AuthUtil authUtil;
 
 
-    /**
-     * Autentica o usuário
-     * @param loginRequest - DTO com login e senha (em formato {@link UserLoginRequest}
-     * @return {@link UserAuthResponse} - token
-     * */
-    public UserAuthResponse login(UserLoginRequest loginRequest) {
 
-        UsernamePasswordAuthenticationToken usernamePassword =
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.login(),
-                        loginRequest.password()
-                );
-
-        Authentication auth = authenticationManager.authenticate(usernamePassword);
-
-        return new UserAuthResponse("Bearer " + tokenService.generateToken((UserModel) auth.getPrincipal()));
-
-    }
-
-    /**
-     * Registra um novo usuário no banco de dados.
-     * @param registerRequest - (em formato {@link UserRegisterRequest}
-     * @return {@link UserAuthResponse} - token.
-     * @throws CustomDuplicateFieldException quando: <br>
-     * * Username já está em uso. <br>
-     * * E-mail já está em uso.
-     *
-     * */
-    public UserAuthResponse register(UserRegisterRequest registerRequest){
-
-        if(userRepository.existsByUsername(registerRequest.username())){
-            throw CustomDuplicateFieldException.username();
-        }
-
-        if(userRepository.existsByEmail(registerRequest.email())){
-            throw CustomDuplicateFieldException.email();
-        }
-
-        String encryptedPassword = new BCryptPasswordEncoder().encode(registerRequest.password());
-        UserModel user = userMapper.fromRegisterToModel(registerRequest);
-        user.setPasswordHash(encryptedPassword);
-
-        UserModel createdUser = userRepository.save(user);
-
-        return new UserAuthResponse("Bearer " + tokenService.generateToken(createdUser));
-    }
 
     /**
      * Retorna todas as informações de um usuário
