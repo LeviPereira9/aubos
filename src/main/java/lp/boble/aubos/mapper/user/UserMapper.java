@@ -1,6 +1,6 @@
 package lp.boble.aubos.mapper.user;
 
-import lp.boble.aubos.dto.user.UserRegisterRequest;
+import lp.boble.aubos.dto.auth.AuthRegisterRequest;
 import lp.boble.aubos.dto.user.UserResponse;
 import lp.boble.aubos.dto.user.UserShortResponse;
 import lp.boble.aubos.dto.user.UserUpdateRequest;
@@ -15,7 +15,7 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
 
     @Mapping(target = "passwordHash", ignore = true)
-    UserModel fromRegisterToModel(UserRegisterRequest userRegisterRequest);
+    UserModel fromRegisterToModel(AuthRegisterRequest authRegisterRequest);
 
     @Mapping(target = "role", source = "role.name")
     @Mapping(target = "status", source = "status.name")

@@ -7,14 +7,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.user.UserAuthResponse;
-import lp.boble.aubos.dto.user.UserLoginRequest;
-import lp.boble.aubos.dto.user.UserRegisterRequest;
+import lp.boble.aubos.dto.auth.AuthRegisterRequest;
+import lp.boble.aubos.dto.auth.AuthResponse;
+import lp.boble.aubos.dto.auth.AuthLoginRequest;
 import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.auth.AuthService;
-import lp.boble.aubos.service.user.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${api.prefix}/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final UserService userService;
     private final AuthService authService;
 
     @Operation(
@@ -50,13 +48,13 @@ public class AuthController {
             )
     })
     @PostMapping("/register")
-    public ResponseEntity<SuccessResponse<UserAuthResponse>>
-    registerUser(@RequestBody UserRegisterRequest registerRequest) {
+    public ResponseEntity<SuccessResponse<AuthResponse>>
+    registerUser(@RequestBody AuthRegisterRequest registerRequest) {
 
-        UserAuthResponse responseData = authService.register(registerRequest);
+        AuthResponse responseData = authService.register(registerRequest);
 
-        SuccessResponse<UserAuthResponse> response =
-                new SuccessResponseBuilder<UserAuthResponse>()
+        SuccessResponse<AuthResponse> response =
+                new SuccessResponseBuilder<AuthResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Usuário registrado com sucesso.")
@@ -79,14 +77,14 @@ public class AuthController {
             )
     })
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponse<UserAuthResponse>>
-    login(@RequestBody UserLoginRequest loginRequest) {
+    public ResponseEntity<SuccessResponse<AuthResponse>>
+    login(@RequestBody AuthLoginRequest loginRequest) {
 
-        UserAuthResponse responseData = authService.login(loginRequest);
+        AuthResponse responseData = authService.login(loginRequest);
 
 
-        SuccessResponse<UserAuthResponse> response =
-                new SuccessResponseBuilder<UserAuthResponse>()
+        SuccessResponse<AuthResponse> response =
+                new SuccessResponseBuilder<AuthResponse>()
                         .operation("POST")
                         .code(HttpStatus.OK)
                         .message("Usuário logado com sucesso.")

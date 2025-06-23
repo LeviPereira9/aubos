@@ -1,9 +1,8 @@
-package lp.boble.aubos.dto.user;
+package lp.boble.aubos.dto.auth;
 
 import java.time.LocalDate;
-import java.util.Date;
 
-public record UserRegisterRequest(
+public record AuthRegisterRequest(
         String username,
         String displayName,
         String email,

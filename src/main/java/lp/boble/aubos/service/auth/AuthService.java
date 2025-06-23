@@ -1,9 +1,9 @@
 package lp.boble.aubos.service.auth;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.user.UserAuthResponse;
-import lp.boble.aubos.dto.user.UserLoginRequest;
-import lp.boble.aubos.dto.user.UserRegisterRequest;
+import lp.boble.aubos.dto.auth.AuthResponse;
+import lp.boble.aubos.dto.auth.AuthLoginRequest;
+import lp.boble.aubos.dto.auth.AuthRegisterRequest;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.mapper.user.UserMapper;
 import lp.boble.aubos.model.user.UserModel;
@@ -28,10 +28,10 @@ public class AuthService {
 
     /**
      * Autentica o usuário
-     * @param loginRequest - DTO com login e senha (em formato {@link UserLoginRequest}
-     * @return {@link UserAuthResponse} - token
+     * @param loginRequest - DTO com login e senha (em formato {@link AuthLoginRequest}
+     * @return {@link AuthResponse} - token
      * */
-    public UserAuthResponse login(UserLoginRequest loginRequest) {
+    public AuthResponse login(AuthLoginRequest loginRequest) {
 
         UsernamePasswordAuthenticationToken usernamePassword =
                 new UsernamePasswordAuthenticationToken(
@@ -41,20 +41,20 @@ public class AuthService {
 
         Authentication auth = authenticationManager.authenticate(usernamePassword);
 
-        return new UserAuthResponse("Bearer " + tokenService.generateToken((UserModel) auth.getPrincipal()));
+        return new AuthResponse("Bearer " + tokenService.generateToken((UserModel) auth.getPrincipal()));
 
     }
 
     /**
      * Registra um novo usuário no banco de dados.
-     * @param registerRequest - (em formato {@link UserRegisterRequest}
-     * @return {@link UserAuthResponse} - token.
+     * @param registerRequest - (em formato {@link AuthRegisterRequest}
+     * @return {@link AuthResponse} - token.
      * @throws CustomDuplicateFieldException quando: <br>
      * * Username já está em uso. <br>
      * * E-mail já está em uso.
      *
      * */
-    public UserAuthResponse register(UserRegisterRequest registerRequest){
+    public AuthResponse register(AuthRegisterRequest registerRequest){
 
         if(userRepository.existsByUsername(registerRequest.username())){
             throw CustomDuplicateFieldException.username();
@@ -70,7 +70,7 @@ public class AuthService {
 
         UserModel createdUser = userRepository.save(user);
 
-        return new UserAuthResponse("Bearer " + tokenService.generateToken(createdUser));
+        return new AuthResponse("Bearer " + tokenService.generateToken(createdUser));
     }
 
 }

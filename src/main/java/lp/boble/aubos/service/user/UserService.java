@@ -113,9 +113,7 @@ public class UserService {
      * @param request - campos DTO para atualização (em formato {@link UserUpdateRequest}
      * @return {@link UserResponse}
      * @throws CustomNotFoundException quando: <br>
-     *  * Usuário não encontrado.
-     * @throws CustomDuplicateFieldException quando: <br>
-     *  * e-mail para atualização já está em uso.
+     *  * Usuário não encontrado..
      *
      * */
     public UserResponse updateUser(String username, UserUpdateRequest request){
@@ -124,10 +122,6 @@ public class UserService {
 
         UserModel found = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
-
-        if(userRepository.existsByEmail(request.email()) && !request.email().equals(found.getEmail())){
-            throw CustomDuplicateFieldException.email();
-        }
 
         userMapper.fromUpdateToModel(request, found);
 
