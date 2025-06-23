@@ -13,6 +13,7 @@ import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.service.jwt.TokenService;
 import lp.boble.aubos.util.AuthUtil;
+import lp.boble.aubos.util.ValidationUtil;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,10 +27,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final AuthUtil authUtil;
-
-
-
+    private final ValidationUtil validationUtil;
 
     /**
      * Retorna todas as informações de um usuário
@@ -40,7 +38,7 @@ public class UserService {
      * */
     public UserResponse getUserInfo(String username){
 
-        this.checkUsernameAndPermission(username);
+        validationUtil.checkUsernameAndPermission(username);
 
         UserModel found = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
@@ -75,7 +73,7 @@ public class UserService {
      * */
     public PageResponse<UserAutocompleteProjection> getUserAutocomplete(String query, int page){
 
-        this.validateSearchRequest(query, page);
+        validationUtil.validateSearchRequest(query, page);
 
         PageRequest pageRequest = PageRequest.of(
                 page,
@@ -95,7 +93,7 @@ public class UserService {
      * */
     public PageResponse<UserSuggestionProjection> getUserSuggestion(String query, int page){
 
-        this.validateSearchRequest(query, page);
+        validationUtil.validateSearchRequest(query, page);
 
         PageRequest pageRequest = PageRequest.of(
                 page,
@@ -118,7 +116,7 @@ public class UserService {
      * */
     public UserResponse updateUser(String username, UserUpdateRequest request){
 
-        this.checkUsernameAndPermission(username);
+        validationUtil.checkUsernameAndPermission(username);
 
         UserModel found = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
@@ -136,7 +134,7 @@ public class UserService {
      * */
     public void deleteUser(String username){
 
-        this.checkUsernameAndPermission(username);
+        validationUtil.checkUsernameAndPermission(username);
 
         UserModel userToDelete = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
@@ -146,43 +144,6 @@ public class UserService {
         userRepository.save(userToDelete);
     }
 
-    /**
-     * Checa se o username está vázio e se o requester têm permissão para ação.
-     *
-     * @param username Username do usuário target da ação (em formato String)
-     * @throws CustomFieldNotProvided quando: <br>
-     *  * Username está vázio; <br>
-     * @throws CustomForbiddenActionException quando: <br>
-     *  * Não é uma Self Request ou não é um MOD.
-     * */
-    private void checkUsernameAndPermission(String username){
-        if(username.isBlank()){
-            throw CustomFieldNotProvided.username();
-        }
 
-        if(authUtil.isNotSelfOrAdmin(username)){
-            throw CustomForbiddenActionException.notSelfOrAdmin();
-        }
-    }
-
-    /**
-     * Valida se os parametros para a busca estão válidas.
-     *
-     * @param query Query de busca (em formato String)
-     * @param page Valor da página que o usuário quer acessar (em formato int)
-     * @throws CustomFieldNotProvided quando: <br>
-     * * Query está vázia. <br>
-     * @throws CustomInvalidPageException quando: <br>
-     * * Page é menor que 0.
-     * */
-    private void validateSearchRequest(String query, int page){
-        if(query.isBlank()){
-            throw CustomFieldNotProvided.query();
-        }
-
-        if(page < 0){
-            throw new CustomInvalidPageException();
-        }
-    }
 
 }

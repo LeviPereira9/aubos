@@ -24,7 +24,6 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final UserMapper userMapper;
-    private final AuthUtil authUtil;
 
     /**
      * Autentica o usuário
