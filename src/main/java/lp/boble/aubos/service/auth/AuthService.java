@@ -1,13 +1,17 @@
 package lp.boble.aubos.service.auth;
 
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.dto.auth.AuthForgetPasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.auth.AuthLoginRequest;
 import lp.boble.aubos.dto.auth.AuthRegisterRequest;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
+import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.user.UserMapper;
 import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.user.UserRepository;
+import lp.boble.aubos.service.email.EmailService;
+import lp.boble.aubos.service.jwt.AuthorizationService;
 import lp.boble.aubos.service.jwt.TokenService;
 import lp.boble.aubos.util.AuthUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,10 +24,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final EmailService emailService;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final UserMapper userMapper;
+    private final AuthorizationService authorizationService;
 
     /**
      * Autentica o usuário
@@ -70,6 +76,23 @@ public class AuthService {
         UserModel createdUser = userRepository.save(user);
 
         return new AuthResponse("Bearer " + tokenService.generateToken(createdUser));
+    }
+
+    public void forgetPassword(AuthForgetPasswordRequest forgetPasswordRequest){
+        UserModel user;
+
+        if(forgetPasswordRequest.login().contains("@")){
+            user = userRepository.findByEmail(forgetPasswordRequest.login())
+                    .orElseThrow(CustomNotFoundException::user);
+        } else {
+            user = userRepository.findByUsername(forgetPasswordRequest.login())
+                    .orElseThrow(CustomNotFoundException::user);;
+        }
+
+        // TODO: Lógica da criação/armazenamento/validação do Token de Recuperar Senha
+
+        emailService.sendToken(user.getEmail());
+
     }
 
 }
