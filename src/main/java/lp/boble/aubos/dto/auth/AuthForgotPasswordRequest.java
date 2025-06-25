@@ -1,5 +1,5 @@
 package lp.boble.aubos.dto.auth;
 
-public record AuthForgetPasswordRequest(
+public record AuthForgotPasswordRequest(
         String login
 ) {}

@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmailService {
 
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    public void sendToken(String email) {
+    public void sendToken(String email, String subject, String text) {
         try{
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
-            message.setSubject("Recuperar Senha");
-            message.setText("TOKEN");
+            message.setSubject(subject);
+            message.setText(text);
             mailSender.send(message);
         } catch (Exception e){
             throw new RuntimeException(e);

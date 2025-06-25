@@ -1,24 +1,29 @@
 package lp.boble.aubos.service.auth;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.auth.AuthForgetPasswordRequest;
+import lp.boble.aubos.dto.auth.AuthForgotPasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.auth.AuthLoginRequest;
 import lp.boble.aubos.dto.auth.AuthRegisterRequest;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.user.UserMapper;
+import lp.boble.aubos.model.auth.ResetToken;
 import lp.boble.aubos.model.user.UserModel;
+import lp.boble.aubos.repository.auth.ResetTokenRepository;
 import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.service.email.EmailService;
-import lp.boble.aubos.service.jwt.AuthorizationService;
 import lp.boble.aubos.service.jwt.TokenService;
-import lp.boble.aubos.util.AuthUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +34,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final UserMapper userMapper;
-    private final AuthorizationService authorizationService;
+    private final ResetTokenRepository tokenRepository;
 
     /**
      * Autentica o usuário
@@ -78,21 +83,56 @@ public class AuthService {
         return new AuthResponse("Bearer " + tokenService.generateToken(createdUser));
     }
 
-    public void forgetPassword(AuthForgetPasswordRequest forgetPasswordRequest){
+    public void forgotPassword(AuthForgotPasswordRequest forgotPasswordRequest){
         UserModel user;
 
-        if(forgetPasswordRequest.login().contains("@")){
-            user = userRepository.findByEmail(forgetPasswordRequest.login())
+        if(forgotPasswordRequest.login().contains("@")){
+            user = userRepository.findByEmail(forgotPasswordRequest.login())
                     .orElseThrow(CustomNotFoundException::user);
         } else {
-            user = userRepository.findByUsername(forgetPasswordRequest.login())
+            user = userRepository.findByUsername(forgotPasswordRequest.login())
                     .orElseThrow(CustomNotFoundException::user);;
         }
 
-        // TODO: Lógica da criação/armazenamento/validação do Token de Recuperar Senha
+        String emailText = String.format("Aqui está o código de confirmação para recuperação de senha: %s", this.createUserToken(user));
 
-        emailService.sendToken(user.getEmail());
+        emailService.sendToken(
+                user.getEmail(),
+                "Recuperação de Senha",
+                emailText
+        );
 
+    }
+
+    private String createUserToken(UserModel user){
+        String token;
+
+        do{
+            token = generateToken();
+        } while(tokenRepository.existsByTokenAndUsedTrue(token));
+
+        ResetToken resetToken = new ResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setUsed(false);
+        resetToken.setExpiresAt(this.generateExpirationDate());
+        resetToken.setCreatedAt(Instant.now());
+
+        tokenRepository.save(resetToken);
+
+        return token;
+    }
+
+    private String generateToken(){
+        SecureRandom random = new SecureRandom();
+
+        int code = 100000+random.nextInt(900000);
+
+        return Integer.toString(code);
+    }
+
+    private Instant generateExpirationDate(){
+        return LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.of("-03"));
     }
 
 }

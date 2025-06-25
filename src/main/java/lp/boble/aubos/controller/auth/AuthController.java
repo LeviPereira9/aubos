@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.dto.auth.AuthForgotPasswordRequest;
 import lp.boble.aubos.dto.auth.AuthRegisterRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.auth.AuthLoginRequest;
@@ -16,6 +17,7 @@ import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -93,5 +95,23 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<SuccessResponse<Void>> forgotPassword(@RequestBody AuthForgotPasswordRequest forgotPasswordRequest) {
+        authService.forgotPassword(forgotPasswordRequest);
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .operation("POST")
+                        .code(HttpStatus.OK)
+                        .message("Código enviado com sucesso.")
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    };
+
+    // TODO: Validação do Token, reset de Senha, Agendar ripação dos tokens
+    // Vali Token: User + Token
+    // Reset de Senha: User + Token + New Senha
+    // Agendar Ripação: @Scheduled
 
 }
