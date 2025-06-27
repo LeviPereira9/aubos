@@ -147,5 +147,11 @@ public class UserModel implements UserDetails {
             defaultRole.setId((short)1);
             this.role = defaultRole;
         }
+        if(this.isOfficial == null){
+            this.isOfficial = false;
+        }
+        if(this.isVerified == null){
+            this.isVerified = false;
+        }
     }
 }
