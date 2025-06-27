@@ -1,10 +1,8 @@
 package lp.boble.aubos.service.auth;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.auth.AuthForgotPasswordRequest;
-import lp.boble.aubos.dto.auth.AuthResponse;
-import lp.boble.aubos.dto.auth.AuthLoginRequest;
-import lp.boble.aubos.dto.auth.AuthRegisterRequest;
+import lp.boble.aubos.dto.auth.*;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.user.UserMapper;
@@ -14,6 +12,7 @@ import lp.boble.aubos.repository.auth.ResetTokenRepository;
 import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.service.email.EmailService;
 import lp.boble.aubos.service.jwt.TokenService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -133,6 +132,40 @@ public class AuthService {
 
     private Instant generateExpirationDate(){
         return LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.of("-03"));
+    }
+
+    public boolean validateResetToken(String resetToken){
+
+        return tokenRepository.existsByTokenAndUsedFalse(resetToken);
+    }
+
+    @Transactional
+    public void changePassword(String token, AuthChangePasswordRequest changePasswordRequest){
+        if(!validateResetToken(token)){
+            throw new RuntimeException("Token inválido");
+        }
+
+        if(!changePasswordRequest.newPassword().equals(changePasswordRequest.confirmPassword())){
+            throw new RuntimeException("Senhas incompátiveis");
+        }
+
+        ResetToken resetToken = tokenRepository.findByToken(token);
+        UserModel user = userRepository.findById(resetToken.getUser().getId()).orElseThrow(CustomNotFoundException::user);;
+
+        String encryptedPassword = new BCryptPasswordEncoder()
+                .encode(changePasswordRequest.newPassword());
+
+        user.setPasswordHash(encryptedPassword);
+        resetToken.setUsed(true);
+
+        userRepository.save(user);
+        tokenRepository.save(resetToken);
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 */10 * * * *")
+    public void disableTokens(){
+        tokenRepository.disableToken(Instant.now());
     }
 
 }

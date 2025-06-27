@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.auth.AuthForgotPasswordRequest;
-import lp.boble.aubos.dto.auth.AuthRegisterRequest;
-import lp.boble.aubos.dto.auth.AuthResponse;
-import lp.boble.aubos.dto.auth.AuthLoginRequest;
+import lp.boble.aubos.dto.auth.*;
 import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
@@ -18,10 +15,7 @@ import lp.boble.aubos.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(
         name = "Auth",
@@ -109,9 +103,41 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     };
 
-    // TODO: Validação do Token, reset de Senha, Agendar ripação dos tokens
-    // Vali Token: User + Token
-    // Reset de Senha: User + Token + New Senha
-    // Agendar Ripação: @Scheduled
+    @PostMapping("/validate-token")
+    public ResponseEntity<SuccessResponse<Void>> validateRequestToken(
+            @RequestBody AuthResetTokenRequest requestToken){
+
+        authService.validateResetToken(requestToken.token());
+
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .operation("POST")
+                        .code(HttpStatus.OK)
+                        .message("Token válidado com sucesso.")
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @PostMapping("/change-password")
+    public ResponseEntity<SuccessResponse<Void>> changePassword(
+            @RequestParam String token,
+            @RequestBody AuthChangePasswordRequest request
+    ){
+
+        authService.changePassword(token, request);
+
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .operation("POST")
+                        .code(HttpStatus.OK)
+                        .message("Senha alterada com sucesso.")
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    // TODO: Agendar Ripação: @Scheduled
 
 }
