@@ -254,11 +254,21 @@ public class ApiKeyService {
 
         String publicId = parts[0];
         String providedSecret = parts[1];
+        boolean isFine;
 
         ApiKeyModel key = apiKeyRepository.findByPublicId(publicId)
                 .orElseThrow(CustomNotFoundException::key);
 
-        if(!verifySecret(providedSecret, key.getHashedSecret())) {
+        if(key.getPreviousHashedSecret() != null){
+            isFine =
+                    verifySecret(providedSecret, key.getPreviousHashedSecret())
+                    | // OU
+                    verifySecret(providedSecret, key.getHashedSecret());
+        } else {
+            isFine = verifySecret(providedSecret, key.getHashedSecret());
+        }
+
+        if(!isFine) {
             throw CustomNotFoundException.key();
         }
 
