@@ -28,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final ValidationUtil validationUtil;
+    private final AuthUtil authUtil;
 
     /**
      * Retorna todas as informações de um usuário
@@ -38,7 +39,7 @@ public class UserService {
      * */
     public UserResponse getUserInfo(String username){
 
-        validationUtil.checkUsernameAndPermission(username);
+        authUtil.isNotSelfOrAdmin(username);
 
         UserModel found = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
@@ -116,7 +117,7 @@ public class UserService {
      * */
     public UserResponse updateUser(String username, UserUpdateRequest request){
 
-        validationUtil.checkUsernameAndPermission(username);
+        authUtil.isNotSelfOrAdmin(username);
 
         UserModel found = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
@@ -134,7 +135,7 @@ public class UserService {
      * */
     public void deleteUser(String username){
 
-        validationUtil.checkUsernameAndPermission(username);
+        authUtil.isNotSelfOrAdmin(username);
 
         UserModel userToDelete = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);

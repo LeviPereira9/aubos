@@ -16,6 +16,7 @@ import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.apikey.ApiKeyRepository;
 import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.util.AuthUtil;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKeyFactory;
@@ -51,6 +52,7 @@ public class ApiKeyService {
 
     private final AuthUtil authUtil;
 
+
     /**
      * Gera e armazena uma nova API Key com todos os requisitos de segurança.
      *
@@ -62,6 +64,8 @@ public class ApiKeyService {
      * * Usuário não encontrado.
     */
     public ApiKeyCreateResponse generateAndStoreApiKey(String username) {
+
+        authUtil.isNotSelfOrAdmin(username);
 
         // 1 - Buscar o usuário que quer criar a chave.
         UserModel user = userRepository.findByUsername(username)
@@ -108,7 +112,7 @@ public class ApiKeyService {
      * @return String no formato "saltBase64.hashBase64" pronto para armazenamento seguro
 
     */
-    public String hashSecret(String secret){
+    private String hashSecret(String secret){
         try {
             // 1 - Gerar salt
             byte[] salt = generateSalt();
@@ -332,9 +336,9 @@ public class ApiKeyService {
      * - Usuário não encontrado
      * */
     public List<ApiKeyResponse> findAllUserKeys(String username){
-        if(username.isBlank()){
-            throw CustomFieldNotProvided.username();
-        }
+
+        authUtil.isNotSelfOrAdmin(username);
+
         UserModel user = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
@@ -360,24 +364,60 @@ public class ApiKeyService {
      * - Não achar a Chave pelo public id
      * */
     public void deleteApiKey(String username, String publicId) {
-        if(username.isBlank()){
-            throw CustomFieldNotProvided.username();
-        }
+
+        authUtil.isNotSelfOrAdmin(username);
 
         if(publicId.isBlank()){
             throw CustomFieldNotProvided.key();
         }
 
-        if(authUtil.isNotSelfOrAdmin(username)){
-            throw CustomForbiddenActionException.notSelfOrAdmin();
-        }
-
-        ApiKeyModel toDelete = apiKeyRepository.findByPublicId(publicId)
+        ApiKeyModel toDelete = apiKeyRepository.findByPublicIdAndOwnerUsername(publicId, username)
                 .orElseThrow(CustomNotFoundException::key);
 
         toDelete.setSoftDelete(true);
 
         apiKeyRepository.save(toDelete);
+    }
+
+    public ApiKeyCreateResponse rotateKey(String username, String public_id){
+        authUtil.isNotSelfOrAdmin(username);
+
+        ApiKeyModel key = apiKeyRepository.findByPublicIdAndOwnerUsername(public_id, username)
+                .orElseThrow(CustomNotFoundException::key);
+
+        byte[] randomBytes = new byte[SECRET_LENGTH];
+        secureRandom.nextBytes(randomBytes);
+
+        String rawSecret = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+        String hashedSecret = hashSecret(rawSecret);
+
+        key.setPreviousHashedSecret(key.getHashedSecret());
+        key.setHashedSecret(hashedSecret);
+        key.setRotatedAt(Instant.now());
+
+        apiKeyRepository.save(key);
+
+        return new ApiKeyCreateResponse(
+                key.getId(),
+                key.getPublicId() + ":" + rawSecret
+        );
+    }
+
+    @Scheduled(cron = "0 0 */1 * * *")
+    public void rotateKeyRevokePrevious(){
+        Instant sixHoursAgo = Instant.now().minus(6, ChronoUnit.HOURS);
+        apiKeyRepository.revokePreviousHash(sixHoursAgo);
+    }
+
+    public void revokePreviousHashSecret(String username, String publicId){
+        authUtil.isNotSelfOrAdmin(username);
+
+        ApiKeyModel key = apiKeyRepository.findByPublicIdAndOwnerUsername(publicId, username)
+                .orElseThrow(CustomNotFoundException::key);
+
+        key.setPreviousHashedSecret(null);
+        apiKeyRepository.save(key);
     }
 
 }

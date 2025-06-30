@@ -123,4 +123,39 @@ public class ApiKeyController {
         return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
+    @PutMapping("/{publicId}/rotate-key")
+    public ResponseEntity<SuccessResponse<ApiKeyCreateResponse>>
+    rotateApiKey(@PathVariable String username, @PathVariable String publicId) {
+        ApiKeyCreateResponse data = apiKeyService.rotateKey(username, publicId);
+
+        SuccessResponse<ApiKeyCreateResponse> response =
+                new SuccessResponseBuilder<ApiKeyCreateResponse>()
+                        .operation("PUT")
+                        .code(HttpStatus.OK)
+                        .message("Chave rotacionada com sucesso. A chave anterior será desativada em 6 horas ou você pode revogar ela agora.")
+                        .data(data)
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @PutMapping("/{publicId}/revoke-previous")
+    public ResponseEntity<SuccessResponse<Void>> revokePreviousHash(
+            @PathVariable String username,
+            @PathVariable String publicId){
+
+        apiKeyService.revokePreviousHashSecret(username, publicId);
+
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .operation("PUT")
+                        .code(HttpStatus.OK)
+                        .message("Chave anterior revogada com sucesso.")
+                        .build();
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 }

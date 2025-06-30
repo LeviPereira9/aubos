@@ -1,5 +1,7 @@
 package lp.boble.aubos.util;
 
+import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
+import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.model.user.UserModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,9 +42,9 @@ public class AuthUtil {
      * @param username - Username do target  (em formato String)
      * @return boolean - true/false caso o requester não seja o target ou um admin.
      * */
-    public boolean isNotSelfOrAdmin(String username){
+    public void isNotSelfOrAdmin(String username){
         if(username.isBlank()){
-            throw new RuntimeException("Username não pode estar vázio.");
+            throw CustomFieldNotProvided.username();
         }
 
         UserModel requester = getRequester();
@@ -50,7 +52,7 @@ public class AuthUtil {
         boolean isOwner = username.equals(requester.getUsername());
         boolean isAdmin = requester.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MOD"));
 
-        return !isOwner && !isAdmin;
+        if(!isOwner && !isAdmin) throw CustomForbiddenActionException.notSelfOrAdmin();
 
     }
 }

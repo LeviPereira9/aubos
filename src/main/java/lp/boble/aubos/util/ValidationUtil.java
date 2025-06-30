@@ -25,9 +25,7 @@ public class ValidationUtil {
             throw CustomFieldNotProvided.username();
         }
 
-        if(authUtil.isNotSelfOrAdmin(username)){
-            throw CustomForbiddenActionException.notSelfOrAdmin();
-        }
+        authUtil.isNotSelfOrAdmin(username);
     }
 
     /**
