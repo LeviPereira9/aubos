@@ -59,7 +59,7 @@ public class SecurityApiKeyFilter extends OncePerRequestFilter {
             }
 
             Authentication auth = new UsernamePasswordAuthenticationToken(
-                    key.getOwner(),
+                    new UserModel(),
                     null,
                     List.of(new SimpleGrantedAuthority("API_KEY_ACCESS"))
             );
