@@ -1,5 +1,6 @@
 package lp.boble.aubos.service.apikey;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.apikey.ApiKeyCreateResponse;
 import lp.boble.aubos.dto.apikey.ApiKeyResponse;
@@ -414,6 +415,7 @@ public class ApiKeyService {
         );
     }
 
+    @Transactional
     @Scheduled(cron = "0 0 */1 * * *")
     public void rotateKeyRevokePrevious(){
         Instant sixHoursAgo = Instant.now().minus(6, ChronoUnit.HOURS);

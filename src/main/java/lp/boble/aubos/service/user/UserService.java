@@ -1,6 +1,7 @@
 package lp.boble.aubos.service.user;
 
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
 import lp.boble.aubos.dto.user.*;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
@@ -11,6 +12,8 @@ import lp.boble.aubos.mapper.user.UserMapper;
 import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.response.pages.PageResponse;
+import lp.boble.aubos.service.auth.AuthService;
+import lp.boble.aubos.service.email.EmailService;
 import lp.boble.aubos.service.jwt.TokenService;
 import lp.boble.aubos.util.AuthUtil;
 import lp.boble.aubos.util.ValidationUtil;
@@ -29,6 +32,8 @@ public class UserService {
     private final UserMapper userMapper;
     private final ValidationUtil validationUtil;
     private final AuthUtil authUtil;
+    private final EmailService emailService;
+    private final AuthService authService;
 
     /**
      * Retorna todas as informações de um usuário
@@ -143,6 +148,31 @@ public class UserService {
         userToDelete.setSoftDeleted(true);
 
         userRepository.save(userToDelete);
+    }
+
+    public void sendConfirmationEmail(String username){
+        authUtil.isNotSelfOrAdmin(username);
+
+        UserModel user = userRepository.findByUsername(username)
+                .orElseThrow(CustomNotFoundException::user);
+
+        if(user.getIsVerified()){
+            throw new RuntimeException("E-mail já está verificado.");
+        }
+
+        authService.sendConfirmationEmail(user);
+    }
+
+    public void changePassword(String username, AuthChangePasswordRequest changePasswordRequest){
+        if(!authUtil.getRequester().getUsername().equals(username)){
+            throw new RuntimeException("Não pode");
+        }
+
+        String oldPassword;
+        String newPassword = changePasswordRequest.newPassword();
+        String confirmPassword = changePasswordRequest.confirmPassword();
+
+
     }
 
 

@@ -45,7 +45,7 @@ public class UserController {
     getUserInfo(@PathVariable String username){
         UserResponse responseData = userService.getUserInfo(username);
 
-        SuccessResponse<UserResponse> successResponse =
+        SuccessResponse<UserResponse> response =
                 new SuccessResponseBuilder<UserResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
@@ -54,7 +54,7 @@ public class UserController {
                         .build();
 
 
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
@@ -72,7 +72,7 @@ public class UserController {
     getUserShortInfo(@PathVariable String username){
         UserShortResponse responseData = userService.getUserShortInfo(username);
 
-        SuccessResponse<UserShortResponse> successResponse =
+        SuccessResponse<UserShortResponse> response =
                 new SuccessResponseBuilder<UserShortResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
@@ -80,7 +80,7 @@ public class UserController {
                         .data(responseData)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(
@@ -98,10 +98,10 @@ public class UserController {
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page){
 
-        PageResponse<UserAutocompleteProjection> successResponse =
+        PageResponse<UserAutocompleteProjection> response =
                 userService.getUserAutocomplete(query, page);
 
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(
@@ -119,10 +119,10 @@ public class UserController {
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page){
 
-        PageResponse<UserSuggestionProjection> successResponse =
+        PageResponse<UserSuggestionProjection> response =
                 userService.getUserSuggestion(query, page);
 
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(
@@ -140,7 +140,7 @@ public class UserController {
 
         UserResponse responseData = userService.updateUser(username, updateRequest);
 
-        SuccessResponse<UserResponse> successResponse =
+        SuccessResponse<UserResponse> response =
                 new SuccessResponseBuilder<UserResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
@@ -148,7 +148,7 @@ public class UserController {
                         .data(responseData)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
@@ -165,14 +165,25 @@ public class UserController {
     deleteUser(@PathVariable String username){
         userService.deleteUser(username);
 
-        SuccessResponse<Void> successResponse =
+        SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()
                         .operation("DELETE")
                         .code(HttpStatus.OK)
                         .message("Usuário excluido com sucesso.")
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/{username}/send-email-confirmation")
+    public ResponseEntity<SuccessResponse<Void>> sendConfirmationEmail(@PathVariable String username){
+        userService.sendConfirmationEmail(username);
+
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

@@ -19,4 +19,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException keyOwner(){
         return new CustomNotFoundException("O dono desta chave ");
     }
+
+    public static CustomNotFoundException token(){
+        return new CustomNotFoundException("TokenModel não encontrado.");
+    }
 }

@@ -1,14 +1,16 @@
 package lp.boble.aubos.service.auth;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.auth.*;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.user.UserMapper;
-import lp.boble.aubos.model.auth.ResetToken;
+import lp.boble.aubos.model.auth.TokenModel;
+import lp.boble.aubos.model.auth.TokenTypeModel;
 import lp.boble.aubos.model.user.UserModel;
-import lp.boble.aubos.repository.auth.ResetTokenRepository;
+import lp.boble.aubos.repository.auth.TokenRepository;
 import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.service.email.EmailService;
 import lp.boble.aubos.service.jwt.TokenService;
@@ -33,11 +35,25 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final UserMapper userMapper;
-    private final ResetTokenRepository tokenRepository;
+    private final TokenRepository tokenRepository;
+
+
+    private TokenTypeModel resetTypeToken;
+    private TokenTypeModel emailTypeToken;
+
+    @PostConstruct
+    private void initTokenTypes(){
+        resetTypeToken = new TokenTypeModel();
+        resetTypeToken.setId(1L);
+
+        emailTypeToken = new TokenTypeModel();
+        emailTypeToken.setId(2L);
+    }
+
 
     /**
      * Autentica o usuário
-     * @param loginRequest - DTO com login e senha (em formato {@link AuthLoginRequest}
+     * @param loginRequest - DTO com ‘login’ e senha (em formato {@link AuthLoginRequest}
      * @return {@link AuthResponse} - token
      * */
     public AuthResponse login(AuthLoginRequest loginRequest) {
@@ -79,6 +95,8 @@ public class AuthService {
 
         UserModel createdUser = userRepository.save(user);
 
+        this.sendConfirmationEmail(createdUser);
+
         return new AuthResponse("Bearer " + tokenService.generateToken(createdUser));
     }
 
@@ -90,36 +108,97 @@ public class AuthService {
                     .orElseThrow(CustomNotFoundException::user);
         } else {
             user = userRepository.findByUsername(forgotPasswordRequest.login())
-                    .orElseThrow(CustomNotFoundException::user);;
+                    .orElseThrow(CustomNotFoundException::user);
         }
 
-        String emailText = String.format("Aqui está o código de confirmação para recuperação de senha: %s", this.createUserToken(user));
-
-        emailService.sendToken(
+        emailService.sendPasswordResetEmail(
                 user.getEmail(),
-                "Recuperação de Senha",
-                emailText
-        );
+                this.createToken(user, 15, resetTypeToken));
 
     }
 
-    private String createUserToken(UserModel user){
-        String token;
+    public void sendConfirmationEmail(UserModel user){
+        emailService.sendVerifyEmail(
+                user.getEmail(),
+                this.createToken(user, 60, emailTypeToken)
+        );
+    }
+
+    @Transactional
+    public void changePassword(
+            String token,
+            AuthChangePasswordRequest changePasswordRequest){
+
+        String newPassword = changePasswordRequest.newPassword();
+        String confirmPassword = changePasswordRequest.confirmPassword();
+
+        if(!newPassword.equals(confirmPassword)){
+            throw new RuntimeException("Senhas incompátiveis");
+        }
+
+        // 1L = ResetToken
+        TokenModel resetToken = tokenRepository.findByToken(token, resetTypeToken.getId())
+                .orElseThrow(CustomNotFoundException::token);
+
+        UserModel user = userRepository.findById(resetToken.getUser().getId())
+                .orElseThrow(CustomNotFoundException::user);
+
+        String encryptedPassword = new BCryptPasswordEncoder()
+                .encode(changePasswordRequest.newPassword());
+
+        user.setPasswordHash(encryptedPassword);
+        resetToken.setUsed(true);
+        resetToken.setUpdatedAt(Instant.now());
+
+        userRepository.save(user);
+        tokenRepository.save(resetToken);
+    }
+    @Transactional
+    public void confirmEmailVerification(String token){
+
+        TokenModel emailToken = tokenRepository.findByToken(token, emailTypeToken.getId())
+                .orElseThrow(CustomNotFoundException::token);
+
+        UserModel user = userRepository.findById(emailToken.getUser().getId())
+                .orElseThrow(CustomNotFoundException::user);
+
+        user.setIsVerified(true);
+        emailToken.setUsed(true);
+        emailToken.setUpdatedAt(Instant.now());
+
+        userRepository.save(user);
+        tokenRepository.save(emailToken);
+    }
+
+    public void validateToken(String token, Long type){
+        boolean valid = tokenRepository.isPending(token, type);
+
+        if(!valid){
+            throw new RuntimeException("Token inválido");
+        }
+    }
+
+    private String createToken(
+            UserModel user,
+            int minutesToExpire,
+            TokenTypeModel type){
+
+        String tokenGenerated;
 
         do{
-            token = generateToken();
-        } while(tokenRepository.existsByTokenAndUsedTrue(token));
+            tokenGenerated = generateToken();
+        }while(tokenRepository.alreadyUsed(tokenGenerated, type.getId()));
 
-        ResetToken resetToken = new ResetToken();
-        resetToken.setToken(token);
-        resetToken.setUser(user);
-        resetToken.setUsed(false);
-        resetToken.setExpiresAt(this.generateExpirationDate());
-        resetToken.setCreatedAt(Instant.now());
+        TokenModel token = new TokenModel();
+        token.setToken(tokenGenerated);
+        token.setUser(user);
+        token.setExpiresAt(this.generateExpirationDate(minutesToExpire));
+        token.setType(type);
+        token.setCreatedAt(Instant.now());
 
-        tokenRepository.save(resetToken);
+        tokenRepository.save(token);
 
-        return token;
+        return tokenGenerated;
     }
 
     private String generateToken(){
@@ -130,40 +209,12 @@ public class AuthService {
         return Integer.toString(code);
     }
 
-    private Instant generateExpirationDate(){
-        return LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.of("-03"));
-    }
-
-    public boolean validateResetToken(String resetToken){
-
-        return tokenRepository.existsByTokenAndUsedFalse(resetToken);
+    private Instant generateExpirationDate(int minutes){
+        return LocalDateTime.now().plusMinutes(minutes).toInstant(ZoneOffset.of("-03"));
     }
 
     @Transactional
-    public void changePassword(String token, AuthChangePasswordRequest changePasswordRequest){
-        if(!validateResetToken(token)){
-            throw new RuntimeException("Token inválido");
-        }
-
-        if(!changePasswordRequest.newPassword().equals(changePasswordRequest.confirmPassword())){
-            throw new RuntimeException("Senhas incompátiveis");
-        }
-
-        ResetToken resetToken = tokenRepository.findByToken(token);
-        UserModel user = userRepository.findById(resetToken.getUser().getId()).orElseThrow(CustomNotFoundException::user);;
-
-        String encryptedPassword = new BCryptPasswordEncoder()
-                .encode(changePasswordRequest.newPassword());
-
-        user.setPasswordHash(encryptedPassword);
-        resetToken.setUsed(true);
-
-        userRepository.save(user);
-        tokenRepository.save(resetToken);
-    }
-
-    @Transactional
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 */15 * * * *")
     public void disableTokens(){
         tokenRepository.disableToken(Instant.now());
     }

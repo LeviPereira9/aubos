@@ -67,7 +67,7 @@ public class SecurityConfigurations {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
+                                .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers(WHITE_LIST_URLS).permitAll()
                                 .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling

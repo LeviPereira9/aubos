@@ -14,7 +14,6 @@ import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(
@@ -28,7 +27,7 @@ public class AuthController {
 
     @Operation(
             summary = "Cria um novo usuário",
-            description = "Cria um novo usuário e retorna o Token para Login"
+            description = "Cria um novo usuário e retorna o TokenModel para Login"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário criado com sucesso"),
@@ -62,7 +61,7 @@ public class AuthController {
 
     @Operation(
             summary = "Entrar na conta",
-            description = "Retorna um Token para acesso"
+            description = "Retorna um TokenModel para acesso"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário logado com sucesso"),
@@ -103,24 +102,24 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     };
 
-    @PostMapping("/validate-token")
+    @GetMapping("/validate-token")
     public ResponseEntity<SuccessResponse<Void>> validateRequestToken(
-            @RequestBody AuthResetTokenRequest requestToken){
+            @RequestBody AuthTokenRequest requestToken){
 
-        authService.validateResetToken(requestToken.token());
+        authService.validateToken(requestToken.token(), requestToken.type());
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()
                         .operation("POST")
                         .code(HttpStatus.OK)
-                        .message("Token válidado com sucesso.")
+                        .message("TokenModel válidado com sucesso.")
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
-    @PostMapping("/change-password")
+    @PutMapping("/forgot-password")
     public ResponseEntity<SuccessResponse<Void>> changePassword(
             @RequestParam String token,
             @RequestBody AuthChangePasswordRequest request
@@ -130,7 +129,7 @@ public class AuthController {
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()
-                        .operation("POST")
+                        .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Senha alterada com sucesso.")
                         .build();
@@ -138,6 +137,22 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    // TODO: Agendar Ripação: @Scheduled
+    @PutMapping("/confirm-email")
+    public ResponseEntity<SuccessResponse<Void>> verifyEmail(
+            @RequestParam String token
+    ){
+
+        authService.confirmEmailVerification(token);
+
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .operation("PUT")
+                        .code(HttpStatus.OK)
+                        .message("E-mail verificado com sucesso.")
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 
 }
