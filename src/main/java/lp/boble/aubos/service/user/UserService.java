@@ -2,6 +2,7 @@ package lp.boble.aubos.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
+import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.user.*;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
@@ -24,6 +25,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -34,6 +37,7 @@ public class UserService {
     private final AuthUtil authUtil;
     private final EmailService emailService;
     private final AuthService authService;
+    private final TokenService tokenService;
 
     /**
      * Retorna todas as informações de um usuário
@@ -163,16 +167,33 @@ public class UserService {
         authService.sendConfirmationEmail(user);
     }
 
-    public void changePassword(String username, AuthChangePasswordRequest changePasswordRequest){
+    public AuthResponse changePassword(String username, AuthChangePasswordRequest changePasswordRequest){
         if(!authUtil.getRequester().getUsername().equals(username)){
             throw new RuntimeException("Não pode");
         }
 
-        String oldPassword;
         String newPassword = changePasswordRequest.newPassword();
         String confirmPassword = changePasswordRequest.confirmPassword();
 
+        if(!newPassword.equals(confirmPassword)){
+            throw new RuntimeException("Aham vai indo.");
+        }
 
+        UserModel user = userRepository.findByUsername(username)
+                .orElseThrow(CustomNotFoundException::user);
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        if(passwordEncoder.matches(newPassword, user.getPassword())){
+            throw new RuntimeException("Senhas iguais.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setTokenId(UUID.randomUUID());
+
+        userRepository.save(user);
+
+        return new AuthResponse("Bearer " + tokenService.generateToken(user));
     }
 
 

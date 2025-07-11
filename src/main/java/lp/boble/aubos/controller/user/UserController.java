@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.docSnippets.SelfOrModError;
 import lp.boble.aubos.config.docSnippets.UsernameErrors;
+import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
+import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.user.*;
 import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.pages.PageResponse;
@@ -181,6 +183,22 @@ public class UserController {
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/{username}/change-password")
+    public ResponseEntity<SuccessResponse<AuthResponse>>
+    changePassword(@PathVariable String username, @RequestBody AuthChangePasswordRequest changePasswordRequest){
+        AuthResponse data = userService.changePassword(username, changePasswordRequest);
+
+        SuccessResponse<AuthResponse> response =
+                new SuccessResponseBuilder<AuthResponse>()
+                        .operation("PATCH")
+                        .code(HttpStatus.OK)
+                        .message("Senha alterada com sucesso.")
+                        .data(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
