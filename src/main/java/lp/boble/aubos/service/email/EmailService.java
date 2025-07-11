@@ -2,7 +2,6 @@ package lp.boble.aubos.service.email;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.exception.custom.email.CustomEmailException;
-import lp.boble.aubos.model.user.UserModel;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,14 @@ public class EmailService {
         }
     }
 
+    /**
+     * Envia o código de confirmação de e-mail, para o e-mail do sujeito.
+     * @param email do usuário
+     * @param token de ativação
+     * @throws CustomEmailException Em caso de: <br>
+     * - Algum erro no envio.
+     *
+     * */
     public void sendVerifyEmail(String email, String token){
         try{
             SimpleMailMessage message = new SimpleMailMessage();
@@ -37,6 +44,14 @@ public class EmailService {
         }
     }
 
+    /**
+     * Envia o código de reset de senha, para o e-mail do sujeito.
+     * @param email do usuário
+     * @param token de ativação
+     * @throws CustomEmailException Em caso de: <br>
+     * - Algum erro no envio.
+     *
+     * */
     public void sendPasswordResetEmail(String email, String token){
         try{
             SimpleMailMessage message = new SimpleMailMessage();

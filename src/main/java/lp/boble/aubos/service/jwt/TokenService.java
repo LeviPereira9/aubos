@@ -20,8 +20,14 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    // TODO: CustomException
 
+    /**
+     * Gera o Token JWT
+     * @param user {@link UserModel}
+     * <hr>
+     * @throws CustomTokenException Em caso de: <br>
+     * - Falha na criação do Token
+     * */
     public String generateToken(UserModel user){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -37,6 +43,14 @@ public class TokenService {
         }
     }
 
+    /**
+     * Valida o Token do usuário e retorna o payload
+     * @param token (String)
+     * @return {@link TokenPayload}
+     * <hr>
+     * @throws CustomTokenException Em caso de:
+     * - Falha na verificação do Token.
+     * */
     public TokenPayload validateToken(String token){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -56,6 +70,10 @@ public class TokenService {
         }
     }
 
+    /**
+     * Gera a expiração do Token JWT
+     * @return 31 dias.
+     * */
     public Instant generateExpirationDate(){
         return LocalDateTime.now().plusDays(31).toInstant(ZoneOffset.of("-03"));
     }

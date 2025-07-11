@@ -119,7 +119,7 @@ public class AuthController {
     }
 
 
-    @PutMapping("/forgot-password")
+    @PatchMapping("/forgot-password")
     public ResponseEntity<SuccessResponse<Void>> changePassword(
             @RequestParam String token,
             @RequestBody AuthChangePasswordRequest request
@@ -137,7 +137,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PutMapping("/confirm-email")
+    @PatchMapping("/confirm-email")
     public ResponseEntity<SuccessResponse<Void>> verifyEmail(
             @RequestParam String token
     ){
@@ -164,7 +164,7 @@ public class AuthController {
                 new SuccessResponseBuilder<Void>()
                         .operation("POST")
                         .code(HttpStatus.OK)
-                        .message("Todas sessões abertas foram encerradas.")
+                        .message("Todas as sessões abertas foram encerradas.")
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

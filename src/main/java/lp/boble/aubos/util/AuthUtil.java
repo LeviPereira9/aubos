@@ -40,7 +40,10 @@ public class AuthUtil {
 
     /**
      * @param username - Username do target  (em formato String)
-     * @return boolean - true/false caso o requester não seja o target ou um admin.
+     * @throws CustomFieldNotProvided em caso de:
+     *  - Username vázio
+     * @throws CustomForbiddenActionException em caso de:
+     * - Não é o requester nem um ADMIN
      * */
     public void isNotSelfOrAdmin(String username){
         if(username.isBlank()){

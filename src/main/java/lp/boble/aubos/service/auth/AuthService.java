@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.auth.*;
 import lp.boble.aubos.exception.custom.auth.CustomPasswordException;
 import lp.boble.aubos.exception.custom.auth.CustomTokenException;
-import lp.boble.aubos.exception.custom.global.CustomDeactivatedException;
+import lp.boble.aubos.exception.custom.email.CustomEmailException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.user.UserMapper;
@@ -77,6 +77,12 @@ public class AuthService {
 
     }
 
+    /**
+     * Logout global, encerra todas as sessões ativas.
+     * @param username do sujeito
+     * @throws CustomNotFoundException Em caso de: <br>
+     * - Usuário não encontrado.
+     * */
     public void globalLogout(String username){
         authUtil.isNotSelfOrAdmin(username);
 
@@ -96,6 +102,7 @@ public class AuthService {
      * * E-mail já está em uso.
      *
      * */
+    @Transactional
     public AuthResponse register(AuthRegisterRequest registerRequest){
 
         if(userRepository.existsByUsername(registerRequest.username())){
@@ -118,6 +125,14 @@ public class AuthService {
         return new AuthResponse("Bearer " + tokenService.generateToken(createdUser));
     }
 
+    /**
+     * Altera a senha do usuário que esqueceu a senha
+     * @param forgotPasswordRequest {@link AuthForgotPasswordRequest}
+     * @throws CustomNotFoundException Em caso de: <br>
+     * - Usuário não encontrado.
+     * @throws CustomEmailException Em caso de: <br>
+     * - Algum problema com o envio de e-mail.
+     * */
     public void forgotPassword(AuthForgotPasswordRequest forgotPasswordRequest){
         UserModel user;
 
@@ -134,7 +149,13 @@ public class AuthService {
                 this.createToken(user, 15, resetTypeToken));
 
     }
-
+    /**
+     * Envia o código de confirmação de e-mail, para o e-mail do sujeito.
+     * @param user {@link UserModel}
+     * @throws CustomEmailException Em caso de: <br>
+     * - Algum erro no envio.
+     *
+     * */
     public void sendConfirmationEmail(UserModel user){
         emailService.sendVerifyEmail(
                 user.getEmail(),
@@ -142,6 +163,18 @@ public class AuthService {
         );
     }
 
+    /**
+     * Muda a senha do usuário que esqueceu a senha.
+     * @param token de confirmação de troca de senha
+     * @param changePasswordRequest {@link AuthChangePasswordRequest}
+     * <hr>
+     * @throws CustomPasswordException Em caso de: <br>
+     * - Nova senha e de confirmação não são iguais. <br>
+     * - A nova senha é igual à antiga.
+     * @throws CustomNotFoundException Em caso de: <br>
+     * - Token não encontrado. <br>
+     * - Usuário não encontrado.
+     * */
     @Transactional
     public void changePassword(
             String token,
@@ -173,6 +206,15 @@ public class AuthService {
         userRepository.save(user);
         tokenRepository.save(resetToken);
     }
+
+    /**
+     *  Confirmação de verificação de e-mail
+     * @param token do usuário
+     * <hr>
+     * @throws CustomNotFoundException Em caso de: <br>
+     * - Token não encontrado <br>
+     * - Usuário não encontrado <br>
+     * */
     @Transactional
     public void confirmEmailVerification(String token){
 
@@ -190,6 +232,14 @@ public class AuthService {
         tokenRepository.save(emailToken);
     }
 
+    /**
+     * Valida se um token é...
+     * @param token do usuário
+     * @param type tipo de token [Reset de senha/Confirmação de e-mail]
+     *             <hr>
+     * @throws CustomTokenException Em caso de: <br>
+     * - Token inválido
+     * */
     public void validateToken(String token, Long type){
         boolean valid = tokenRepository.isPending(token, type);
 
@@ -198,6 +248,14 @@ public class AuthService {
         }
     }
 
+    /**
+     * Persiste o token para o usuário.
+     * @param user {@link UserModel}
+     * @param minutesToExpire em int
+     * @param type de token que será gerado [Reset de Senha/Confirmação de e-mail] {@link TokenTypeModel}
+     *
+     * @return token gerado (String)
+     * */
     private String createToken(
             UserModel user,
             int minutesToExpire,
@@ -221,6 +279,10 @@ public class AuthService {
         return tokenGenerated;
     }
 
+    /**
+     * Gera o token
+     * @return token (String)
+     * */
     private String generateToken(){
         SecureRandom random = new SecureRandom();
 
@@ -229,10 +291,19 @@ public class AuthService {
         return Integer.toString(code);
     }
 
+    /**
+     * Gera o expirationDate para os tokens
+     * @param minutes em int
+     * @return Instant
+     * */
     private Instant generateExpirationDate(int minutes){
         return LocalDateTime.now().plusMinutes(minutes).toInstant(ZoneOffset.of("-03"));
     }
 
+    /**
+     * Rotina para desabilitar os tokens que não foram utilizados <br>
+     * É realizado a cada 15 minutos.
+     * */
     @Transactional
     @Scheduled(cron = "0 */15 * * * *")
     public void disableTokens(){

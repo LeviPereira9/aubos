@@ -1,15 +1,15 @@
 package lp.boble.aubos.service.user;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.user.*;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.auth.CustomPasswordException;
-import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
+import lp.boble.aubos.exception.custom.email.CustomEmailException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
-import lp.boble.aubos.exception.custom.pages.CustomInvalidPageException;
 import lp.boble.aubos.exception.custom.user.CustomEmailAlreadyVerified;
 import lp.boble.aubos.mapper.user.UserMapper;
 import lp.boble.aubos.model.user.UserModel;
@@ -21,9 +21,6 @@ import lp.boble.aubos.service.jwt.TokenService;
 import lp.boble.aubos.util.AuthUtil;
 import lp.boble.aubos.util.ValidationUtil;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -155,6 +152,14 @@ public class UserService {
         userRepository.save(userToDelete);
     }
 
+    /**
+     * Envia o código de confirmação de e-mail, para o e-mail do sujeito.
+     * @param username do usuário
+     * @throws CustomEmailAlreadyVerified Em caso de: <br>
+     * - E-mail já foi verificado.
+     * @throws CustomEmailException Em caso de: <br>
+     * - Algum erro no envio.
+     * */
     public void sendConfirmationEmail(String username){
         authUtil.isNotSelfOrAdmin(username);
 
@@ -168,6 +173,21 @@ public class UserService {
         authService.sendConfirmationEmail(user);
     }
 
+    /**
+     * Mudança de senha do usuário
+     * @param username do usuário que vai receber a troca de senha
+     * @param changePasswordRequest dto com a nova senha {@link AuthChangePasswordRequest}
+     * @return {@link AuthResponse}
+     * <hr>
+     * @throws CustomForbiddenActionException Em caso de: <br>
+     * - Requester não é o target
+     * @throws CustomPasswordException Em caso de: <br>
+     * - Senha nova é igual a antiga <br>
+     * - Senha nova e confirmação de senha não conferem
+     * @throws CustomNotFoundException Em caso de:<br>
+     * - Usuário não encontrado
+     * */
+    @Transactional
     public AuthResponse changePassword(String username, AuthChangePasswordRequest changePasswordRequest){
         if(!authUtil.getRequester().getUsername().equals(username)){
             throw CustomForbiddenActionException.notTheRequester();
