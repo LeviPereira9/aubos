@@ -16,4 +16,8 @@ public class CustomDuplicateFieldException extends GlobalException {
         return new CustomDuplicateFieldException("Este e-mail já está em uso.");
     }
 
+    public static CustomDuplicateFieldException password() {
+        return new CustomDuplicateFieldException("A nova senha não pode ser a mesma que a antiga.");
+    }
+
 }

@@ -4,6 +4,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.auth.*;
+import lp.boble.aubos.exception.custom.auth.CustomPasswordException;
+import lp.boble.aubos.exception.custom.auth.CustomTokenException;
+import lp.boble.aubos.exception.custom.global.CustomDeactivatedException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.user.UserMapper;
@@ -148,7 +151,7 @@ public class AuthService {
         String confirmPassword = changePasswordRequest.confirmPassword();
 
         if(!newPassword.equals(confirmPassword)){
-            throw new RuntimeException("Senhas incompátiveis");
+            throw CustomPasswordException.dontMatch();
         }
 
         // 1L = ResetToken
@@ -191,7 +194,7 @@ public class AuthService {
         boolean valid = tokenRepository.isPending(token, type);
 
         if(!valid){
-            throw new RuntimeException("Token inválido");
+            throw CustomTokenException.invalid();
         }
     }
 

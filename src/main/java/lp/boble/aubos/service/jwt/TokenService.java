@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import lp.boble.aubos.exception.custom.auth.CustomTokenException;
 import lp.boble.aubos.model.user.UserModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class TokenService {
                     .withClaim("id", user.getTokenId().toString())
                     .sign(algorithm);
         } catch (JWTCreationException e) {
-            throw new RuntimeException("Error while creating token: ", e);
+            throw CustomTokenException.errorOnCreate();
         }
     }
 
@@ -51,7 +52,7 @@ public class TokenService {
             return new TokenPayload(username, tokenId);
 
         } catch (JWTVerificationException e) {
-            throw new RuntimeException("Error while validating token: ", e);
+            throw CustomTokenException.errorOnValid();
         }
     }
 

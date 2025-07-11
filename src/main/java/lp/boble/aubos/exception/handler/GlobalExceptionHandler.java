@@ -1,6 +1,7 @@
 package lp.boble.aubos.exception.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lp.boble.aubos.exception.custom.global.CustomDeactivatedException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
@@ -50,6 +51,19 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(CustomDeactivatedException.class)
+    public ResponseEntity<ErrorResponse> handleDeactivatedException(
+            CustomDeactivatedException ex, HttpServletRequest request
+    ){
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.FORBIDDEN.value(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
 }

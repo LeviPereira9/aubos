@@ -1,6 +1,7 @@
 package lp.boble.aubos.service.email;
 
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.exception.custom.email.CustomEmailException;
 import lp.boble.aubos.model.user.UserModel;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,7 +21,7 @@ public class EmailService {
             message.setText(text);
             mailSender.send(message);
         } catch (Exception e)   {
-            throw new RuntimeException(e);
+            throw CustomEmailException.failed();
         }
     }
 
@@ -32,7 +33,7 @@ public class EmailService {
             message.setText(String.format("Código para confirmação do e-mail: %s", token));
             mailSender.send(message);
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw CustomEmailException.failed();
         }
     }
 
@@ -44,7 +45,7 @@ public class EmailService {
             message.setText(String.format("Código para recuperação de senha: %s", token));
             mailSender.send(message);
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw CustomEmailException.failed();
         }
     }
 

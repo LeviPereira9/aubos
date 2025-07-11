@@ -5,10 +5,12 @@ import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.user.*;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
+import lp.boble.aubos.exception.custom.auth.CustomPasswordException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.pages.CustomInvalidPageException;
+import lp.boble.aubos.exception.custom.user.CustomEmailAlreadyVerified;
 import lp.boble.aubos.mapper.user.UserMapper;
 import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.user.UserRepository;
@@ -55,7 +57,6 @@ public class UserService {
 
         return userMapper.fromModelToResponse(found);
     }
-
     /**
      * Busca informações simples de usuário
      * @param username target (em formato String)
@@ -161,7 +162,7 @@ public class UserService {
                 .orElseThrow(CustomNotFoundException::user);
 
         if(user.getIsVerified()){
-            throw new RuntimeException("E-mail já está verificado.");
+            throw new CustomEmailAlreadyVerified();
         }
 
         authService.sendConfirmationEmail(user);
@@ -169,14 +170,14 @@ public class UserService {
 
     public AuthResponse changePassword(String username, AuthChangePasswordRequest changePasswordRequest){
         if(!authUtil.getRequester().getUsername().equals(username)){
-            throw new RuntimeException("Não pode");
+            throw CustomForbiddenActionException.notTheRequester();
         }
 
         String newPassword = changePasswordRequest.newPassword();
         String confirmPassword = changePasswordRequest.confirmPassword();
 
         if(!newPassword.equals(confirmPassword)){
-            throw new RuntimeException("Aham vai indo.");
+            throw CustomPasswordException.sameAsCurrent();
         }
 
         UserModel user = userRepository.findByUsername(username)
@@ -185,7 +186,7 @@ public class UserService {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         if(passwordEncoder.matches(newPassword, user.getPassword())){
-            throw new RuntimeException("Senhas iguais.");
+            throw CustomPasswordException.dontMatch();
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));

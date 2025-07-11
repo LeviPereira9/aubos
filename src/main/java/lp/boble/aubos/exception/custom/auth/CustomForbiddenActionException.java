@@ -12,4 +12,8 @@ public class CustomForbiddenActionException extends AuthException {
     public static CustomForbiddenActionException noToken() {
         return new CustomForbiddenActionException("Nenhum autenticador fornecido.");
     }
+
+    public static CustomForbiddenActionException notTheRequester() {
+        return new CustomForbiddenActionException("Apenas o próprio usuário pode realizar está ação.");
+    }
 }

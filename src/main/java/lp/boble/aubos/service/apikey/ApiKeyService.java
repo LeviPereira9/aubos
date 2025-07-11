@@ -8,6 +8,7 @@ import lp.boble.aubos.exception.custom.apikey.ApiKeyException;
 import lp.boble.aubos.exception.custom.apikey.CustomApiKeyGenerationException;
 import lp.boble.aubos.exception.custom.apikey.CustomApiKeyValidationException;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
+import lp.boble.aubos.exception.custom.auth.CustomHashGenerationException;
 import lp.boble.aubos.exception.custom.global.CustomDeactivatedException;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
@@ -124,7 +125,7 @@ public class ApiKeyService {
             // 3 - Preparar para armazenar
             return encodeForStorage(salt, hash);
         }catch (NoSuchAlgorithmException | InvalidKeySpecException e){
-            throw new RuntimeException(e);
+            throw CustomHashGenerationException.failedToGenerateHash();
         }
     }
 
