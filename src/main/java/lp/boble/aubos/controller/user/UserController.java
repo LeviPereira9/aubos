@@ -177,17 +177,50 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Código de verificação do e-mail",
+            description = "Envio do código de verificação do e-mail"
+    )
+    @ApiResponse(responseCode = "200", description = "Código enviado com sucesso.")
+    @SelfOrModError
+    @UsernameErrors
     @PostMapping("/{username}/send-email-confirmation")
     public ResponseEntity<SuccessResponse<Void>> sendConfirmationEmail(@PathVariable String username){
         userService.sendConfirmationEmail(username);
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()
+                        .operation("POST")
+                        .code(HttpStatus.OK)
+                        .message("Token enviado com sucesso.")
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Mudança de senha",
+            description = "Mudança de senha"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Requester não é o target",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Nova senha igual antiga, senha nova e confirmação não conferem",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    @SelfOrModError
+    @UsernameErrors
     @PatchMapping("/{username}/change-password")
     public ResponseEntity<SuccessResponse<AuthResponse>>
     changePassword(@PathVariable String username, @RequestBody AuthChangePasswordRequest changePasswordRequest){

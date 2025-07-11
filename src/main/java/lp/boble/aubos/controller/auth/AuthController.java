@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.docSnippets.SelfOrModError;
+import lp.boble.aubos.config.docSnippets.UsernameErrors;
 import lp.boble.aubos.dto.auth.*;
 import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
@@ -89,6 +91,23 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Recuperação de senha",
+            description = "Envio do código de recuperação de senha"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Código enviado com sucesso."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "503",
+                    description = "Envio de e-mail fora do ar",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @PostMapping("/forgot-password")
     public ResponseEntity<SuccessResponse<Void>> forgotPassword(@RequestBody AuthForgotPasswordRequest forgotPasswordRequest) {
         authService.forgotPassword(forgotPasswordRequest);
@@ -102,6 +121,14 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     };
 
+    @Operation(
+            summary = "Validador de Token",
+            description = "Valida tokens gerados para operação de reset de senha e verificação de e-mail"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token válidado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Token inválido", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping("/validate-token")
     public ResponseEntity<SuccessResponse<Void>> validateRequestToken(
             @RequestBody AuthTokenRequest requestToken){
@@ -112,13 +139,28 @@ public class AuthController {
                 new SuccessResponseBuilder<Void>()
                         .operation("POST")
                         .code(HttpStatus.OK)
-                        .message("TokenModel válidado com sucesso.")
+                        .message("Token válidado com sucesso.")
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
+    @Operation(
+            summary = "Alteração de senha esquecida",
+            description = "Alterar a senha do usuário por meio do Token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário/Token não encontrado",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Senha antiga igual a nova, nova senha e confirmação não confere",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
     @PatchMapping("/forgot-password")
     public ResponseEntity<SuccessResponse<Void>> changePassword(
             @RequestParam String token,
@@ -137,7 +179,18 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PatchMapping("/confirm-email")
+    @Operation(
+            summary = "Verificação de email",
+            description = "Verifica o e-mail do usuário"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "E-mail verificado com sucesso."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário/Token não encontrado.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PatchMapping("/verify-email")
     public ResponseEntity<SuccessResponse<Void>> verifyEmail(
             @RequestParam String token
     ){
@@ -154,6 +207,13 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(summary = "Encerrador de sessão global", description = "Encerra todas as sessões abertas.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Todas as sessões abertas foram encerradas."),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    @UsernameErrors
+    @SelfOrModError
     @PostMapping("/{username}/globalLogout")
     public ResponseEntity<SuccessResponse<Void>> globalLogout(
             @PathVariable String username
