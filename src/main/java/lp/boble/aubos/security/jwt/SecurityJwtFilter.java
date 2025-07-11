@@ -9,18 +9,20 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.service.jwt.AuthorizationService;
+import lp.boble.aubos.service.jwt.TokenPayload;
 import lp.boble.aubos.service.jwt.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -50,9 +52,23 @@ public class SecurityJwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            String subject = tokenService.validateToken(token);
+            TokenPayload tokenPayload = tokenService.validateToken(token);
 
-            UserDetails userDetails = authorizationService.loadUserByUsername(subject);
+            UserModel userDetails = authorizationService.loadUserByUsername(tokenPayload.getSubject());
+
+            UUID payloadToken;
+            try { // Ver se chegou o ID
+                payloadToken = UUID.fromString(tokenPayload.getToken());
+            } catch (IllegalArgumentException e) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if(!userDetails.getTokenId().equals(payloadToken)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -75,13 +91,13 @@ public class SecurityJwtFilter extends OncePerRequestFilter {
     }
 
     private String recoverToken(HttpServletRequest request){
-        String authHeader = request.getHeader("Authorization");
+        String auth = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (auth == null  || !auth.startsWith("Bearer ")) {
             return null;
         }
 
-        return authHeader.replace("Bearer ", "");
+        return auth.replace("Bearer ", "");
     }
 
     private void handleException(

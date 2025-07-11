@@ -19,7 +19,7 @@ public class AuthorizationService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String usernameOrEmail){
+    public UserModel loadUserByUsername(String usernameOrEmail){
 
         if(usernameOrEmail.isBlank() || usernameOrEmail.equals("NONE_PROVIDED")){
             throw CustomFieldNotProvided.login();

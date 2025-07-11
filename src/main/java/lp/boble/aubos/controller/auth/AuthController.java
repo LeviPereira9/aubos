@@ -154,5 +154,20 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping("/{username}/globalLogout")
+    public ResponseEntity<SuccessResponse<Void>> globalLogout(
+            @PathVariable String username
+    ){
+        authService.globalLogout(username);
+
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .operation("POST")
+                        .code(HttpStatus.OK)
+                        .message("Todas sessões abertas foram encerradas.")
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 }

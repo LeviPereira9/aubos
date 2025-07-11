@@ -84,6 +84,9 @@ public class UserModel implements UserDetails {
     @JoinColumn(name = "role")
     private RoleModel role;
 
+    @Column(name = "token_id")
+    private UUID tokenId;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = this.role.getName();

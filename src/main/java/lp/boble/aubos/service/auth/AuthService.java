@@ -14,6 +14,7 @@ import lp.boble.aubos.repository.auth.TokenRepository;
 import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.service.email.EmailService;
 import lp.boble.aubos.service.jwt.TokenService;
+import lp.boble.aubos.util.AuthUtil;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class AuthService {
     private final TokenService tokenService;
     private final UserMapper userMapper;
     private final TokenRepository tokenRepository;
+    private final AuthUtil authUtil;
 
 
     private TokenTypeModel resetTypeToken;
@@ -64,10 +67,21 @@ public class AuthService {
                         loginRequest.password()
                 );
 
+
         Authentication auth = authenticationManager.authenticate(usernamePassword);
 
         return new AuthResponse("Bearer " + tokenService.generateToken((UserModel) auth.getPrincipal()));
 
+    }
+
+    public void globalLogout(String username){
+        authUtil.isNotSelfOrAdmin(username);
+
+        UserModel target = userRepository.findByUsername(username)
+                .orElseThrow(CustomNotFoundException::user);
+
+        target.setTokenId(UUID.randomUUID());
+        userRepository.save(target);
     }
 
     /**
@@ -93,6 +107,7 @@ public class AuthService {
         UserModel user = userMapper.fromRegisterToModel(registerRequest);
         user.setPasswordHash(encryptedPassword);
 
+        user.setTokenId(UUID.randomUUID());
         UserModel createdUser = userRepository.save(user);
 
         this.sendConfirmationEmail(createdUser);
@@ -142,6 +157,8 @@ public class AuthService {
 
         UserModel user = userRepository.findById(resetToken.getUser().getId())
                 .orElseThrow(CustomNotFoundException::user);
+
+        user.setTokenId(UUID.randomUUID());
 
         String encryptedPassword = new BCryptPasswordEncoder()
                 .encode(changePasswordRequest.newPassword());
