@@ -391,10 +391,23 @@ public class ApiKeyService {
         apiKeyRepository.save(toDelete);
     }
 
-    public ApiKeyCreateResponse rotateKey(String username, String public_id){
+    /**
+     * Rotaciona a chave
+     * @param username (string)
+     * @param publicId (string)
+     * @return {@link ApiKeyCreateResponse}
+     * <hr>
+     * @throws CustomFieldNotProvided Em caso de: <br>
+     * - Username vazio
+     * @throws CustomNotFoundException Em caso de: <br>
+     * - Chave não encontrada <br>
+     * @throws CustomForbiddenActionException Em caso de: <br>
+     * - Não ser ADM ou Requester
+     * */
+    public ApiKeyCreateResponse rotateKey(String username, String publicId){
         authUtil.isNotSelfOrAdmin(username);
 
-        ApiKeyModel key = apiKeyRepository.findByPublicIdAndOwnerUsername(public_id, username)
+        ApiKeyModel key = apiKeyRepository.findByPublicIdAndOwnerUsername(publicId, username)
                 .orElseThrow(CustomNotFoundException::key);
 
         byte[] randomBytes = new byte[SECRET_LENGTH];
@@ -423,6 +436,19 @@ public class ApiKeyService {
         apiKeyRepository.revokePreviousHash(sixHoursAgo);
     }
 
+
+    /**
+     * Revoga a chave prévia a rotação
+     * @param username (string)
+     * @param publicId (string)
+     * <hr>
+     * @throws CustomFieldNotProvided Em caso de: <br>
+     * - Username vazio
+     * @throws CustomNotFoundException Em caso de: <br>
+     * - Chave não encontrada <br>
+     * @throws CustomForbiddenActionException Em caso de: <br>
+     * - Não ser ADM ou Requester
+     * */
     public void revokePreviousHashSecret(String username, String publicId){
         authUtil.isNotSelfOrAdmin(username);
 

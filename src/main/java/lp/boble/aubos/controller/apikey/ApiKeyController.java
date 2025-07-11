@@ -123,6 +123,19 @@ public class ApiKeyController {
         return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
+    @Operation(
+            summary = "Rotação de Chave",
+            description = "Gera uma nova secret, mantendo ainda a mesma chave"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "Chave rotacionada com sucesso..."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Chave não encontrada.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @UsernameErrors
+    @SelfOrModError
     @PutMapping("/{publicId}/rotate-key")
     public ResponseEntity<SuccessResponse<ApiKeyCreateResponse>>
     rotateApiKey(@PathVariable String username, @PathVariable String publicId) {
@@ -139,7 +152,15 @@ public class ApiKeyController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-
+    @Operation(
+            summary = "Revogar chave anterior",
+            description = "Revoga a chave anterior a rotação")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Chave revogada com sucesso."),
+            @ApiResponse(responseCode = "404", description = "Chave não encontrada")
+    })
+    @UsernameErrors
+    @SelfOrModError
     @PutMapping("/{publicId}/revoke-previous")
     public ResponseEntity<SuccessResponse<Void>> revokePreviousHash(
             @PathVariable String username,
