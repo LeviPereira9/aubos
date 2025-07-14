@@ -23,7 +23,6 @@ import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.user.UserService;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
@@ -62,7 +61,7 @@ public class UserController {
         String ifNoneMatch = request.getHeader("If-None-Match");
 
         if(eTag.equals(ifNoneMatch)){
-            throw CustomNotModifiedException.user();
+            throw new CustomNotModifiedException();
         }
 
         UserResponse responseData = userService.getUserInfo(username);
@@ -100,7 +99,7 @@ public class UserController {
         String ifNoneMatch = request.getHeader("If-None-Match");
 
         if(eTag.equals(ifNoneMatch)){
-            throw CustomNotModifiedException.user();
+            throw new CustomNotModifiedException();
         }
 
         UserShortResponse responseData = userService.getUserShortInfo(username);
@@ -139,7 +138,7 @@ public class UserController {
         String ifNoneMatch = request.getHeader("If-None-Match");
 
         if(eTag.equals(ifNoneMatch)){
-            throw CustomNotModifiedException.userQuery();
+            throw new CustomNotModifiedException();
         }
 
         PageResponse<UserAutocompleteProjection> response =
@@ -168,7 +167,7 @@ public class UserController {
         String ifNoneMatch = request.getHeader("If-None-Match");
 
         if(eTag.equals(ifNoneMatch)){
-            throw CustomNotModifiedException.userQuery();
+            throw new CustomNotModifiedException();
         }
 
         PageResponse<UserSuggestionProjection> response =
@@ -292,7 +291,7 @@ public class UserController {
         Instant lastUpdate = userRepository.getUpdate(username)
                 .orElseThrow(CustomNotFoundException::user);
 
-        return "\""+String.valueOf(lastUpdate.toEpochMilli())+"\"";
+        return "\""+ lastUpdate.toEpochMilli() + "\"";
     }
 
     private String generateQueryEtag(String query, int page){

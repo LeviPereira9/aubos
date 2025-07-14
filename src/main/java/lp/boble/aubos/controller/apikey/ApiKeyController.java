@@ -66,7 +66,7 @@ public class ApiKeyController {
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    };
+    }
 
     @Operation(
             summary = "Listar todas as chaves ativas",
@@ -86,7 +86,7 @@ public class ApiKeyController {
         String ifNoneMatch = request.getHeader("if-none-match");
 
         if(eTag.equals(ifNoneMatch)){
-            throw CustomNotModifiedException.apiKey();
+            throw new CustomNotModifiedException();
         }
 
         List<ApiKeyResponse> dataResponse = apiKeyService.findAllUserKeys(username);

@@ -1,10 +1,8 @@
 package lp.boble.aubos.exception.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lp.boble.aubos.exception.custom.global.CustomDeactivatedException;
-import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
-import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
-import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.exception.custom.apikey.CustomApiKeyValidationException;
+import lp.boble.aubos.exception.custom.global.*;
 import lp.boble.aubos.response.error.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,5 +63,24 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
+
+    @ExceptionHandler(CustomNotModifiedException.class)
+    public ResponseEntity<ErrorResponse> handleNotModified(){
+        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+    }
+
+    @ExceptionHandler(CustomApiKeyValidationException.class)
+    public ResponseEntity<ErrorResponse> handleApiKeyValidationException(
+            CustomApiKeyValidationException ex, HttpServletRequest request
+    ){
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.FORBIDDEN.value(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
 
 }
