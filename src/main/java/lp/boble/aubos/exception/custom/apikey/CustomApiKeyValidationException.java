@@ -1,5 +1,6 @@
 package lp.boble.aubos.exception.custom.apikey;
 
+// TODO: Exceptions
 public class CustomApiKeyValidationException extends ApiKeyException {
     public CustomApiKeyValidationException(String message) {
         super(message);

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -58,8 +59,7 @@ public interface UserRepository extends JpaRepository<UserModel, UUID> {
             u.profilePic as profilePic,
             u.bio as bio,
             u.isVerified as isVerified,
-            u.isOfficial as isOfficial,
-            u.lastLogin as lastLogin
+            u.isOfficial as isOfficial
            FROM UserModel u
                WHERE
                    u.status.name = 'ACTIVE'
@@ -74,4 +74,10 @@ public interface UserRepository extends JpaRepository<UserModel, UUID> {
             @Param("query") String query,
             Pageable pageable
     );
+
+    @Query("""
+    SELECT u.updatedAt FROM UserModel u
+    WHERE u.status.name = 'ACTIVE' AND u.username = :username
+""")
+    Optional<Instant> getUpdate(String username);
 }

@@ -116,7 +116,7 @@ public class AuthService {
         String encryptedPassword = new BCryptPasswordEncoder().encode(registerRequest.password());
         UserModel user = userMapper.fromRegisterToModel(registerRequest);
         user.setPasswordHash(encryptedPassword);
-
+        user.setUpdatedAt(Instant.now());
         user.setTokenId(UUID.randomUUID());
         UserModel createdUser = userRepository.save(user);
 
@@ -225,6 +225,7 @@ public class AuthService {
                 .orElseThrow(CustomNotFoundException::user);
 
         user.setIsVerified(true);
+        user.setUpdatedAt(Instant.now());
         emailToken.setUsed(true);
         emailToken.setUpdatedAt(Instant.now());
 

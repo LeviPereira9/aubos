@@ -62,8 +62,8 @@ public class UserModel implements UserDetails {
     @Column(name = "join_date")
     private Instant joinDate = Instant.now();
 
-    @Column(name = "last_login")
-    private Instant lastLogin;
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status")

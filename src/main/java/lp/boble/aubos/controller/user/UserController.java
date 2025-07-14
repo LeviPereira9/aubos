@@ -7,20 +7,30 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.config.docSnippets.SelfOrModError;
 import lp.boble.aubos.config.docSnippets.UsernameErrors;
 import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.user.*;
+import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
+import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.user.UserService;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 
 @Tag(
         name = "User",
@@ -31,6 +41,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Operation(
             summary = "Buscar um usuário pelo username",
@@ -43,8 +54,17 @@ public class UserController {
     @SelfOrModError
     @UsernameErrors
     @GetMapping("/{username}")
-    public ResponseEntity<SuccessResponse<UserResponse>>
-    getUserInfo(@PathVariable String username){
+    public ResponseEntity<SuccessResponse<UserResponse>> getUserInfo(
+            @PathVariable String username,
+            HttpServletRequest request){
+
+        String eTag = this.generateUserEtag(username);
+        String ifNoneMatch = request.getHeader("If-None-Match");
+
+        if(eTag.equals(ifNoneMatch)){
+            throw CustomNotModifiedException.user();
+        }
+
         UserResponse responseData = userService.getUserInfo(username);
 
         SuccessResponse<UserResponse> response =
@@ -56,7 +76,10 @@ public class UserController {
                         .build();
 
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok()
+                .eTag(eTag)
+                .cacheControl(CacheProfiles.userPrivate())
+                .body(response);
     }
 
 
@@ -71,7 +94,15 @@ public class UserController {
     @UsernameErrors
     @GetMapping("/{username}/details")
     public ResponseEntity<SuccessResponse<UserShortResponse>>
-    getUserShortInfo(@PathVariable String username){
+    getUserShortInfo(@PathVariable String username, HttpServletRequest request){
+
+        String eTag = this.generateUserEtag(username);
+        String ifNoneMatch = request.getHeader("If-None-Match");
+
+        if(eTag.equals(ifNoneMatch)){
+            throw CustomNotModifiedException.user();
+        }
+
         UserShortResponse responseData = userService.getUserShortInfo(username);
 
         SuccessResponse<UserShortResponse> response =
@@ -82,7 +113,10 @@ public class UserController {
                         .data(responseData)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok()
+                .cacheControl(CacheProfiles.userPublic())
+                .eTag(eTag)
+                .body(response);
     }
 
     @Operation(
@@ -98,12 +132,20 @@ public class UserController {
     public ResponseEntity<PageResponse<UserAutocompleteProjection>>
     getAutocompleteUser(
             @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page){
+            @RequestParam(defaultValue = "0") int page,
+            HttpServletRequest request){
+
+        String eTag = this.generateQueryEtag(query, page);
+        String ifNoneMatch = request.getHeader("If-None-Match");
+
+        if(eTag.equals(ifNoneMatch)){
+            throw CustomNotModifiedException.userQuery();
+        }
 
         PageResponse<UserAutocompleteProjection> response =
                 userService.getUserAutocomplete(query, page);
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok().eTag(eTag).body(response);
     }
 
     @Operation(
@@ -119,7 +161,15 @@ public class UserController {
     public ResponseEntity<PageResponse<UserSuggestionProjection>>
     getSuggestionsUser(
             @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page){
+            @RequestParam(defaultValue = "0") int page,
+            HttpServletRequest request){
+
+        String eTag = this.generateQueryEtag(query, page);
+        String ifNoneMatch = request.getHeader("If-None-Match");
+
+        if(eTag.equals(ifNoneMatch)){
+            throw CustomNotModifiedException.userQuery();
+        }
 
         PageResponse<UserSuggestionProjection> response =
                 userService.getUserSuggestion(query, page);
@@ -237,4 +287,17 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    private String generateUserEtag(String username){
+
+        Instant lastUpdate = userRepository.getUpdate(username)
+                .orElseThrow(CustomNotFoundException::user);
+
+        return "\""+String.valueOf(lastUpdate.toEpochMilli())+"\"";
+    }
+
+    private String generateQueryEtag(String query, int page){
+        String toHash = "query="+query.toLowerCase()+"&page="+page;
+
+        return DigestUtils.md5DigestAsHex(toHash.getBytes(StandardCharsets.UTF_8));
+    }
 }

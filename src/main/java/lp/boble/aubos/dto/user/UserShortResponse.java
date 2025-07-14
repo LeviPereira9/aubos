@@ -9,7 +9,6 @@ public record UserShortResponse(
         String location,
         String status,
         Instant joinDate,
-        Instant lastLogin,
         boolean isVerified,
         boolean isOfficial,
         String role

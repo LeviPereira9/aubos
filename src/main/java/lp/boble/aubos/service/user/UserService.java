@@ -24,6 +24,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -44,6 +46,10 @@ public class UserService {
      * @return {@link UserResponse}
      * @throws CustomNotFoundException quando: <br>
      * * Usuário não encontrado.
+     * @throws CustomFieldNotProvided em caso de:
+     *  - Username vázio
+     * @throws CustomForbiddenActionException em caso de:
+     * - Não é o requester nem um ADMIN
      * */
     public UserResponse getUserInfo(String username){
 
@@ -130,6 +136,8 @@ public class UserService {
                 .orElseThrow(CustomNotFoundException::user);
 
         userMapper.fromUpdateToModel(request, found);
+
+        found.setUpdatedAt(Instant.now());
 
         return userMapper.fromModelToResponse(userRepository.save(found));
     }

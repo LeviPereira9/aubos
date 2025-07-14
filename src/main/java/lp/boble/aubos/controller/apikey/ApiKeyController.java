@@ -7,19 +7,27 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.config.docSnippets.SelfOrModError;
 import lp.boble.aubos.config.docSnippets.UsernameErrors;
 import lp.boble.aubos.dto.apikey.ApiKeyCreateResponse;
 import lp.boble.aubos.dto.apikey.ApiKeyResponse;
+import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
+import lp.boble.aubos.repository.apikey.ApiKeyRepository;
 import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.apikey.ApiKeyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Tag(
@@ -31,6 +39,7 @@ import java.util.List;
 public class ApiKeyController {
 
     private final ApiKeyService apiKeyService;
+    private final ApiKeyRepository apiKeyRepository;
 
     @Operation(
             summary = "Gerar nova chave API",
@@ -71,7 +80,15 @@ public class ApiKeyController {
     @SelfOrModError
     @GetMapping
     public ResponseEntity<SuccessResponse<List<ApiKeyResponse>>>
-    getApiKeys(@PathVariable String username) {
+    getApiKeys(@PathVariable String username, HttpServletRequest request) {
+
+        String eTag = this.generateApiKeysEtag(username);
+        String ifNoneMatch = request.getHeader("if-none-match");
+
+        if(eTag.equals(ifNoneMatch)){
+            throw CustomNotModifiedException.apiKey();
+        }
+
         List<ApiKeyResponse> dataResponse = apiKeyService.findAllUserKeys(username);
 
         String messageResponse = dataResponse.isEmpty() ?
@@ -87,7 +104,11 @@ public class ApiKeyController {
                         .data(dataResponse)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity
+                .ok()
+                .eTag(eTag)
+                .cacheControl(CacheProfiles.apiKeyPrivate())
+                .body(response);
     }
 
     @Operation(
@@ -177,6 +198,18 @@ public class ApiKeyController {
 
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    private String generateApiKeysEtag(String username){
+        List<Instant> updates = apiKeyRepository.getLastUpdatedKeys(username)
+                .orElse(new ArrayList<>());
+
+        String toHash = String.join(updates
+                .stream()
+                .sorted()
+                .toString(), ",");
+
+        return DigestUtils.md5DigestAsHex(toHash.getBytes(StandardCharsets.UTF_8));
     }
 
 }

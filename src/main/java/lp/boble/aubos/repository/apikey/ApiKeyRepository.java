@@ -23,15 +23,15 @@ public interface ApiKeyRepository extends JpaRepository<ApiKeyModel, UUID> {
 
     @Query("""
     SELECT k FROM ApiKeyModel k
-    WHERE k.owner = :owner AND k.softDelete = false
+    WHERE k.owner.username = :owner AND k.softDelete = false
 """)
-    List<ApiKeyModel> findAllByOwner(@Param("owner") UserModel owner);
+    List<ApiKeyModel> findAllByOwner(@Param("owner") String owner);
 
     @Query("""
     SELECT COUNT(k) FROM ApiKeyModel k
-    WHERE k.owner = :owner AND k.status.id = 1
+    WHERE k.owner.username = :owner AND k.status.id = 1
 """)
-    int countByOwnerAndStatus(@Param("owner") UserModel owner);
+    int countByOwnerAndStatus(@Param("owner") String owner);
 
     @Modifying
     @Query("""
@@ -42,4 +42,10 @@ public interface ApiKeyRepository extends JpaRepository<ApiKeyModel, UUID> {
      k.rotatedAt < :sixHoursAgo
 """)
     void revokePreviousHash(Instant sixHoursAgo);
+
+    @Query("""
+    SELECT k.lastUsedAt FROM ApiKeyModel k
+    WHERE k.owner.username = :owner AND k.softDelete = false AND k.status.id = 1
+""")
+    Optional<List<Instant>> getLastUpdatedKeys(String owner);
 }

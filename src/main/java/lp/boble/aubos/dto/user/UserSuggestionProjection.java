@@ -9,6 +9,5 @@ public interface UserSuggestionProjection{
     String getBio();
     boolean getIsVerified();
     boolean getIsOfficial();
-    Instant getLastLogin();
 
 }

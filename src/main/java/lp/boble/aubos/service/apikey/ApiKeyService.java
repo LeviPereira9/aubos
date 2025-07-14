@@ -74,7 +74,7 @@ public class ApiKeyService {
                 .orElseThrow(CustomNotFoundException::user);
 
         // Verificar o limite de chaves do usuário
-        validateKeyLimit(user);
+        validateKeyLimit(username);
 
         // 2 - Cria o rawSecret em 32 Bytes
         byte[] randomBytes = new byte[SECRET_LENGTH];
@@ -318,12 +318,12 @@ public class ApiKeyService {
 
     /**
      * Valida se o usuário pode criar novas chaves conforme políticas.
-     * @param user passando o {@link UserModel}
+     * @param username passando o {@link UserModel}
      * @throws CustomApiKeyValidationException em caso de: <br>
      * - O número de chaves que o usuário possui for maior que {@value MAX_KEYS_PER_USER}
      */
-    private void validateKeyLimit(UserModel user){
-        long activeKeys = apiKeyRepository.countByOwnerAndStatus(user);
+    private void validateKeyLimit(String username){
+        long activeKeys = apiKeyRepository.countByOwnerAndStatus(username);
 
         if(activeKeys >= MAX_KEYS_PER_USER){
             throw CustomApiKeyValidationException.keyLimitExceeded();
@@ -351,10 +351,7 @@ public class ApiKeyService {
 
         authUtil.isNotSelfOrAdmin(username);
 
-        UserModel user = userRepository.findByUsername(username)
-                .orElseThrow(CustomNotFoundException::user);
-
-        List<ApiKeyModel> keys = apiKeyRepository.findAllByOwner(user);
+        List<ApiKeyModel> keys = apiKeyRepository.findAllByOwner(username);
 
         return keys
                 .stream()
