@@ -37,4 +37,4 @@ import java.lang.annotation.*;
 })
 @SelfOrModError
 @UsernameErrors
-public @interface DocChangePassword {}
+public @interface DocUserChangePassword {}

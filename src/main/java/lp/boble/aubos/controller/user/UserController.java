@@ -1,17 +1,9 @@
 package lp.boble.aubos.controller.user;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
-import lp.boble.aubos.config.docSnippets.SelfOrModError;
-import lp.boble.aubos.config.docSnippets.UsernameErrors;
 import lp.boble.aubos.config.documentation.user.*;
 import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
@@ -19,7 +11,6 @@ import lp.boble.aubos.dto.user.*;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.repository.user.UserRepository;
-import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
@@ -195,7 +186,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DocChangePassword
+    @DocUserChangePassword
     @PatchMapping("/{username}/change-password")
     public ResponseEntity<SuccessResponse<AuthResponse>>
     changePassword(@PathVariable String username, @RequestBody AuthChangePasswordRequest changePasswordRequest){
