@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.config.docSnippets.SelfOrModError;
 import lp.boble.aubos.config.docSnippets.UsernameErrors;
+import lp.boble.aubos.config.documentation.user.*;
 import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.user.*;
@@ -42,16 +43,7 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
-    @Operation(
-            summary = "Buscar um usuário pelo username",
-            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso"),
-    })
-    @SelfOrModError
-    @UsernameErrors
+    @DocGetUserInfo
     @GetMapping("/{username}")
     public ResponseEntity<SuccessResponse<UserResponse>> getUserInfo(
             @PathVariable String username,
@@ -82,15 +74,7 @@ public class UserController {
     }
 
 
-    @Operation(
-            summary = "Buscar usuário por username",
-            description = "Qualquer usuário pode fazer esta ação, retorna apenas informações não sensíveis de usuários",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso.")
-    })
-    @UsernameErrors
+    @DocGetUserShortInfo
     @GetMapping("/{username}/details")
     public ResponseEntity<SuccessResponse<UserShortResponse>>
     getUserShortInfo(@PathVariable String username, HttpServletRequest request){
@@ -118,18 +102,10 @@ public class UserController {
                 .body(response);
     }
 
-    @Operation(
-            summary = "Listar usernames e displaynames pelo termo de busca",
-            description = "Qualquer usuário pode fazer esta ação, retorna usernames e seus status caso compartilhem do termo de busca semelhantes ao username ou displayname",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usernames encontrados com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Termo inválido", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-    })
+    @DocGetAutoCompleteUser
     @GetMapping("/search")
     public ResponseEntity<PageResponse<UserAutocompleteProjection>>
-    getAutocompleteUser(
+    getAutoCompleteUser(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
             HttpServletRequest request){
@@ -147,15 +123,7 @@ public class UserController {
         return ResponseEntity.ok().eTag(eTag).body(response);
     }
 
-    @Operation(
-            summary = "Listar usuários pelo termo de busca",
-            description = "Qualquer usuário pode fazer esta ação, retorna usuários que compartilhem do termo de busca semelhantes ao username ou displayname",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuários encontrados com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Termo inválido", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-    })
+    @DocGetSuggestionsUser
     @GetMapping("/suggestions")
     public ResponseEntity<PageResponse<UserSuggestionProjection>>
     getSuggestionsUser(
@@ -176,14 +144,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(
-            summary = "Atualizar usuário",
-            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
-    @SelfOrModError
-    @UsernameErrors
+    @DocUpdateUser
     @PutMapping("/{username}")
     public ResponseEntity<SuccessResponse<UserResponse>>
     updateUser(@PathVariable String username,
@@ -203,14 +164,7 @@ public class UserController {
     }
 
 
-    @Operation(
-            summary = "Soft delete",
-            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso")
-    @SelfOrModError
-    @UsernameErrors
+    @DocDeleteUser
     @DeleteMapping("/{username}")
     public ResponseEntity<SuccessResponse<Void>>
     deleteUser(@PathVariable String username){
@@ -226,13 +180,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(
-            summary = "Código de verificação do e-mail",
-            description = "Envio do código de verificação do e-mail"
-    )
-    @ApiResponse(responseCode = "200", description = "Código enviado com sucesso.")
-    @SelfOrModError
-    @UsernameErrors
+    @DocSendConfirmationEmail
     @PostMapping("/{username}/send-email-confirmation")
     public ResponseEntity<SuccessResponse<Void>> sendConfirmationEmail(@PathVariable String username){
         userService.sendConfirmationEmail(username);
@@ -247,29 +195,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(
-            summary = "Mudança de senha",
-            description = "Mudança de senha"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso."),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Usuário não encontrado",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Requester não é o target",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "Nova senha igual antiga, senha nova e confirmação não conferem",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
-    @SelfOrModError
-    @UsernameErrors
+    @DocChangePassword
     @PatchMapping("/{username}/change-password")
     public ResponseEntity<SuccessResponse<AuthResponse>>
     changePassword(@PathVariable String username, @RequestBody AuthChangePasswordRequest changePasswordRequest){
