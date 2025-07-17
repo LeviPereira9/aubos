@@ -7,13 +7,13 @@ spring.datasource.password=db_senha
 
 # JWT
 api.security.token.secret = TokenSecret
-logging.level.org.springframework.security= [TRUE/FALSE] mostrar o debug das requisições
+logging.level.org.springframework.security= [TRUE/FALSE] mostrar o debug das requisicoes
 
 # API
 api.prefix= prefixo da rota
 
-# Email (Enviar e-mails pelo Java, a conta gmail que você for usar precisa ter a
-# autenticação de 2 fatores ativadas, dps só seguir o mestre: https://www.youtube.com/watch?v=_MwdIaMy_Ao)
+# Email (Enviar e-mails pelo Java, a conta gmail que voce for usar precisa ter a
+# autenticacao de 2 fatores ativadas, dps so seguir o mestre: https://www.youtube.com/watch?v=_MwdIaMy_Ao)
 spring.mail.host=smtp.exemplo.com
 spring.mail.port=587
 spring.mail.username=seu-email@example.com
