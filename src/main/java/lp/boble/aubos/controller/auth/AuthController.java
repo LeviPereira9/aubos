@@ -1,17 +1,9 @@
 package lp.boble.aubos.controller.auth;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.config.docSnippets.SelfOrModError;
-import lp.boble.aubos.config.docSnippets.UsernameErrors;
 import lp.boble.aubos.config.documentation.auth.*;
 import lp.boble.aubos.dto.auth.*;
-import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.auth.AuthService;

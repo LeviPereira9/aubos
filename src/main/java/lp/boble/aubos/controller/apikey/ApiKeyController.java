@@ -1,23 +1,14 @@
 package lp.boble.aubos.controller.apikey;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
-import lp.boble.aubos.config.docSnippets.SelfOrModError;
-import lp.boble.aubos.config.docSnippets.UsernameErrors;
 import lp.boble.aubos.config.documentation.apikey.*;
 import lp.boble.aubos.dto.apikey.ApiKeyCreateResponse;
 import lp.boble.aubos.dto.apikey.ApiKeyResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.repository.apikey.ApiKeyRepository;
-import lp.boble.aubos.response.error.ErrorResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.apikey.ApiKeyService;
