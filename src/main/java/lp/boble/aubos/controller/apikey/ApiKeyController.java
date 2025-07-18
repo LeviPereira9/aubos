@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.config.docSnippets.SelfOrModError;
 import lp.boble.aubos.config.docSnippets.UsernameErrors;
+import lp.boble.aubos.config.documentation.apikey.*;
 import lp.boble.aubos.dto.apikey.ApiKeyCreateResponse;
 import lp.boble.aubos.dto.apikey.ApiKeyResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
@@ -41,16 +42,7 @@ public class ApiKeyController {
     private final ApiKeyService apiKeyService;
     private final ApiKeyRepository apiKeyRepository;
 
-    @Operation(
-            summary = "Gerar nova chave API",
-            description = "Apenas o próprio usuário pode realizar esta ação",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Chave gerada com sucesso")
-    })
-    @SelfOrModError
-    @UsernameErrors
+    @DocCreateApiKey
     @PostMapping("/create")
     public ResponseEntity<SuccessResponse<ApiKeyCreateResponse>>
     createApiKey(@PathVariable String username) {
@@ -68,16 +60,7 @@ public class ApiKeyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(
-            summary = "Listar todas as chaves ativas",
-            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação",
-            security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Chaves encontradas com sucesso/Usuário não possui nenhuma chave")
-    })
-    @UsernameErrors
-    @SelfOrModError
+    @DocGetApiKeys
     @GetMapping
     public ResponseEntity<SuccessResponse<List<ApiKeyResponse>>>
     getApiKeys(@PathVariable String username, HttpServletRequest request) {
@@ -111,24 +94,8 @@ public class ApiKeyController {
                 .body(response);
     }
 
-    @Operation(
-            summary = "Desativar chave",
-            description = "Apenas o próprio usuário ou um MOD podem realizar esta ação"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Chave desativada com sucesso"),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Username/Public ID inválido",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Username/Public ID não encontrado",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
-    @SelfOrModError
+
+    @DocDeleteApiKey
     @DeleteMapping("/{publicId}")
     public ResponseEntity<SuccessResponse<Void>> deleteApiKey
     (@PathVariable String username, @PathVariable String publicId) {
@@ -144,19 +111,7 @@ public class ApiKeyController {
         return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
-    @Operation(
-            summary = "Rotação de Chave",
-            description = "Gera uma nova secret, mantendo ainda a mesma chave"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "Chave rotacionada com sucesso..."),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Chave não encontrada.",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @UsernameErrors
-    @SelfOrModError
+    @DocRotateApiKey
     @PutMapping("/{publicId}/rotate-key")
     public ResponseEntity<SuccessResponse<ApiKeyCreateResponse>>
     rotateApiKey(@PathVariable String username, @PathVariable String publicId) {
@@ -173,15 +128,7 @@ public class ApiKeyController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(
-            summary = "Revogar chave anterior",
-            description = "Revoga a chave anterior a rotação")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Chave revogada com sucesso."),
-            @ApiResponse(responseCode = "404", description = "Chave não encontrada")
-    })
-    @UsernameErrors
-    @SelfOrModError
+    @DocRevokePreviousHash
     @PutMapping("/{publicId}/revoke-previous")
     public ResponseEntity<SuccessResponse<Void>> revokePreviousHash(
             @PathVariable String username,
