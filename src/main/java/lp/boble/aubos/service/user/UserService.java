@@ -20,6 +20,9 @@ import lp.boble.aubos.service.email.EmailService;
 import lp.boble.aubos.service.jwt.TokenService;
 import lp.boble.aubos.util.AuthUtil;
 import lp.boble.aubos.util.ValidationUtil;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -67,6 +70,7 @@ public class UserService {
      * @throws CustomNotFoundException quando: <br>
      *  * Usuário não encontrado.
      * */
+    @Cacheable(value = "userShort", key = "#username")
     public UserShortResponse getUserShortInfo(String username){
         if(username.isBlank()){
             throw CustomFieldNotProvided.username();
@@ -128,6 +132,7 @@ public class UserService {
      *  * Usuário não encontrado..
      *
      * */
+    @CachePut(value = "userShort", key = "#username")
     public UserResponse updateUser(String username, UserUpdateRequest request){
 
         authUtil.isNotSelfOrAdmin(username);
@@ -148,6 +153,8 @@ public class UserService {
      * @throws CustomNotFoundException quando: <br>
      * * Usuário não encontrado.
      * */
+    @CacheEvict(value = "userShort", key = "#username")
+    @Transactional
     public void deleteUser(String username){
 
         authUtil.isNotSelfOrAdmin(username);

@@ -10,16 +10,14 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.security.Security;
-
 @Configuration
-public class SwaggerConfiguration {
-
-    private final String token = "bearerAuth";
-    private final String apiKey = "apiKeyAuth";
+public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        String token = "bearerAuth";
+        String apiKey = "apiKeyAuth";
+
         return new OpenAPI().info(new Info()
                 .title("Aubos API")
                 .version("1.0 巴西人")
