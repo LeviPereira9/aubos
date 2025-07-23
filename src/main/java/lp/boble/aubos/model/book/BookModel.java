@@ -3,10 +3,13 @@ package lp.boble.aubos.model.book;
 import jakarta.persistence.*;
 import lombok.Data;
 import lp.boble.aubos.model.book.dependencies.*;
+import lp.boble.aubos.model.book.relationships.BookContributor;
+import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -62,5 +65,10 @@ public class BookModel {
     private UserModel updatedBy;
 
     // Relações N:N
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    private List<BookLanguage> availableLanguages;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    private List<BookContributor> contributors;
 
 }

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "tb_book_family_membership")
 @Data
-public class BookFamilyMembership {
+public class BookFamilyMembershipModel {
     @Id
     @GeneratedValue
     private UUID id;

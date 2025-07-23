@@ -10,12 +10,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "tb_book_metrics")
 @Data
-public class Metrics {
+public class MetricsModel {
     @Id
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "book_id")
     private BookModel book;
 

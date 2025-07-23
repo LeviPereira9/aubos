@@ -1,10 +1,13 @@
 package lp.boble.aubos.model.book.dependencies;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -28,4 +31,8 @@ public class ContributorModel {
     @ManyToOne
     @JoinColumn(name = "updated_by")
     private UserModel updatedBy;
+
+    @OneToMany(mappedBy = "contributor")
+    @JsonIgnore
+    private List<ContributorModel> books;
 }
