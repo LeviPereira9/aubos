@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
+import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Data
 public class ContributorModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "name")
@@ -34,5 +35,5 @@ public class ContributorModel {
 
     @OneToMany(mappedBy = "contributor")
     @JsonIgnore
-    private List<ContributorModel> books;
+    private List<BookContributor> books;
 }

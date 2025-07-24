@@ -6,6 +6,8 @@ import lp.boble.aubos.model.book.dependencies.*;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.model.user.UserModel;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -27,14 +29,14 @@ public class BookModel {
     @Column(name = "synopsis")
     private String synopsis;
     @Column(name = "published_at")
-    private LocalDate publishedAt;
+    private LocalDate publishedOn;
     @Column(name = "finished_at")
-    private LocalDate finishedAt;
+    private LocalDate finishedOn;
 
     //Relações
     @ManyToOne
     @JoinColumn(name = "language_id")
-    private LanguageModel language;
+    private Language language;
 
     @ManyToOne
     @JoinColumn(name = "type_id")
@@ -53,14 +55,14 @@ public class BookModel {
     private LicenseModel licenseModel;
 
     // Controle
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private UserModel createdBy;
 
     @Column(name = "last_update")
     private Instant lastUpdated;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private UserModel updatedBy;
 
