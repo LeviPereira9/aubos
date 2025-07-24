@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lp.boble.aubos.model.book.BookModel;
-import lp.boble.aubos.model.book.dependencies.Language;
+import lp.boble.aubos.model.book.dependencies.LanguageModel;
 
 import java.util.UUID;
 
@@ -23,5 +23,5 @@ public class BookLanguage {
 
     @ManyToOne
     @JoinColumn(name = "language_id")
-    private Language language;
+    private LanguageModel language;
 }

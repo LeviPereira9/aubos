@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
+import lp.boble.aubos.model.book.dependencies.ContributorRole;
 import lp.boble.aubos.model.user.RoleModel;
 
 import java.util.UUID;
@@ -29,5 +30,16 @@ public class BookContributor {
 
     @ManyToOne
     @JoinColumn(name = "contributor_role_id")
-    private RoleModel contributorRole;
+    private ContributorRole contributorRole;
+
+    public BookContributor(
+            BookModel book,
+            ContributorModel contributor,
+            ContributorRole contributorRole) {
+        this.book = book;
+        this.contributor = contributor;
+        this.contributorRole = contributorRole;
+    }
+
+    public BookContributor(){}
 }

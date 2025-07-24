@@ -6,8 +6,6 @@ import lp.boble.aubos.model.book.dependencies.*;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.model.user.UserModel;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -36,23 +34,23 @@ public class BookModel {
     //Relações
     @ManyToOne
     @JoinColumn(name = "language_id")
-    private Language language;
+    private LanguageModel language;
 
     @ManyToOne
     @JoinColumn(name = "type_id")
-    private Type type;
+    private TypeModel type;
 
     @ManyToOne
     @JoinColumn(name = "status_id")
-    private Status status;
+    private StatusModel status;
 
     @ManyToOne
     @JoinColumn(name = "restriction_id")
-    private Restriction restriction;
+    private RestrictionModel restriction;
 
     @ManyToOne
     @JoinColumn(name = "license_id")
-    private LicenseModel licenseModel;
+    private LicenseModel license;
 
     // Controle
     @ManyToOne(fetch = FetchType.LAZY)

@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "tb_language")
 @Data
-public class Language {
+public class LanguageModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

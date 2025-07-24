@@ -11,5 +11,5 @@ import lombok.Data;
 public class ContributorRole {
     @Id
     private int id;
-    private String role;
+    private String name;
 }

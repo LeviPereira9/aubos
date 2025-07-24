@@ -9,7 +9,7 @@ import lombok.Data;
 @Entity
 @Table(name = "tb_book_type")
 @Data
-public class Type {
+public class TypeModel {
     @Id
     private int id;
 

@@ -7,17 +7,12 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "tb_book_restriction")
+@Table(name = "tb_book_status")
 @Data
-public class Restriction {
-
+public class StatusModel {
     @Id
     private int id;
 
-    @Column(name = "age")
-    private int age;
-
-    @Column(name = "description")
-    private String description;
-
+    @Column(name = "label")
+    private String label;
 }
