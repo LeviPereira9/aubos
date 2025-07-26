@@ -1,8 +1,10 @@
 package lp.boble.aubos.controller.book;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
+import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.response.success.SuccessResponse;
@@ -10,8 +12,11 @@ import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.book.BookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.UUID;
 
 @RestController
@@ -39,7 +44,14 @@ public class BookController {
     };
 
     @GetMapping("/{id}")
-    public ResponseEntity<SuccessResponse<BookResponse>> getBook(@PathVariable UUID id){
+    public ResponseEntity<SuccessResponse<BookResponse>> getBook(@PathVariable UUID id, HttpServletRequest request){
+
+        String eTag = this.generateBookEtag(id);
+        String ifNoneMatch = request.getHeader("If-None-Match");
+
+        if(eTag.equals(ifNoneMatch)){
+            throw new CustomNotModifiedException();
+        }
 
         BookResponse data = bookService.getBookById(id);
 
@@ -81,5 +93,18 @@ public class BookController {
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    private String generateBookEtag(UUID id){
+
+        Instant lastUpdate = bookRepository.getLastUpdated(id)
+                .orElse(null);
+
+        String base = (lastUpdate != null)
+                ? lastUpdate.toString()
+                : "no-update"+id.toString();
+
+
+        return "\"" + DigestUtils.md5DigestAsHex(base.getBytes(StandardCharsets.UTF_8)) + "\"";
     }
 }

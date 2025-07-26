@@ -206,9 +206,13 @@ public class UserController {
     private String generateUserEtag(String username){
 
         Instant lastUpdate = userRepository.getUpdate(username)
-                .orElseThrow(CustomNotFoundException::user);
+                .orElse(null);
 
-        return "\""+ lastUpdate.toEpochMilli() + "\"";
+        String base = (lastUpdate != null)
+                ? lastUpdate.toString()
+                : "no-update" + username;
+
+        return "\"" + DigestUtils.md5DigestAsHex(base.getBytes(StandardCharsets.UTF_8)) + "\"";
     }
 
     private String generateQueryEtag(String query, int page){
