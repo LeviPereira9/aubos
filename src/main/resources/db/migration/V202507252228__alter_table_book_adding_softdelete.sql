@@ -1,0 +1,1 @@
+ALTER TABLE tb_book ADD COLUMN soft_deleted BOOLEAN DEFAULT FALSE;

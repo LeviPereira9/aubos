@@ -22,7 +22,6 @@ public class BookModel {
 
     @Column(name = "cover_url")
     private String coverUrl = "https://placehold.co/400x600";
-
     @Column(name = "title")
     private String title;
     @Column(name = "subtitle")
@@ -33,6 +32,9 @@ public class BookModel {
     private LocalDate publishedOn;
     @Column(name = "finished_at")
     private LocalDate finishedOn;
+
+    @Column(name = "soft_deleted")
+    private boolean softDeleted;
 
     //Relações
     @ManyToOne
@@ -68,10 +70,10 @@ public class BookModel {
     private UserModel updatedBy;
 
     // Relações N:N
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookLanguage> availableLanguages;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookContributor> contributors;
 
 }

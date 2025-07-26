@@ -5,7 +5,8 @@ import lp.boble.aubos.dto.book.dependencies.BookAddContributor;
 import java.time.LocalDate;
 import java.util.List;
 
-public record BookCreateRequest(
+public record BookRequest(
+        String coverUrl,
         String title,
         String subtitle,
         String synopsis,

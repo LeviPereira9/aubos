@@ -1,6 +1,6 @@
 package lp.boble.aubos.mapper.book;
 
-import lp.boble.aubos.dto.book.BookCreateRequest;
+import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.dto.book.dependencies.ContributorResponse;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
@@ -8,11 +8,8 @@ import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
-import lp.boble.aubos.service.book.dependencies.ContributorService;
 import org.mapstruct.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +24,7 @@ public interface BookMapper {
     @Mapping(target = "status", source = "dp.status")
     @Mapping(target = "restriction", source = "dp.restriction")
     @Mapping(target = "license", source = "dp.license")
-    BookModel fromCreateRequestToModel(BookCreateRequest bookCreateRequest, DependencyData dp);
+    BookModel fromCreateRequestToModel(BookRequest bookRequest, DependencyData dp);
 
     @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "language", source = "book.language.value")
@@ -59,6 +56,8 @@ public interface BookMapper {
                 l -> l.getLanguage().getValue()
         ).toList();
     }
+
+
 
 
 }

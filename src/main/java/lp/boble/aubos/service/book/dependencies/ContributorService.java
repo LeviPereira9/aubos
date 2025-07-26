@@ -2,7 +2,6 @@ package lp.boble.aubos.service.book.dependencies;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.BookCreateRequest;
 import lp.boble.aubos.dto.book.dependencies.BookAddContributor;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.model.book.BookModel;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +42,6 @@ public class ContributorService {
                         this.getContributor(c.contributorId()),
                         this.getRole(c.contributorRoleId())
                 ))
-                .toList();
+                .collect(Collectors.toList());
     }
 }

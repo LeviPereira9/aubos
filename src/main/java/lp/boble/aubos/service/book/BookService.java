@@ -2,16 +2,13 @@ package lp.boble.aubos.service.book;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.BookCreateRequest;
+import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
-import lp.boble.aubos.dto.book.dependencies.ContributorResponse;
-import lp.boble.aubos.dto.book.dependencies.DependencyData;
-import lp.boble.aubos.dto.book.dependencies.LicenseResponse;
-import lp.boble.aubos.dto.book.dependencies.RestrictionResponse;
+import lp.boble.aubos.dto.book.dependencies.*;
+import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.BookMapper;
 import lp.boble.aubos.model.book.BookModel;
-import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.service.book.dependencies.BookDependenciesService;
@@ -19,6 +16,7 @@ import lp.boble.aubos.service.book.dependencies.ContributorService;
 import lp.boble.aubos.util.AuthUtil;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -32,18 +30,21 @@ public class BookService {
     private final BookMapper bookMapper;
 
     @Transactional
-    public void createBook(BookCreateRequest book) {
+    public BookResponse createBook(BookRequest book) {
+
+        hasAuthor(book.contributors());
 
         DependencyData dependencyData = dependenciesService.loadDependencyData(book);
-
         BookModel bookToSave = bookMapper.fromCreateRequestToModel(book, dependencyData);
-        bookToSave.setCreatedBy(authUtil.getRequester());
 
-        bookToSave.setContributors(contributorService.getContributors(
+        List<BookContributor> contributors = contributorService.getContributors(
                 bookToSave,
-                book.contributors()));
+                book.contributors());
 
-        bookRepository.save(bookToSave);
+        bookToSave.setCreatedBy(authUtil.getRequester());
+        bookToSave.setContributors(contributors);
+
+        return bookMapper.toResponse(bookRepository.save(bookToSave));
     }
 
     public BookResponse getBookById(UUID id){
@@ -51,6 +52,48 @@ public class BookService {
                 .orElseThrow(CustomNotFoundException::user);
 
         return bookMapper.toResponse(book);
+    }
+
+    @Transactional
+    public BookResponse updateBook(UUID id, BookRequest book) {
+
+        hasAuthor(book.contributors());
+
+        BookModel bookToUpdate = bookRepository.findById(id)
+                .orElseThrow(CustomNotFoundException::user);
+
+        DependencyData dependencyData = dependenciesService.loadDependencyData(book);
+        List<BookContributor> contributors = contributorService.getContributors(bookToUpdate, book.contributors());
+
+        bookToUpdate = bookMapper.fromCreateRequestToModel(book, dependencyData);
+
+        bookToUpdate.getContributors().clear();
+        bookToUpdate.getContributors().addAll(contributors);
+        bookToUpdate.setLastUpdated(Instant.now());
+        bookToUpdate.setUpdatedBy(authUtil.getRequester());
+
+        return bookMapper.toResponse(bookRepository.save(bookToUpdate));
+    }
+
+    @Transactional
+    public void deleteBook(UUID id){
+        BookModel book = bookRepository.findById(id)
+                .orElseThrow(CustomNotFoundException::user);
+
+        book.setSoftDeleted(true);
+        book.setLastUpdated(Instant.now());
+        book.setUpdatedBy(authUtil.getRequester());
+
+        bookRepository.save(book);
+    }
+
+    private void hasAuthor(List<BookAddContributor> contributors){
+        boolean hasAuthor = contributors.stream()
+                .anyMatch(c -> c.contributorRoleId() == 1);
+
+        if(!hasAuthor){
+            throw new CustomFieldNotProvided("Sem autor.");
+        }
     }
 
 }

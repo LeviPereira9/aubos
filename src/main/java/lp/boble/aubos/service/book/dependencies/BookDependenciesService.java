@@ -1,7 +1,7 @@
 package lp.boble.aubos.service.book.dependencies;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.BookCreateRequest;
+import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.model.book.dependencies.*;
@@ -43,7 +43,7 @@ public class BookDependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public DependencyData loadDependencyData(BookCreateRequest book){
+    public DependencyData loadDependencyData(BookRequest book){
 
         LanguageModel language = this.getLanguage(book.languageId());
         TypeModel type = this.getType(book.typeId());
