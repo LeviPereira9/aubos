@@ -48,8 +48,8 @@ public class BookService {
     }
 
     public BookResponse getBookById(UUID id){
-        BookModel book = bookRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
+        BookModel book = bookRepository.findByIdAndSoftDeletedTrue(id)
+                .orElseThrow(CustomNotFoundException::book);
 
         return bookMapper.toResponse(book);
     }
@@ -59,8 +59,8 @@ public class BookService {
 
         hasAuthor(book.contributors());
 
-        BookModel bookToUpdate = bookRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
+        BookModel bookToUpdate = bookRepository.findByIdAndSoftDeletedTrue(id)
+                .orElseThrow(CustomNotFoundException::book);
 
         DependencyData dependencyData = dependenciesService.loadDependencyData(book);
         List<BookContributor> contributors = contributorService.getContributors(bookToUpdate, book.contributors());
@@ -77,8 +77,8 @@ public class BookService {
 
     @Transactional
     public void deleteBook(UUID id){
-        BookModel book = bookRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
+        BookModel book = bookRepository.findByIdAndSoftDeletedTrue(id)
+                .orElseThrow(CustomNotFoundException::book);
 
         book.setSoftDeleted(true);
         book.setLastUpdated(Instant.now());
@@ -92,7 +92,7 @@ public class BookService {
                 .anyMatch(c -> c.contributorRoleId() == 1);
 
         if(!hasAuthor){
-            throw new CustomFieldNotProvided("Sem autor.");
+            throw new CustomFieldNotProvided("Autor não informado");
         }
     }
 

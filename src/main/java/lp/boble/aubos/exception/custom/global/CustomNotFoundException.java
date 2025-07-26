@@ -23,4 +23,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException token(){
         return new CustomNotFoundException("TokenModel não encontrado.");
     }
+
+    public static CustomNotFoundException book(){
+        return new CustomNotFoundException("Livro não encontrado.");
+    }
 }
