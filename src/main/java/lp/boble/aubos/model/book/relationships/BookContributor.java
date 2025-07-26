@@ -60,5 +60,22 @@ public class BookContributor {
         return contributorRole != null && "publicadora".equals(contributorRole.getName());
     }
 
+    public static Map<String, List<ContributorResponse>> arrangeContributors(List<BookContributor> rawContributors){
+        Map<String, List<ContributorResponse>> contributors = new HashMap<>();
+        contributors.put("autor", new ArrayList<>());
+        contributors.put("editor", new ArrayList<>());
+        contributors.put("ilustrador", new ArrayList<>());
+        contributors.put("publicadora", new ArrayList<>());
 
+        rawContributors.forEach(c ->
+                contributors.get(c.getContributorRole().getName())
+                        .add(new ContributorResponse(
+                                c.getContributor().getId(),
+                                c.getContributor().getName(),
+                                c.getContributorRole().getName()
+                        ))
+        );
+
+        return contributors;
+    }
 }

@@ -8,6 +8,7 @@ import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
+import lp.boble.aubos.service.book.dependencies.ContributorService;
 import org.mapstruct.*;
 
 import java.util.ArrayList;
@@ -42,21 +43,8 @@ public interface BookMapper {
     BookResponse toResponse(BookModel book);
 
     @AfterMapping
-    default void arrangeContributors(BookModel book, @MappingTarget BookResponse.BookResponseBuilder builder){
-        Map<String, List<ContributorResponse>> contributors = new HashMap<>();
-        contributors.put("autor", new ArrayList<>());
-        contributors.put("editor", new ArrayList<>());
-        contributors.put("ilustrador", new ArrayList<>());
-        contributors.put("publicadora", new ArrayList<>());
-
-        book.getContributors().forEach(c ->
-                contributors.get(c.getContributorRole().getName())
-                        .add(new ContributorResponse(
-                                c.getContributor().getId(),
-                                c.getContributor().getName(),
-                                c.getContributorRole().getName()
-                        ))
-        );
+    default void mapContributors(BookModel book, @MappingTarget BookResponse.BookResponseBuilder builder){
+        Map<String, List<ContributorResponse>> contributors = BookContributor.arrangeContributors(book.getContributors());
 
         builder
                 .authors(contributors.get("autor"))
