@@ -3,12 +3,13 @@ package lp.boble.aubos.model.book.relationships;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lp.boble.aubos.dto.book.dependencies.ContributorResponse;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
 import lp.boble.aubos.model.user.RoleModel;
 
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "tb_book_contributor")
@@ -42,4 +43,22 @@ public class BookContributor {
     }
 
     public BookContributor(){}
+
+    public boolean isAuthor(){
+        return contributorRole != null && "autor".equals(contributorRole.getName());
+    }
+
+    public boolean isEditor(){
+        return contributorRole != null && "editor".equals(contributorRole.getName());
+    }
+
+    public boolean isIllustrator(){
+        return contributorRole != null && "ilustrador".equals(contributorRole.getName());
+    }
+
+    public boolean isPublisher(){
+        return contributorRole != null && "publicadora".equals(contributorRole.getName());
+    }
+
+
 }

@@ -1,13 +1,23 @@
 package lp.boble.aubos.mapper.book;
 
 import lp.boble.aubos.dto.book.BookCreateRequest;
+import lp.boble.aubos.dto.book.BookResponse;
+import lp.boble.aubos.dto.book.dependencies.ContributorResponse;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
+import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import lp.boble.aubos.model.book.relationships.BookContributor;
+import lp.boble.aubos.model.book.relationships.BookLanguage;
+import org.mapstruct.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Mapper(
-        componentModel = "spring"
+        componentModel = "spring",
+        uses = {DependenciesMapper.class}
 )
 public interface BookMapper {
 
@@ -16,8 +26,50 @@ public interface BookMapper {
     @Mapping(target = "status", source = "dp.status")
     @Mapping(target = "restriction", source = "dp.restriction")
     @Mapping(target = "license", source = "dp.license")
-    BookModel fromCreateRequestToModel(
-            BookCreateRequest bookCreateRequest,
-            DependencyData dp);
+    BookModel fromCreateRequestToModel(BookCreateRequest bookCreateRequest, DependencyData dp);
+
+    @Mapping(target = "language", source = "book.language.value")
+    @Mapping(target = "type", source = "book.type.name")
+    @Mapping(target = "status", source = "book.status.label")
+    @Mapping(target = "authors", ignore = true)
+    @Mapping(target = "editors", ignore = true)
+    @Mapping(target = "illustrators", ignore = true)
+    @Mapping(target = "publishers", ignore = true)
+    @Mapping(target = "availableLanguages", source = "book.availableLanguages", qualifiedByName = "languageList")
+    @Mapping(target = "license", source = "license", qualifiedByName = "licenseMapper")
+    @Mapping(target = "restriction", source = "restriction", qualifiedByName = "restrictionMapper")
+    BookResponse toResponse(BookModel book);
+
+    @AfterMapping
+    default void arrangeContributors(BookModel book, @MappingTarget BookResponse.BookResponseBuilder builder){
+        Map<String, List<ContributorResponse>> contributors = new HashMap<>();
+        contributors.put("autor", new ArrayList<>());
+        contributors.put("editor", new ArrayList<>());
+        contributors.put("ilustrador", new ArrayList<>());
+        contributors.put("publicadora", new ArrayList<>());
+
+        book.getContributors().forEach(c ->
+                contributors.get(c.getContributorRole().getName())
+                        .add(new ContributorResponse(
+                                c.getContributor().getId(),
+                                c.getContributor().getName(),
+                                c.getContributorRole().getName()
+                        ))
+        );
+
+        builder
+                .authors(contributors.get("autor"))
+                .editors(contributors.get("editor"))
+                .illustrators(contributors.get("ilustrador"))
+                .publishers(contributors.get("publicadora"));
+    }
+
+    @Named("languageList")
+    static List<String> languageList(List<BookLanguage> bookLanguages){
+        return bookLanguages.stream().map(
+                l -> l.getLanguage().getValue()
+        ).toList();
+    }
+
 
 }

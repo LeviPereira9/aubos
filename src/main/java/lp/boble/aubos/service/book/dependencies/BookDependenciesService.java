@@ -6,7 +6,6 @@ import lp.boble.aubos.dto.book.dependencies.DependencyData;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.model.book.dependencies.*;
 import lp.boble.aubos.repository.book.depedencies.*;
-import lp.boble.aubos.util.AuthUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,7 +43,7 @@ public class BookDependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public DependencyData getDependencyData(BookCreateRequest book){
+    public DependencyData loadDependencyData(BookCreateRequest book){
 
         LanguageModel language = this.getLanguage(book.languageId());
         TypeModel type = this.getType(book.typeId());
