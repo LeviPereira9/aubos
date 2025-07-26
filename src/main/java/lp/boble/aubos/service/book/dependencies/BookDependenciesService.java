@@ -4,9 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.*;
+import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.repository.book.depedencies.*;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +48,20 @@ public class BookDependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
+    public List<BookLanguage> getAvailableLanguages(BookModel book, List<Integer> ids){
+        List<LanguageModel> languages = languageRepository.findAllById(ids);
+
+        return languages.stream().map(lang ->
+                new BookLanguage(
+                        book,
+                        lang
+                )).collect(Collectors.toList());
+    }
+
+    public List<LanguageModel> getAllAvailableLanguages(List<Integer> ids){
+        return languageRepository.findAllById(ids);
+    }
+
     public DependencyData loadDependencyData(BookRequest book){
 
         LanguageModel language = this.getLanguage(book.languageId());
@@ -50,8 +69,9 @@ public class BookDependenciesService {
         StatusModel status = this.getStatus(book.statusId());
         RestrictionModel restriction = this.getRestriction(book.restrictionId());
         LicenseModel license = this.getLicense(book.licenseId());
+        List<BookLanguage> availableLanguages = this.getAvailableLanguages(new BookModel(), book.availableLanguagesId());
 
-        return new DependencyData(language, type, status, restriction, license) ;
+        return new DependencyData(language, type, status, restriction, license, availableLanguages) ;
     }
 
 }

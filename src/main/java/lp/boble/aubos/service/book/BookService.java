@@ -10,6 +10,7 @@ import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.BookMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
+import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.service.book.dependencies.BookDependenciesService;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
@@ -40,15 +41,19 @@ public class BookService {
         List<BookContributor> contributors = contributorService.getContributors(
                 bookToSave,
                 book.contributors());
+        List<BookLanguage> availableLanguages = dependenciesService.getAvailableLanguages(
+                bookToSave,
+                book.availableLanguagesId());
 
         bookToSave.setCreatedBy(authUtil.getRequester());
         bookToSave.setContributors(contributors);
+        bookToSave.setAvailableLanguages(availableLanguages);
 
         return bookMapper.toResponse(bookRepository.save(bookToSave));
     }
 
     public BookResponse getBookById(UUID id){
-        BookModel book = bookRepository.findByIdAndSoftDeletedTrue(id)
+        BookModel book = bookRepository.findByIdAndSoftDeletedFalse(id)
                 .orElseThrow(CustomNotFoundException::book);
 
         return bookMapper.toResponse(book);
@@ -59,11 +64,12 @@ public class BookService {
 
         hasAuthor(book.contributors());
 
-        BookModel bookToUpdate = bookRepository.findByIdAndSoftDeletedTrue(id)
+        BookModel bookToUpdate = bookRepository.findByIdAndSoftDeletedFalse(id)
                 .orElseThrow(CustomNotFoundException::book);
 
         DependencyData dependencyData = dependenciesService.loadDependencyData(book);
         List<BookContributor> contributors = contributorService.getContributors(bookToUpdate, book.contributors());
+
 
         bookToUpdate = bookMapper.fromCreateRequestToModel(book, dependencyData);
 
@@ -77,7 +83,7 @@ public class BookService {
 
     @Transactional
     public void deleteBook(UUID id){
-        BookModel book = bookRepository.findByIdAndSoftDeletedTrue(id)
+        BookModel book = bookRepository.findByIdAndSoftDeletedFalse(id)
                 .orElseThrow(CustomNotFoundException::book);
 
         book.setSoftDeleted(true);

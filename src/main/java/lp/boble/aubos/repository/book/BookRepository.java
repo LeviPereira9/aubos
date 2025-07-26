@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface BookRepository extends JpaRepository<BookModel, UUID> {
 
-    Optional<BookModel> findByIdAndSoftDeletedTrue(UUID id);
+    Optional<BookModel> findByIdAndSoftDeletedFalse(UUID id);
 
     @Query("""
     SELECT b.lastUpdated FROM BookModel b

@@ -19,18 +19,25 @@ import java.util.Map;
 )
 public interface BookMapper {
 
+    @Mapping(target = "softDeleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "lastUpdated", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "language", source = "dp.language")
     @Mapping(target = "type", source = "dp.type")
     @Mapping(target = "status", source = "dp.status")
     @Mapping(target = "restriction", source = "dp.restriction")
     @Mapping(target = "license", source = "dp.license")
+    @Mapping(target = "availableLanguages", source = "dp.availableLanguages")
     BookModel fromCreateRequestToModel(BookRequest bookRequest, DependencyData dp);
 
+
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "language", source = "book.language.value")
     @Mapping(target = "type", source = "book.type.name")
     @Mapping(target = "status", source = "book.status.label")
-    @Mapping(target = "authors", ignore = true)
+    @Mapping(target = "authors", ignore = true) // Dps vem. >:)
     @Mapping(target = "editors", ignore = true)
     @Mapping(target = "illustrators", ignore = true)
     @Mapping(target = "publishers", ignore = true)

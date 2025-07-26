@@ -8,10 +8,12 @@ import lp.boble.aubos.dto.book.dependencies.RestrictionResponse;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Builder
 @Data
 public class BookResponse {
+    private UUID id;
     private String coverUrl;
     private String title;
     private String subtitle;

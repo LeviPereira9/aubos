@@ -32,7 +32,6 @@ public class ContributorService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    @Transactional
     public List<BookContributor> getContributors(
             BookModel book,
             List<BookAddContributor> contributors){

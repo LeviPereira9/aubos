@@ -24,4 +24,10 @@ public class BookLanguage {
     @ManyToOne
     @JoinColumn(name = "language_id")
     private LanguageModel language;
+
+    public BookLanguage() {}
+    public BookLanguage(BookModel book, LanguageModel language) {
+        this.book = book;
+        this.language = language;
+    }
 }
