@@ -28,6 +28,7 @@ public interface BookMapper {
     @Mapping(target = "license", source = "dp.license")
     BookModel fromCreateRequestToModel(BookCreateRequest bookCreateRequest, DependencyData dp);
 
+    @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "language", source = "book.language.value")
     @Mapping(target = "type", source = "book.type.name")
     @Mapping(target = "status", source = "book.status.label")

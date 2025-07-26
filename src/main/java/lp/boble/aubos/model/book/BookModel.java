@@ -20,6 +20,9 @@ public class BookModel {
     @GeneratedValue
     private UUID id;
 
+    @Column(name = "cover_url")
+    private String coverUrl = "https://placehold.co/400x600";
+
     @Column(name = "title")
     private String title;
     @Column(name = "subtitle")

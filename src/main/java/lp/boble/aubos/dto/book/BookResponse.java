@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 @Data
 public class BookResponse {
+    private String coverUrl;
     private String title;
     private String subtitle;
     private String synopsis;
