@@ -17,4 +17,8 @@ public final class CacheProfiles {
     public static CacheControl apiKeyPrivate(){
         return CacheControl.maxAge(5, TimeUnit.MINUTES).cachePrivate();
     }
+
+    public static CacheControl book(){
+        return CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
+    }
 }

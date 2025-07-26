@@ -2,6 +2,7 @@ package lp.boble.aubos.controller.book;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
@@ -63,7 +64,7 @@ public class BookController {
                         .data(data)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok().cacheControl(CacheProfiles.book()).eTag(eTag).body(response);
     }
 
     @PutMapping("/{id}")
