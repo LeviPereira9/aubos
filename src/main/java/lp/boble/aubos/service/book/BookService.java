@@ -5,15 +5,20 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.dto.book.dependencies.*;
+import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.BookMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
+import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.book.BookRepository;
+import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
+import lp.boble.aubos.repository.book.relationships.BookLanguageRepository;
 import lp.boble.aubos.service.book.dependencies.BookDependenciesService;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
+import lp.boble.aubos.service.book.relationships.RelationshipsService;
 import lp.boble.aubos.util.AuthUtil;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +34,9 @@ public class BookService {
     private final BookRepository bookRepository;
     private final ContributorService contributorService;
     private final BookMapper bookMapper;
+    private final RelationshipsService relationshipsService;
+    private final BookLanguageRepository bookLanguageRepository;
+    private final BookContributorRepository bookContributorRepository;
 
     @Transactional
     public BookResponse createBook(BookRequest book) {
@@ -68,15 +76,20 @@ public class BookService {
                 .orElseThrow(CustomNotFoundException::book);
 
         DependencyData dependencyData = dependenciesService.loadDependencyData(book);
-        List<BookContributor> contributors = contributorService.getContributors(bookToUpdate, book.contributors());
 
 
-        bookToUpdate = bookMapper.fromCreateRequestToModel(book, dependencyData);
+        bookMapper.fromUpdateToModel(bookToUpdate, book, dependencyData);
 
-        bookToUpdate.getContributors().clear();
-        bookToUpdate.getContributors().addAll(contributors);
-        bookToUpdate.setLastUpdated(Instant.now());
+        bookLanguageRepository.deleteByBook(bookToUpdate);
+        bookContributorRepository.deleteByBook(bookToUpdate);
+
         bookToUpdate.setUpdatedBy(authUtil.getRequester());
+
+        RelationshipsData relationshipsData = relationshipsService.loadRelationshipsData(bookToUpdate, book);
+        bookToUpdate.getAvailableLanguages().addAll(relationshipsData.availableLanguages());
+        bookToUpdate.getContributors().addAll(relationshipsData.contributors());
+
+
 
         return bookMapper.toResponse(bookRepository.save(bookToUpdate));
     }

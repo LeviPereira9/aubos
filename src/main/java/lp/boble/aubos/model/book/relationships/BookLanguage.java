@@ -6,6 +6,7 @@ import lombok.Data;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -29,5 +30,18 @@ public class BookLanguage {
     public BookLanguage(BookModel book, LanguageModel language) {
         this.book = book;
         this.language = language;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookLanguage that = (BookLanguage) o;
+        return Objects.equals(book, that.book) && Objects.equals(language, that.language);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(book, language);
     }
 }

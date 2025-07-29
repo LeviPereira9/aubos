@@ -4,14 +4,15 @@ import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.dto.book.dependencies.ContributorResponse;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
+import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import org.mapstruct.*;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
@@ -28,9 +29,20 @@ public interface BookMapper {
     @Mapping(target = "status", source = "dp.status")
     @Mapping(target = "restriction", source = "dp.restriction")
     @Mapping(target = "license", source = "dp.license")
-    @Mapping(target = "availableLanguages", source = "dp.availableLanguages")
     BookModel fromCreateRequestToModel(BookRequest bookRequest, DependencyData dp);
 
+    @Mapping(target = "softDeleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "lastUpdated", expression = "java(java.time.Instant.now())")
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "language", source = "dp.language")
+    @Mapping(target = "type", source = "dp.type")
+    @Mapping(target = "status", source = "dp.status")
+    @Mapping(target = "restriction", source = "dp.restriction")
+    @Mapping(target = "license", source = "dp.license")
+    @Mapping(target = "contributors", ignore = true)
+    @Mapping(target = "availableLanguages", ignore = true)
+    void fromUpdateToModel(@MappingTarget BookModel bookModel, BookRequest br, DependencyData dp);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "coverUrl", source = "coverUrl")
@@ -62,6 +74,57 @@ public interface BookMapper {
         return bookLanguages.stream().map(
                 l -> l.getLanguage().getValue()
         ).toList();
+    }
+
+
+    void updateRelationships(@MappingTarget BookModel bookModel, RelationshipsData rp);
+
+    default void mapRelationships(@MappingTarget BookModel bookModel, RelationshipsData rp){
+        if(rp.availableLanguages() != null){
+            bookModel.setAvailableLanguages(rp.availableLanguages());
+        }
+
+        if(rp.contributors() != null){
+            bookModel.setContributors(rp.contributors());
+        }
+    }
+
+    private void updateBookLanguages(BookModel bookModel, List<BookLanguage> newLanguages) {
+        // Remove todas as linguagens antigas explicitamente
+        List<BookLanguage> toRemove = new ArrayList<>(bookModel.getAvailableLanguages());
+        for (BookLanguage bl : toRemove) {
+            bl.setBook(null); // desassocia
+        }
+        bookModel.getAvailableLanguages().clear();
+
+        // Adiciona os novos
+        for (BookLanguage newLang : newLanguages) {
+            newLang.setBook(bookModel);
+            bookModel.getAvailableLanguages().add(newLang);
+        }
+    }
+
+    private void updateBookContributor(BookModel bookModel, List<BookContributor> newContributors){
+        Map<UUID, BookContributor> currentMap = bookModel.getContributors().stream()
+                .filter(bc -> bc.getId() != null)
+                .collect(Collectors.toMap(BookContributor::getId, bc -> bc));
+
+        List<BookContributor> mergedList = new ArrayList<>();
+
+        for(BookContributor newContributor : newContributors){
+            if(newContributor.getId() != null && currentMap.containsKey(newContributor.getId())){
+                BookContributor existing = currentMap.get(newContributor.getId());
+                existing.setContributor(newContributor.getContributor());
+                existing.setContributorRole(newContributor.getContributorRole());
+                mergedList.add(existing);
+            } else {
+                newContributor.setBook(bookModel);
+                mergedList.add(newContributor);
+            }
+        }
+
+        bookModel.getContributors().clear();
+        bookModel.getContributors().addAll(mergedList);
     }
 
 
