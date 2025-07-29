@@ -9,10 +9,8 @@ import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.BookMapper;
+import lp.boble.aubos.model.Enum.ContributorRoleEnum;
 import lp.boble.aubos.model.book.BookModel;
-import lp.boble.aubos.model.book.relationships.BookContributor;
-import lp.boble.aubos.model.book.relationships.BookLanguage;
-import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
 import lp.boble.aubos.repository.book.relationships.BookLanguageRepository;
@@ -41,28 +39,21 @@ public class BookService {
     @Transactional
     public BookResponse createBook(BookRequest book) {
 
-        hasAuthor(book.contributors());
+        validateAuthor(book.contributors());
 
         DependencyData dependencyData = dependenciesService.loadDependencyData(book);
         BookModel bookToSave = bookMapper.fromCreateRequestToModel(book, dependencyData);
-
-        List<BookContributor> contributors = contributorService.getContributors(
-                bookToSave,
-                book.contributors());
-        List<BookLanguage> availableLanguages = dependenciesService.getAvailableLanguages(
-                bookToSave,
-                book.availableLanguagesId());
+        RelationshipsData relationshipsData = relationshipsService.loadRelationshipsData(bookToSave, book);
 
         bookToSave.setCreatedBy(authUtil.getRequester());
-        bookToSave.setContributors(contributors);
-        bookToSave.setAvailableLanguages(availableLanguages);
+        bookToSave.setContributors(relationshipsData.contributors());
+        bookToSave.setAvailableLanguages(relationshipsData.availableLanguages());
 
         return bookMapper.toResponse(bookRepository.save(bookToSave));
     }
 
     public BookResponse getBookById(UUID id){
-        BookModel book = bookRepository.findByIdAndSoftDeletedFalse(id)
-                .orElseThrow(CustomNotFoundException::book);
+        BookModel book = findBookOrThrow(id);
 
         return bookMapper.toResponse(book);
     }
@@ -70,28 +61,20 @@ public class BookService {
     @Transactional
     public BookResponse updateBook(UUID id, BookRequest book) {
 
-        hasAuthor(book.contributors());
+        validateAuthor(book.contributors());
 
-        BookModel bookToUpdate = bookRepository.findByIdAndSoftDeletedFalse(id)
-                .orElseThrow(CustomNotFoundException::book);
+        BookModel bookToUpdate = findBookOrThrow(id);
 
         DependencyData dependencyData = dependenciesService.loadDependencyData(book);
-
-
         bookMapper.fromUpdateToModel(bookToUpdate, book, dependencyData);
 
-        bookLanguageRepository.deleteByBook(bookToUpdate);
-        bookContributorRepository.deleteByBook(bookToUpdate);
+        relationshipsService.updateRelationships(bookToUpdate, book);
 
         bookToUpdate.setUpdatedBy(authUtil.getRequester());
 
-        RelationshipsData relationshipsData = relationshipsService.loadRelationshipsData(bookToUpdate, book);
-        bookToUpdate.getAvailableLanguages().addAll(relationshipsData.availableLanguages());
-        bookToUpdate.getContributors().addAll(relationshipsData.contributors());
+        BookModel savedBook = bookRepository.save(bookToUpdate);
 
-
-
-        return bookMapper.toResponse(bookRepository.save(bookToUpdate));
+        return bookMapper.toResponse(savedBook);
     }
 
     @Transactional
@@ -106,13 +89,20 @@ public class BookService {
         bookRepository.save(book);
     }
 
-    private void hasAuthor(List<BookAddContributor> contributors){
+    private void validateAuthor(List<BookAddContributor> contributors){
         boolean hasAuthor = contributors.stream()
-                .anyMatch(c -> c.contributorRoleId() == 1);
+                .anyMatch(c -> c.contributorRoleId() == ContributorRoleEnum.AUTHOR.getId());
 
         if(!hasAuthor){
-            throw new CustomFieldNotProvided("Autor não informado");
+            throw new CustomFieldNotProvided("Autor não informado.");
         }
     }
+
+    private BookModel findBookOrThrow(UUID id){
+        return bookRepository.findByIdAndSoftDeletedFalse(id)
+                .orElseThrow(CustomNotFoundException::book);
+    }
+
+
 
 }
