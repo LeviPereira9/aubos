@@ -2,6 +2,7 @@ package lp.boble.aubos.service.book;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.dto.book.BookPageProjection;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.dto.book.dependencies.*;
@@ -14,10 +15,17 @@ import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
 import lp.boble.aubos.repository.book.relationships.BookLanguageRepository;
+import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.service.book.dependencies.BookDependenciesService;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
 import lp.boble.aubos.service.book.relationships.RelationshipsService;
 import lp.boble.aubos.util.AuthUtil;
+import lp.boble.aubos.util.ValidationUtil;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -30,11 +38,9 @@ public class BookService {
     private final AuthUtil authUtil;
 
     private final BookRepository bookRepository;
-    private final ContributorService contributorService;
     private final BookMapper bookMapper;
     private final RelationshipsService relationshipsService;
-    private final BookLanguageRepository bookLanguageRepository;
-    private final BookContributorRepository bookContributorRepository;
+    private final ValidationUtil validationUtil;
 
     @Transactional
     public BookResponse createBook(BookRequest book) {
@@ -52,12 +58,14 @@ public class BookService {
         return bookMapper.toResponse(bookRepository.save(bookToSave));
     }
 
+    @Cacheable(value = "book", key = "#id")
     public BookResponse getBookById(UUID id){
         BookModel book = findBookOrThrow(id);
 
         return bookMapper.toResponse(book);
     }
 
+    @CachePut(value = "book", key = "#id")
     @Transactional
     public BookResponse updateBook(UUID id, BookRequest book) {
 
@@ -77,6 +85,11 @@ public class BookService {
         return bookMapper.toResponse(savedBook);
     }
 
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "book", key = "#id"),
+                    @CacheEvict(value = "bookSearch", allEntries = true)}
+    )
     @Transactional
     public void deleteBook(UUID id){
         BookModel book = bookRepository.findByIdAndSoftDeletedFalse(id)
@@ -87,6 +100,20 @@ public class BookService {
         book.setUpdatedBy(authUtil.getRequester());
 
         bookRepository.save(book);
+    }
+
+    @Cacheable(value = "bookSearch", key = "'search=' + #search + ',page=' + #page")
+    public PageResponse<BookPageProjection> getBookBySearch(String search, int page){
+        validationUtil.validateSearchRequest(search, page);
+
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                10
+        );
+
+        return new PageResponse<>(
+                    bookRepository.getAllShortBookInfo(pageRequest, search)
+                );
     }
 
     private void validateAuthor(List<BookAddContributor> contributors){

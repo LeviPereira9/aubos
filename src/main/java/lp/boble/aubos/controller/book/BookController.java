@@ -3,14 +3,17 @@ package lp.boble.aubos.controller.book;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
+import lp.boble.aubos.dto.book.BookPageProjection;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.repository.book.BookRepository;
+import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.book.BookService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
@@ -18,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -67,6 +73,27 @@ public class BookController {
         return ResponseEntity.ok().cacheControl(CacheProfiles.book()).eTag(eTag).body(response);
     }
 
+    @GetMapping("/suggestions")
+    public ResponseEntity<PageResponse<BookPageProjection>> getBookSuggestions(
+            @RequestParam String search,
+            @RequestParam(defaultValue = "0") int page,
+            HttpServletRequest request){
+
+        String eTag = this.generateSearchEtag(search, page);
+        String ifNoneMatch = request.getHeader("If-None-Match");
+
+        if(eTag.equals(ifNoneMatch)){
+            throw new CustomNotModifiedException();
+        }
+
+        PageResponse<BookPageProjection> response = bookService.getBookBySearch(search, page);
+
+        return ResponseEntity.ok()
+                .eTag(eTag)
+                .cacheControl(CacheProfiles.book())
+                .body(response);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SuccessResponse<BookResponse>>  updateBook(@PathVariable UUID id, @RequestBody BookRequest book){
         BookResponse data = bookService.updateBook(id, book);
@@ -105,6 +132,32 @@ public class BookController {
                 ? lastUpdate.toString()
                 : "no-update"+id.toString();
 
+
+        return "\"" + DigestUtils.md5DigestAsHex(base.getBytes(StandardCharsets.UTF_8)) + "\"";
+    }
+
+    private String generateSearchEtag(String search, int page){
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                10
+        );
+
+        PageResponse<BookPageProjection> pageResult = bookService.getBookBySearch(search, page);
+
+        String base;
+
+        if(pageResult != null && pageResult.getContent() != null){
+            Optional<Instant> lastUpdated = pageResult.getContent().stream()
+                    .map(BookPageProjection::getLastUpdated)
+                    .filter(Objects::nonNull)
+                    .max(Comparator.naturalOrder());
+
+            base = lastUpdated
+                    .map(Instant::toString)
+                    .orElse("no-update") + search+page;
+        } else {
+            base = "no-update" + search + page;
+        }
 
         return "\"" + DigestUtils.md5DigestAsHex(base.getBytes(StandardCharsets.UTF_8)) + "\"";
     }

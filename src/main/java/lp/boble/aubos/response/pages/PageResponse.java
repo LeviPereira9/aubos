@@ -3,6 +3,7 @@ package lp.boble.aubos.response.pages;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
 

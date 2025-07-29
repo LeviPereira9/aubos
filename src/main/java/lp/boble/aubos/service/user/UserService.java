@@ -109,9 +109,10 @@ public class UserService {
      * @return {@link PageResponse}<{@link UserSuggestionProjection}>
      *
      * */
-    public PageResponse<UserSuggestionProjection> getUserSuggestion(String query, int page){
+    @Cacheable(value = "userSearch", key = "'search=' + #search + ',page=' + #page")
+    public PageResponse<UserSuggestionProjection> getUserSuggestion(String search, int page){
 
-        validationUtil.validateSearchRequest(query, page);
+        validationUtil.validateSearchRequest(search, page);
 
         PageRequest pageRequest = PageRequest.of(
                 page,
@@ -119,7 +120,7 @@ public class UserService {
         );
 
         return new PageResponse<>(
-                userRepository.findUserSuggestions(query, pageRequest)
+                userRepository.findUserSuggestions(search, pageRequest)
         );
     }
 
