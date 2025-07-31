@@ -45,8 +45,9 @@ public class CacheConfig {
 
         // TTL customizados
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("bookSearch", customConfig(Duration.ofMinutes(10),mapper));
+        cacheConfigurations.put("bookSearch", customConfig(Duration.ofMinutes(30),mapper));
         cacheConfigurations.put("userSearch", customConfig(Duration.ofMinutes(10),mapper));
+        cacheConfigurations.put("userAutocomplete", customConfig(Duration.ofMinutes(10),mapper));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)

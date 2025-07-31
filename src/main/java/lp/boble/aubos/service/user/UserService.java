@@ -63,6 +63,7 @@ public class UserService {
 
         return userMapper.fromModelToResponse(found);
     }
+
     /**
      * Busca informações simples de usuário
      * @param username target (em formato String)
@@ -84,27 +85,28 @@ public class UserService {
 
     /**
      * Busca usuários devolvendo mais informações simples.
-     * @param query username target (em formato de String)
+     * @param search username target (em formato de String)
      * @param page paginação (em formato int)
      * @return {@link PageResponse}<{@link UserAutocompleteProjection}>
      *
      * */
-    public PageResponse<UserAutocompleteProjection> getUserAutocomplete(String query, int page){
+    @Cacheable(value = "userAutocomplete", key = "'search=' + #search + ',page=' + #page")
+    public PageResponse<UserAutocompleteProjection> getUserAutocomplete(String search, int page){
 
-        validationUtil.validateSearchRequest(query, page);
+        validationUtil.validateSearchRequest(search, page);
 
         PageRequest pageRequest = PageRequest.of(
                 page,
                 5);
 
         return new PageResponse<>(
-                userRepository.findUserAutocomplete(query, pageRequest)
+                userRepository.findUserAutocomplete(search, pageRequest)
         );
     }
 
     /**
      * Busca usuários devolvendo mais informações relevantes.
-     * @param query username target (em formato de String)
+     * @param search username target (em formato de String)
      * @param page paginação (em formato int)
      * @return {@link PageResponse}<{@link UserSuggestionProjection}>
      *
