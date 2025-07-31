@@ -2,9 +2,11 @@ package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookRequest;
+import lp.boble.aubos.dto.book.dependencies.DependencyData;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;
+import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.repository.book.depedencies.LanguageRepository;
 import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
@@ -12,7 +14,9 @@ import lp.boble.aubos.repository.book.relationships.BookLanguageRepository;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,17 +46,37 @@ public class RelationshipsService {
     }
 
     public void updateRelationships(BookModel bookModel, BookRequest bookRequest){
-        // Deletar os antigos
-        bookLanguageRepository.deleteByBook(bookModel);
-        bookContributorRepository.deleteByBook(bookModel);
-
-        // Carrega os novos
         RelationshipsData relationshipsData = this.loadRelationshipsData(bookModel, bookRequest);
 
-        // Associa os novos
-        bookModel.getAvailableLanguages().clear();
-        bookModel.getContributors().clear();
-        bookModel.getAvailableLanguages().addAll(relationshipsData.availableLanguages());
-        bookModel.getContributors().addAll(relationshipsData.contributors());
+        this.updateLanguages(bookModel, relationshipsData.availableLanguages());
+        this.updateContributors(bookModel, relationshipsData.contributors());
+    }
+
+    public void updateLanguages(BookModel bookModel, List<BookLanguage> rawLanguages) {
+        Set<BookLanguage> currentLanguages = new HashSet<>(bookModel.getAvailableLanguages());
+        Set<BookLanguage> incomingLanguages = new HashSet<>(rawLanguages);
+
+        Set<BookLanguage> toRemove = new HashSet<>(currentLanguages);
+        toRemove.removeAll(incomingLanguages);
+
+        Set<BookLanguage> toAdd = new HashSet<>(incomingLanguages);
+        toAdd.removeAll(currentLanguages);
+
+        bookModel.getAvailableLanguages().removeAll(toRemove);
+        bookModel.getAvailableLanguages().addAll(toAdd);
+    }
+
+    public void updateContributors(BookModel bookModel, List<BookContributor> rawContributors) {
+        Set<BookContributor> currentContributors = new HashSet<>(bookModel.getContributors());
+        Set<BookContributor> incomingContributors = new HashSet<>(rawContributors);
+
+        Set<BookContributor> toRemove = new HashSet<>(currentContributors);
+        toRemove.removeAll(incomingContributors);
+
+        Set<BookContributor> toAdd = new HashSet<>(incomingContributors);
+        toAdd.removeAll(currentContributors);
+
+        bookModel.getContributors().removeAll(toRemove);
+        bookModel.getContributors().addAll(toAdd);
     }
 }

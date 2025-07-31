@@ -37,11 +37,11 @@ public class BookLanguage {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BookLanguage that = (BookLanguage) o;
-        return Objects.equals(book, that.book) && Objects.equals(language, that.language);
+        return Objects.equals(language, that.language);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(book, language);
+        return Objects.hash(language);
     }
 }
