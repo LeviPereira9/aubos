@@ -10,6 +10,5 @@ public record DependencyData(
         TypeModel type,
         StatusModel status,
         RestrictionModel restriction,
-        LicenseModel license,
-        List<BookLanguage> availableLanguages
+        LicenseModel license
 ) {}

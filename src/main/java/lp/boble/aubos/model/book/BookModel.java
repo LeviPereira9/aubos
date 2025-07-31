@@ -76,8 +76,7 @@ public class BookModel {
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookContributor> contributors;
 
-    public void clearRelationships(){
-        this.getAvailableLanguages().clear();
-        this.getContributors().clear();
-    }
+    //TODO: alternativesTitles
+    //TODO: tags
+
 }

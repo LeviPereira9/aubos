@@ -32,15 +32,5 @@ public class ContributorService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<BookContributor> getContributors(
-            BookModel book,
-            List<BookAddContributor> contributors){
-        return contributors.stream()
-                .map(c -> new BookContributor(
-                        book,
-                        this.getContributor(c.contributorId()),
-                        this.getRole(c.contributorRoleId())
-                ))
-                .collect(Collectors.toList());
-    }
+
 }

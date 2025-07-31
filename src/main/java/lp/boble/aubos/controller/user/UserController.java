@@ -215,6 +215,7 @@ public class UserController {
         return "\"" + DigestUtils.md5DigestAsHex(base.getBytes(StandardCharsets.UTF_8)) + "\"";
     }
 
+    // TODO: eTag digno
     private String generateQueryEtag(String query, int page){
         String toHash = "query="+query.toLowerCase()+"&page="+page;
 

@@ -48,16 +48,6 @@ public class BookDependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<BookLanguage> getAvailableLanguages(BookModel book, List<Integer> ids){
-        List<LanguageModel> languages = languageRepository.findAllById(ids);
-
-        return languages.stream().map(lang ->
-                new BookLanguage(
-                        book,
-                        lang
-                )).collect(Collectors.toList());
-    }
-
     public List<LanguageModel> getAllAvailableLanguages(List<Integer> ids){
         return languageRepository.findAllById(ids);
     }
@@ -69,9 +59,8 @@ public class BookDependenciesService {
         StatusModel status = this.getStatus(book.statusId());
         RestrictionModel restriction = this.getRestriction(book.restrictionId());
         LicenseModel license = this.getLicense(book.licenseId());
-        List<BookLanguage> availableLanguages = this.getAvailableLanguages(new BookModel(), book.availableLanguagesId());
 
-        return new DependencyData(language, type, status, restriction, license, availableLanguages) ;
+        return new DependencyData(language, type, status, restriction, license) ;
     }
 
 }

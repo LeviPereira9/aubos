@@ -2,6 +2,7 @@ package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookRequest;
+import lp.boble.aubos.dto.book.dependencies.BookAddContributor;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.model.book.BookModel;
@@ -24,8 +25,6 @@ import java.util.stream.Collectors;
 public class RelationshipsService {
     private final LanguageRepository languageRepository;
     private final ContributorService contributorService;
-    private final BookLanguageRepository bookLanguageRepository;
-    private final BookContributorRepository bookContributorRepository;
 
     public List<BookLanguage> getAvailableLanguages(BookModel book, List<Integer> ids){
         List<LanguageModel> languages = languageRepository.findAllById(ids);
@@ -37,10 +36,22 @@ public class RelationshipsService {
                 )).collect(Collectors.toList());
     }
 
+    public List<BookContributor> getContributors(
+            BookModel book,
+            List<BookAddContributor> contributors){
+        return contributors.stream()
+                .map(c -> new BookContributor(
+                        book,
+                        contributorService.getContributor(c.contributorId()),
+                        contributorService.getRole(c.contributorRoleId())
+                ))
+                .collect(Collectors.toList());
+    }
+
     public RelationshipsData loadRelationshipsData(BookModel bookModel, BookRequest bookRequest){
 
         return new RelationshipsData(
-                contributorService.getContributors(bookModel, bookRequest.contributors()),
+                this.getContributors(bookModel, bookRequest.contributors()),
                 this.getAvailableLanguages(bookModel, bookRequest.availableLanguagesId())
         );
     }
