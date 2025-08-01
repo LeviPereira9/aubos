@@ -2,13 +2,16 @@ package lp.boble.aubos.service.book.dependencies;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookRequest;
-import lp.boble.aubos.dto.book.dependencies.DependencyData;
+import lp.boble.aubos.dto.book.dependencies.*;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.dependencies.*;
 import lp.boble.aubos.repository.book.depedencies.*;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,8 @@ public class DependenciesService {
     private final RestrictionRepository restrictionRepository;
     private final LicenseRepository licenseRepository;
     private final ContributorRoleRepository contributorRoleRepository;
+    private final DependenciesMapper dependenciesMapper;
+    private final LanguageService languageService;
 
     public ContributorRole getRole(Integer id){
         return contributorRoleRepository.findById(id)
@@ -34,17 +39,16 @@ public class DependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<LanguageModel> getAllLanguages(){
-        return languageRepository.findAll();
-    }
-
     public TypeModel getType(Integer id){
         return typeRepository.findById(id)
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<TypeModel> getAllTypes(){
-        return typeRepository.findAll();
+    public List<TypeResponse> getAllTypes(){
+
+        return typeRepository.findAll().stream()
+                .map(dependenciesMapper::fromModelToTypeResponse)
+                .collect(Collectors.toList());
     }
 
     public StatusModel getStatus(Integer id){
@@ -52,8 +56,10 @@ public class DependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<StatusModel> getAllStatus(){
-        return statusRepository.findAll();
+    public List<StatusResponse> getAllStatus(){
+        return statusRepository.findAll().stream()
+                .map(dependenciesMapper::fromModelToStatusResponse)
+                .collect(Collectors.toList());
     }
 
     public RestrictionModel getRestriction(Integer id){
@@ -61,8 +67,11 @@ public class DependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<RestrictionModel> getAllRestriction(){
-        return restrictionRepository.findAll();
+    public List<RestrictionResponse> getAllRestriction(){
+
+        return restrictionRepository.findAll().stream()
+                .map(dependenciesMapper::fromModelToRestrictionResponse)
+                .collect(Collectors.toList());
     }
 
     public LicenseModel getLicense(Integer id){
@@ -70,13 +79,15 @@ public class DependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<LicenseModel> getAllLicense(){
-        return licenseRepository.findAll();
+    public List<LicenseResponse> getAllLicense(){
+        return licenseRepository.findAll().stream()
+                .map(dependenciesMapper::fromModelToLicenseResponse)
+                .collect(Collectors.toList());
     }
 
     public DependencyData loadDependencyData(BookRequest book){
 
-        LanguageModel language = this.getLanguage(book.languageId());
+        LanguageModel language = languageService.getLanguage(book.languageId());
         TypeModel type = this.getType(book.typeId());
         StatusModel status = this.getStatus(book.statusId());
         RestrictionModel restriction = this.getRestriction(book.restrictionId());
@@ -85,6 +96,16 @@ public class DependenciesService {
         return new DependencyData(language, type, status, restriction, license) ;
     }
 
+    @Cacheable(value = "dependencies", key = "'singleton'")
+    public DependencyResponse loadDependencyResponse(){
+        return new DependencyResponse(
+                languageService.getAllLanguages(),
+                this.getAllLicense(),
+                this.getAllRestriction(),
+                this.getAllStatus(),
+                this.getAllTypes()
+        );
+    }
 
 
 }

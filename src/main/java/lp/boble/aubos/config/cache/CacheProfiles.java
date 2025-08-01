@@ -29,4 +29,8 @@ public final class CacheProfiles {
     public static CacheControl search(){
         return CacheControl.maxAge(15, TimeUnit.SECONDS).cachePublic();
     }
+
+    public static CacheControl dependencies(){
+        return CacheControl.maxAge(7, TimeUnit.DAYS).mustRevalidate().cachePublic();
+    }
 }

@@ -1,3 +1,6 @@
 package lp.boble.aubos.dto.book.dependencies;
 
-public record TypeResponse() {}
+public record TypeResponse(
+        int id,
+        String name
+) {}

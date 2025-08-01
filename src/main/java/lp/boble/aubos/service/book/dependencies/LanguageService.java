@@ -1,20 +1,43 @@
 package lp.boble.aubos.service.book.dependencies;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.dto.book.dependencies.LanguageRequest;
+import lp.boble.aubos.dto.book.dependencies.LanguageResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;
 import lp.boble.aubos.repository.book.depedencies.LanguageRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LanguageService {
     private final LanguageRepository languageRepository;
+    private final DependenciesMapper dependenciesMapper;
 
-    public  getLanguage(int id){
 
+    public LanguageModel getLanguage(int id){
+        return this.findLanguageOrThrow(id);
+    }
+
+    public List<LanguageResponse> getAllLanguages(){
+        return languageRepository.findAll().stream()
+                .map(dependenciesMapper::fromModelToLanguageResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @CacheEvict(value = "dependencies", allEntries = true)
+    public LanguageResponse createLanguage(LanguageRequest request){
+        LanguageModel language = dependenciesMapper.toLanguageModel(request);
+
+        return dependenciesMapper.fromModelToLanguageResponse(languageRepository.save(language));
     }
 
 

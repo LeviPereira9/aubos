@@ -1,3 +1,6 @@
 package lp.boble.aubos.dto.book.dependencies;
 
-public record LanguageResponse() {}
+public record LanguageResponse(
+    int id,
+    String value
+) {}
