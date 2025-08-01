@@ -27,4 +27,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException book(){
         return new CustomNotFoundException("Livro não encontrado.");
     }
+
+    public static CustomNotFoundException language(){
+        return new CustomNotFoundException("Língua não encontrada.");
+    }
 }

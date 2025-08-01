@@ -1,6 +1,6 @@
 package lp.boble.aubos.dto.book;
 
-import lp.boble.aubos.dto.book.dependencies.BookAddContributor;
+import lp.boble.aubos.dto.book.parts.BookAddContributor;
 
 import java.time.LocalDate;
 import java.util.List;

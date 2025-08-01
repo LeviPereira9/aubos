@@ -8,6 +8,7 @@ import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.dto.book.dependencies.*;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
+import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.BookMapper;

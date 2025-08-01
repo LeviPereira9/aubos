@@ -2,9 +2,9 @@ package lp.boble.aubos.dto.book;
 
 import lombok.Builder;
 import lombok.Data;
-import lp.boble.aubos.dto.book.dependencies.ContributorBookResponse;
-import lp.boble.aubos.dto.book.dependencies.LicenseResponse;
-import lp.boble.aubos.dto.book.dependencies.RestrictionResponse;
+import lp.boble.aubos.dto.book.parts.BookContributorResponse;
+import lp.boble.aubos.dto.book.parts.BookLicenseResponse;
+import lp.boble.aubos.dto.book.parts.BookRestrictionResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,16 +18,16 @@ public class BookResponse {
     private String title;
     private String subtitle;
     private String synopsis;
-    private List<ContributorBookResponse> authors;
-    private List<ContributorBookResponse> editors;
-    private List<ContributorBookResponse> illustrators;
-    private List<ContributorBookResponse> publishers;
+    private List<BookContributorResponse> authors;
+    private List<BookContributorResponse> editors;
+    private List<BookContributorResponse> illustrators;
+    private List<BookContributorResponse> publishers;
     private LocalDate publishedOn;
     private LocalDate finishedOn;
     private String language;
     private String type;
     private String status;
-    private LicenseResponse license;
-    private RestrictionResponse restriction;
+    private BookLicenseResponse license;
+    private BookRestrictionResponse restriction;
     private List<String> availableLanguages;
 }

@@ -3,7 +3,7 @@ package lp.boble.aubos.model.book.relationships;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import lp.boble.aubos.dto.book.dependencies.ContributorBookResponse;
+import lp.boble.aubos.dto.book.parts.BookContributorResponse;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
@@ -59,8 +59,8 @@ public class BookContributor {
         return contributorRole != null && "publicadora".equals(contributorRole.getName());
     }
 
-    public static Map<String, List<ContributorBookResponse>> arrangeContributors(List<BookContributor> rawContributors){
-        Map<String, List<ContributorBookResponse>> contributors = new HashMap<>();
+    public static Map<String, List<BookContributorResponse>> arrangeContributors(List<BookContributor> rawContributors){
+        Map<String, List<BookContributorResponse>> contributors = new HashMap<>();
         contributors.put("autor", new ArrayList<>());
         contributors.put("editor", new ArrayList<>());
         contributors.put("ilustrador", new ArrayList<>());
@@ -68,10 +68,9 @@ public class BookContributor {
 
         rawContributors.forEach(c ->
                 contributors.get(c.getContributorRole().getName())
-                        .add(new ContributorBookResponse(
+                        .add(new BookContributorResponse(
                                 c.getContributor().getId(),
-                                c.getContributor().getName(),
-                                c.getContributorRole().getName()
+                                c.getContributor().getName()
                         ))
         );
 

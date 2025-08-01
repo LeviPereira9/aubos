@@ -4,9 +4,8 @@ import lp.boble.aubos.dto.book.BookPageProjection;
 import lp.boble.aubos.dto.book.BookPageResponse;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
-import lp.boble.aubos.dto.book.dependencies.ContributorBookResponse;
+import lp.boble.aubos.dto.book.parts.BookContributorResponse;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
-import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
@@ -14,7 +13,6 @@ import lp.boble.aubos.model.book.relationships.BookLanguage;
 import org.mapstruct.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
@@ -62,7 +60,7 @@ public interface BookMapper {
 
     @AfterMapping
     default void mapContributors(BookModel book, @MappingTarget BookResponse.BookResponseBuilder builder){
-        Map<String, List<ContributorBookResponse>> contributors = BookContributor.arrangeContributors(book.getContributors());
+        Map<String, List<BookContributorResponse>> contributors = BookContributor.arrangeContributors(book.getContributors());
 
         builder
                 .authors(contributors.get("autor"))

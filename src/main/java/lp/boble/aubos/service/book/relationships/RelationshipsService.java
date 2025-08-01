@@ -2,7 +2,7 @@ package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookRequest;
-import lp.boble.aubos.dto.book.dependencies.BookAddContributor;
+import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;
