@@ -28,7 +28,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -87,11 +86,11 @@ public class UserService {
      * Busca usuários devolvendo mais informações simples.
      * @param search username target (em formato de String)
      * @param page paginação (em formato int)
-     * @return {@link PageResponse}<{@link UserAutocompleteProjection}>
+     * @return {@link PageResponse}<{@link UserAutocompletePageProjection}>
      *
      * */
     @Cacheable(value = "userAutocomplete", key = "'search=' + #search + ',page=' + #page")
-    public PageResponse<UserAutocompleteProjection> getUserAutocomplete(String search, int page){
+    public PageResponse<UserAutocompletePageResponse> getUserAutocomplete(String search, int page){
 
         validationUtil.validateSearchRequest(search, page);
 
@@ -99,20 +98,22 @@ public class UserService {
                 page,
                 5);
 
-        return new PageResponse<>(
+        PageResponse<UserAutocompletePageProjection> pageFound = new PageResponse<>(
                 userRepository.findUserAutocomplete(search, pageRequest)
         );
+
+        return pageFound.map(userMapper::fromAutocompleteProjectionToResponse);
     }
 
     /**
      * Busca usuários devolvendo mais informações relevantes.
      * @param search username target (em formato de String)
      * @param page paginação (em formato int)
-     * @return {@link PageResponse}<{@link UserSuggestionProjection}>
+     * @return {@link PageResponse}<{@link UserSuggestionPageProjection}>
      *
      * */
     @Cacheable(value = "userSearch", key = "'search=' + #search + ',page=' + #page")
-    public PageResponse<UserSuggestionProjection> getUserSuggestion(String search, int page){
+    public PageResponse<UserSuggestionPageResponse> getUserSuggestion(String search, int page){
 
         validationUtil.validateSearchRequest(search, page);
 
@@ -121,9 +122,11 @@ public class UserService {
                 10
         );
 
-        return new PageResponse<>(
+        PageResponse<UserSuggestionPageProjection> pageFound = new PageResponse<>(
                 userRepository.findUserSuggestions(search, pageRequest)
         );
+
+        return pageFound.map(userMapper::fromSuggestionProjectionToResponse);
     }
 
     /**

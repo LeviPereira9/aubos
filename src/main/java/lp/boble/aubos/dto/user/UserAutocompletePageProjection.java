@@ -1,6 +1,6 @@
 package lp.boble.aubos.dto.user;
 
-public interface UserAutocompleteProjection{
+public interface UserAutocompletePageProjection {
         String getUsername();
         String getDisplayName();
         boolean getIsVerified();

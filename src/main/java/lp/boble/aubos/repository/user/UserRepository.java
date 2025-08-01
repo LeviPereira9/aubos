@@ -1,7 +1,7 @@
 package lp.boble.aubos.repository.user;
 
-import lp.boble.aubos.dto.user.UserAutocompleteProjection;
-import lp.boble.aubos.dto.user.UserSuggestionProjection;
+import lp.boble.aubos.dto.user.UserAutocompletePageProjection;
+import lp.boble.aubos.dto.user.UserSuggestionPageProjection;
 import lp.boble.aubos.model.user.UserModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +46,7 @@ public interface UserRepository extends JpaRepository<UserModel, UUID> {
                u.displayName LIKE CONCAT('%', REPLACE(:query, ' ', '%'), '%'))
        ORDER BY u.displayName
 """)
-    Page<UserAutocompleteProjection> findUserAutocomplete(
+    Page<UserAutocompletePageProjection> findUserAutocomplete(
           @Param("query") String query,
           Pageable pageable);
 
@@ -70,7 +70,7 @@ public interface UserRepository extends JpaRepository<UserModel, UUID> {
            ORDER BY u.displayName
 """
     )
-    Page<UserSuggestionProjection> findUserSuggestions(
+    Page<UserSuggestionPageProjection> findUserSuggestions(
             @Param("query") String query,
             Pageable pageable
     );

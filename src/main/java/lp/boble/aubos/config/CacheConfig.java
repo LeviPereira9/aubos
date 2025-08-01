@@ -35,7 +35,8 @@ public class CacheConfig {
        // Configuração especificas
        Map<String, RedisCacheConfiguration> customConfigs = Map.of(
                "bookSearch", defaultCacheConfig.entryTtl(Duration.ofMinutes(5)),
-               "userSearch", defaultCacheConfig.entryTtl(Duration.ofMinutes(5))
+               "userSearch", defaultCacheConfig.entryTtl(Duration.ofMinutes(5)),
+               "userAutocomplete", defaultCacheConfig.entryTtl(Duration.ofMinutes(5))
        );
 
        return RedisCacheManager.builder(connectionFactory)

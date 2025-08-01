@@ -1,8 +1,6 @@
 package lp.boble.aubos.dto.user;
 
-import java.time.Instant;
-
-public interface UserSuggestionProjection{
+public interface UserSuggestionPageProjection {
     String getUsername();
     String getDisplayName();
     String getProfilePic();

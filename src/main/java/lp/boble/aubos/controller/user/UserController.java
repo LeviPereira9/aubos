@@ -8,7 +8,6 @@ import lp.boble.aubos.config.documentation.user.*;
 import lp.boble.aubos.dto.auth.AuthChangePasswordRequest;
 import lp.boble.aubos.dto.auth.AuthResponse;
 import lp.boble.aubos.dto.user.*;
-import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.repository.user.UserRepository;
 import lp.boble.aubos.response.pages.PageResponse;
@@ -95,44 +94,32 @@ public class UserController {
 
     @DocGetAutoCompleteUser
     @GetMapping("/search")
-    public ResponseEntity<PageResponse<UserAutocompleteProjection>>
+    public ResponseEntity<PageResponse<UserAutocompletePageResponse>>
     getAutoCompleteUser(
             @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            HttpServletRequest request){
+            @RequestParam(defaultValue = "0") int page){
 
-        String eTag = this.generateQueryEtag(query, page);
-        String ifNoneMatch = request.getHeader("If-None-Match");
+        PageResponse<UserAutocompletePageResponse> response = userService.getUserAutocomplete(query, page);
 
-        if(eTag.equals(ifNoneMatch)){
-            throw new CustomNotModifiedException();
-        }
-
-        PageResponse<UserAutocompleteProjection> response =
-                userService.getUserAutocomplete(query, page);
-
-        return ResponseEntity.ok().eTag(eTag).body(response);
+        return ResponseEntity.ok()
+                .cacheControl(CacheProfiles.search())
+                .body(response);
     }
 
     @DocGetSuggestionsUser
     @GetMapping("/suggestions")
-    public ResponseEntity<PageResponse<UserSuggestionProjection>>
+    public ResponseEntity<PageResponse<UserSuggestionPageResponse>>
     getSuggestionsUser(
             @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            HttpServletRequest request){
+            @RequestParam(defaultValue = "0") int page){
 
-        String eTag = this.generateQueryEtag(query, page);
-        String ifNoneMatch = request.getHeader("If-None-Match");
 
-        if(eTag.equals(ifNoneMatch)){
-            throw new CustomNotModifiedException();
-        }
-
-        PageResponse<UserSuggestionProjection> response =
+        PageResponse<UserSuggestionPageResponse> response =
                 userService.getUserSuggestion(query, page);
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok()
+                .cacheControl(CacheProfiles.search())
+                .body(response);
     }
 
     @DocUpdateUser
