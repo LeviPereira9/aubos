@@ -36,4 +36,7 @@ public class ContributorModel {
     @OneToMany(mappedBy = "contributor")
     @JsonIgnore
     private List<BookContributor> books;
+
+    @Column(name = "soft_deleted")
+    private boolean softDeleted;
 }

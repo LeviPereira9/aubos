@@ -13,11 +13,8 @@ import lp.boble.aubos.mapper.book.BookMapper;
 import lp.boble.aubos.model.Enum.ContributorRoleEnum;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.repository.book.BookRepository;
-import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
-import lp.boble.aubos.repository.book.relationships.BookLanguageRepository;
 import lp.boble.aubos.response.pages.PageResponse;
-import lp.boble.aubos.service.book.dependencies.BookDependenciesService;
-import lp.boble.aubos.service.book.dependencies.ContributorService;
+import lp.boble.aubos.service.book.dependencies.DependenciesService;
 import lp.boble.aubos.service.book.relationships.RelationshipsService;
 import lp.boble.aubos.util.AuthUtil;
 import lp.boble.aubos.util.ValidationUtil;
@@ -34,7 +31,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class BookService {
-    private final BookDependenciesService dependenciesService;
+    private final DependenciesService dependenciesService;
     private final AuthUtil authUtil;
 
     private final BookRepository bookRepository;

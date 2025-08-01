@@ -1,7 +1,9 @@
 package lp.boble.aubos.config;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +30,8 @@ public class CacheConfig {
     }
 
     @Bean
-    public RedisCacheManager redisCacheManager(RedisConnectionFactory connectionFactory, PathMatcher mvcPathMatcher) {
+    public RedisCacheManager redisCacheManager(
+            RedisConnectionFactory connectionFactory, PathMatcher mvcPathMatcher) {
 
         try {
             connectionFactory.getConnection().ping();
@@ -40,6 +43,7 @@ public class CacheConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        
 
         RedisCacheConfiguration defaultConfig = customConfig(Duration.ofHours(1), mapper);
 
@@ -48,6 +52,8 @@ public class CacheConfig {
         cacheConfigurations.put("bookSearch", customConfig(Duration.ofMinutes(30),mapper));
         cacheConfigurations.put("userSearch", customConfig(Duration.ofMinutes(10),mapper));
         cacheConfigurations.put("userAutocomplete", customConfig(Duration.ofMinutes(10),mapper));
+        cacheConfigurations.put("contributor", customConfig(Duration.ofMinutes(10), mapper));
+        cacheConfigurations.put("contributorSearch", customConfig(Duration.ofMinutes(5), mapper));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)

@@ -20,4 +20,8 @@ public class CustomDuplicateFieldException extends GlobalException {
         return new CustomDuplicateFieldException("A nova senha não pode ser a mesma que a antiga.");
     }
 
+    public static CustomDuplicateFieldException contributorName(){
+        return new CustomDuplicateFieldException("O nome desse contribuidor já está em uso.");
+    }
+
 }

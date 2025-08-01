@@ -18,11 +18,11 @@ public class GlobalExceptionHandler {
     ){
         ErrorResponse error = new ErrorResponse(
                 ex.getMessage(),
-                HttpStatus.CONFLICT.value(),
+                HttpStatus.BAD_REQUEST.value(),
                 request.getRequestURI()
         );
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(CustomFieldNotProvided.class)

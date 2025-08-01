@@ -76,21 +76,13 @@ public class BookController {
     @GetMapping("/suggestions")
     public ResponseEntity<PageResponse<BookPageProjection>> getBookSuggestions(
             @RequestParam String search,
-            @RequestParam(defaultValue = "0") int page,
-            HttpServletRequest request){
+            @RequestParam(defaultValue = "0") int page){
 
-        String eTag = this.generateSearchEtag(search, page);
-        String ifNoneMatch = request.getHeader("If-None-Match");
-
-        if(eTag.equals(ifNoneMatch)){
-            throw new CustomNotModifiedException();
-        }
 
         PageResponse<BookPageProjection> response = bookService.getBookBySearch(search, page);
 
         return ResponseEntity.ok()
-                .eTag(eTag)
-                .cacheControl(CacheProfiles.book())
+                .cacheControl(CacheProfiles.search())
                 .body(response);
     }
 
@@ -132,32 +124,6 @@ public class BookController {
                 ? lastUpdate.toString()
                 : "no-update"+id.toString();
 
-
-        return "\"" + DigestUtils.md5DigestAsHex(base.getBytes(StandardCharsets.UTF_8)) + "\"";
-    }
-
-    private String generateSearchEtag(String search, int page){
-        PageRequest pageRequest = PageRequest.of(
-                page,
-                10
-        );
-
-        PageResponse<BookPageProjection> pageResult = bookService.getBookBySearch(search, page);
-
-        String base;
-
-        if(pageResult != null && pageResult.getContent() != null){
-            Optional<Instant> lastUpdated = pageResult.getContent().stream()
-                    .map(BookPageProjection::getLastUpdated)
-                    .filter(Objects::nonNull)
-                    .max(Comparator.naturalOrder());
-
-            base = lastUpdated
-                    .map(Instant::toString)
-                    .orElse("no-update") + search+page;
-        } else {
-            base = "no-update" + search + page;
-        }
 
         return "\"" + DigestUtils.md5DigestAsHex(base.getBytes(StandardCharsets.UTF_8)) + "\"";
     }

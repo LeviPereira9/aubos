@@ -2,7 +2,7 @@ package lp.boble.aubos.mapper.book;
 
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
-import lp.boble.aubos.dto.book.dependencies.ContributorResponse;
+import lp.boble.aubos.dto.book.dependencies.ContributorBookResponse;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
@@ -60,7 +60,7 @@ public interface BookMapper {
 
     @AfterMapping
     default void mapContributors(BookModel book, @MappingTarget BookResponse.BookResponseBuilder builder){
-        Map<String, List<ContributorResponse>> contributors = BookContributor.arrangeContributors(book.getContributors());
+        Map<String, List<ContributorBookResponse>> contributors = BookContributor.arrangeContributors(book.getContributors());
 
         builder
                 .authors(contributors.get("autor"))

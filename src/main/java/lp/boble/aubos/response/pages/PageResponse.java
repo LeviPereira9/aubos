@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Data
 public class PageResponse<T> {
@@ -33,7 +34,7 @@ public class PageResponse<T> {
 
         List<R> mappedContent = this.content.stream()
                 .map(mapper)
-                .toList();
+                .collect(Collectors.toList());
 
         PageResponse<R> mappedPage = new PageResponse<>();
         mappedPage.page = this.page;

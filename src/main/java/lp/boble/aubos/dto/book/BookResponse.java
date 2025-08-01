@@ -2,7 +2,7 @@ package lp.boble.aubos.dto.book;
 
 import lombok.Builder;
 import lombok.Data;
-import lp.boble.aubos.dto.book.dependencies.ContributorResponse;
+import lp.boble.aubos.dto.book.dependencies.ContributorBookResponse;
 import lp.boble.aubos.dto.book.dependencies.LicenseResponse;
 import lp.boble.aubos.dto.book.dependencies.RestrictionResponse;
 
@@ -18,10 +18,10 @@ public class BookResponse {
     private String title;
     private String subtitle;
     private String synopsis;
-    private List<ContributorResponse> authors;
-    private List<ContributorResponse> editors;
-    private List<ContributorResponse> illustrators;
-    private List<ContributorResponse> publishers;
+    private List<ContributorBookResponse> authors;
+    private List<ContributorBookResponse> editors;
+    private List<ContributorBookResponse> illustrators;
+    private List<ContributorBookResponse> publishers;
     private LocalDate publishedOn;
     private LocalDate finishedOn;
     private String language;

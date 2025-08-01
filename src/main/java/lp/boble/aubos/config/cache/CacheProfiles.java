@@ -21,4 +21,12 @@ public final class CacheProfiles {
     public static CacheControl book(){
         return CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
     }
+
+    public static CacheControl contributor(){
+        return CacheControl.maxAge(15, TimeUnit.MINUTES).cachePublic();
+    }
+
+    public static CacheControl search(){
+        return CacheControl.maxAge(15, TimeUnit.SECONDS).cachePublic();
+    }
 }

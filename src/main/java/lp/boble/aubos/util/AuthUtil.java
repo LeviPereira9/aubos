@@ -53,9 +53,13 @@ public class AuthUtil {
         UserModel requester = getRequester();
 
         boolean isOwner = username.equals(requester.getUsername());
-        boolean isAdmin = requester.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MOD"));
+        boolean isAdmin = isAdmin();
 
         if(!isOwner && !isAdmin) throw CustomForbiddenActionException.notSelfOrAdmin();
 
+    }
+
+    public boolean isAdmin(){
+        return requester.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MOD"));
     }
 }
