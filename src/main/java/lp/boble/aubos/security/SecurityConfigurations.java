@@ -40,7 +40,8 @@ public class SecurityConfigurations {
             "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/api/v1/auth/**"
     };
 
     private final SecurityJwtFilter securityJwtFilter;
@@ -67,8 +68,8 @@ public class SecurityConfigurations {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers(WHITE_LIST_URLS).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/actuator/*").hasRole("ADMIN")
                                 .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(filterExceptionHandler))
