@@ -70,6 +70,7 @@ public class SecurityConfigurations {
                         authorize -> authorize
                                 .requestMatchers(WHITE_LIST_URLS).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/actuator/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/language").hasRole("ADMIN")
                                 .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(filterExceptionHandler))

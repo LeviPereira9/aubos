@@ -33,7 +33,7 @@ public class LanguageService {
     }
 
     @Transactional
-    @CacheEvict(value = "dependencies", allEntries = true)
+    @CacheEvict(value = "dependencies", key = "'singleton'")
     public LanguageResponse createLanguage(LanguageRequest request){
         LanguageModel language = dependenciesMapper.toLanguageModel(request);
 
