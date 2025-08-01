@@ -3,6 +3,7 @@ package lp.boble.aubos.service.book;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookPageProjection;
+import lp.boble.aubos.dto.book.BookPageResponse;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.dto.book.dependencies.*;
@@ -100,7 +101,7 @@ public class BookService {
     }
 
     @Cacheable(value = "bookSearch", key = "'search=' + #search + ',page=' + #page")
-    public PageResponse<BookPageProjection> getBookBySearch(String search, int page){
+    public PageResponse<BookPageResponse> getBookBySearch(String search, int page){
         validationUtil.validateSearchRequest(search, page);
 
         PageRequest pageRequest = PageRequest.of(
@@ -108,9 +109,11 @@ public class BookService {
                 10
         );
 
-        return new PageResponse<>(
-                    bookRepository.getAllShortBookInfo(pageRequest, search)
-                );
+        PageResponse<BookPageProjection> pageFound = new PageResponse<>(
+                bookRepository.getAllShortBookInfo(pageRequest, search)
+        );
+
+        return pageFound.map(bookMapper::fromProjectionToResponse);
     }
 
     private void validateAuthor(List<BookAddContributor> contributors){

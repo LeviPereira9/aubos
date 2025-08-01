@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.BookPageProjection;
+import lp.boble.aubos.dto.book.BookPageResponse;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
@@ -74,12 +75,12 @@ public class BookController {
     }
 
     @GetMapping("/suggestions")
-    public ResponseEntity<PageResponse<BookPageProjection>> getBookSuggestions(
+    public ResponseEntity<PageResponse<BookPageResponse>> getBookSuggestions(
             @RequestParam String search,
             @RequestParam(defaultValue = "0") int page){
 
 
-        PageResponse<BookPageProjection> response = bookService.getBookBySearch(search, page);
+        PageResponse<BookPageResponse> response = bookService.getBookBySearch(search, page);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheProfiles.search())

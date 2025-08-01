@@ -12,6 +12,7 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.util.PathMatcher;
 
@@ -20,44 +21,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@Slf4j
 public class CacheConfig {
 
-    RedisCacheConfiguration customConfig(Duration ttl, ObjectMapper mapper) {
-        return RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(mapper)))
-                .entryTtl(ttl);
-    }
+   @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+       //Configuração padrão
+       RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+               .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                       new GenericJackson2JsonRedisSerializer()//Serializa para JSON
+               ))
+               .entryTtl(Duration.ofMinutes(30));
 
-    @Bean
-    public RedisCacheManager redisCacheManager(
-            RedisConnectionFactory connectionFactory, PathMatcher mvcPathMatcher) {
+       // Configuração especificas
+       Map<String, RedisCacheConfiguration> customConfigs = Map.of(
+               "bookSearch", defaultCacheConfig.entryTtl(Duration.ofMinutes(5)),
+               "userSearch", defaultCacheConfig.entryTtl(Duration.ofMinutes(5))
+       );
 
-        try {
-            connectionFactory.getConnection().ping();
-        } catch (Exception e) {
-            log.error("Redis não disponível.");
-        }
-
-        // Mapeando o cache
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        
-
-        RedisCacheConfiguration defaultConfig = customConfig(Duration.ofHours(1), mapper);
-
-        // TTL customizados
-        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("bookSearch", customConfig(Duration.ofMinutes(30),mapper));
-        cacheConfigurations.put("userSearch", customConfig(Duration.ofMinutes(10),mapper));
-        cacheConfigurations.put("userAutocomplete", customConfig(Duration.ofMinutes(10),mapper));
-        cacheConfigurations.put("contributor", customConfig(Duration.ofMinutes(10), mapper));
-        cacheConfigurations.put("contributorSearch", customConfig(Duration.ofMinutes(5), mapper));
-
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(defaultConfig)
-                .withInitialCacheConfigurations(cacheConfigurations)
-                .build();
-    }
+       return RedisCacheManager.builder(connectionFactory)
+               .cacheDefaults(defaultCacheConfig)
+               .withInitialCacheConfigurations(customConfigs)
+               .build();
+   }
 }
