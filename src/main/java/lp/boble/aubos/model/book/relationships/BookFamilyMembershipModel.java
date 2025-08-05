@@ -3,7 +3,7 @@ package lp.boble.aubos.model.book.relationships;
 import jakarta.persistence.*;
 import lombok.Data;
 import lp.boble.aubos.model.book.BookModel;
-import lp.boble.aubos.model.book.dependencies.FamilyModel;
+import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;

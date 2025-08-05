@@ -31,4 +31,12 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException language(){
         return new CustomNotFoundException("Língua não encontrada.");
     }
+
+    public static CustomNotFoundException family(){
+        return new CustomNotFoundException("Nenhuma saga, série ou coletânea encontrada com esse nome.");
+    }
+
+    public static CustomNotFoundException familyType(){
+        return new CustomNotFoundException("Tipo de coleção não encontrado.");
+    }
 }

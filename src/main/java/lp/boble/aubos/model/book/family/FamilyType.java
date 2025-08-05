@@ -1,4 +1,4 @@
-package lp.boble.aubos.model.book.dependencies;
+package lp.boble.aubos.model.book.family;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
