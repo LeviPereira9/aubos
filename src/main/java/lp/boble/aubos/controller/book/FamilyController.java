@@ -55,13 +55,28 @@ public class FamilyController {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<FamilyResponse>> createFamily(@RequestBody FamilyRequest request) {
-        FamilyResponse data = familyService.createFamily(request);
+        FamilyResponse data = familyService.createFamily(request, false);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Coleção criada com sucesso")
+                        .data(data)
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/official")
+    public ResponseEntity<SuccessResponse<FamilyResponse>> createOfficialFamily(@RequestBody FamilyRequest request) {
+        FamilyResponse data = familyService.createFamily(request, true);
+
+        SuccessResponse<FamilyResponse> response =
+                new SuccessResponseBuilder<FamilyResponse>()
+                        .operation("POST")
+                        .code(HttpStatus.CREATED)
+                        .message("Coleção oficial criada com sucesso")
                         .data(data)
                         .build();
 

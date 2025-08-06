@@ -36,11 +36,19 @@ public class FamilyService {
     private final VisibilityRepository visibilityRepository;
 
     @Transactional
-    public FamilyResponse createFamily(FamilyRequest request) {
+    public FamilyResponse createFamily(FamilyRequest request, boolean isOfficial) {
         FamilyModel family = familyMapper.toModel(request);
         family.setCreatedBy(authUtil.getRequester());
+        family.setCreatedAt(Instant.now());
 
         this.applyDataToFamily(family, request);
+
+        System.out.println(authUtil.getRequester().getAuthorities());
+
+        if(isOfficial){
+            family.setOfficial(true);
+        }
+
 
         return familyMapper.toResponse(familyRepository.save(family));
     }
@@ -96,6 +104,7 @@ public class FamilyService {
         int currentTypeId = model.getType() != null ? model.getType().getId() : 0;
         int requestTypeId = request.type() != 0 ? request.type() : 0;
 
+
         FamilyType type = model.getType();
         if(!Objects.equals(currentTypeId, requestTypeId)){
             type = this.findFamilyTypeOrThrow(requestTypeId);
@@ -105,6 +114,10 @@ public class FamilyService {
         // Se o REQUEST for null adiciona o padrão.
         int currentVisibilityId = model.getVisibility() != null ? model.getVisibility().getId() : 0;
         int requestVisibilityId = request.visibility() != 0 ? request.visibility() : VisiblityEnum.PUBLIC.getId();
+
+        if(model.isOfficial()){
+            requestVisibilityId = VisiblityEnum.PUBLIC.getId();
+        }
 
         Visibility visibility = model.getVisibility();
         if(visibility == null || !Objects.equals(currentVisibilityId, requestVisibilityId)){

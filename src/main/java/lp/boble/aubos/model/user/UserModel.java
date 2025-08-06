@@ -91,13 +91,13 @@ public class UserModel implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = this.role.getName();
 
-        if(role.equals("admin")) {
+        if(role.equals("ADMIN")) {
             return List.of(
                     new SimpleGrantedAuthority("ROLE_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_MOD"),
                     new SimpleGrantedAuthority("ROLE_READER")
             );
-        } else if(role.equals("mod")) {
+        } else if(role.equals("MOD")) {
             return List.of(
                     new SimpleGrantedAuthority("ROLE_MOD"),
                     new SimpleGrantedAuthority("ROLE_READER")
