@@ -1,5 +1,8 @@
 package lp.boble.aubos.model.Enum;
 
+import lombok.Getter;
+
+@Getter
 public enum ContributorRoleEnum {
     AUTHOR(1),
     ILLUSTRATOR(2),
@@ -12,7 +15,4 @@ public enum ContributorRoleEnum {
         this.id = id;
     }
 
-    public int getId() {
-        return id;
-    }
 }

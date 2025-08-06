@@ -39,4 +39,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException familyType(){
         return new CustomNotFoundException("Tipo de coleção não encontrado.");
     }
+
+    public static CustomNotFoundException visibility(){
+        return new CustomNotFoundException("Classificação de visibilidade da coleção não encontrado.");
+    }
 }

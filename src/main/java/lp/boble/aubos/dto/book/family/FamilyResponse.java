@@ -4,6 +4,9 @@ import java.util.UUID;
 
 public record FamilyResponse (
         UUID id,
+        String coverUrl,
         String name,
-        String type
+        String type,
+        UUID shareToken,
+        String visibility
 ) {}

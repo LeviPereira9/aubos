@@ -33,5 +33,24 @@ public class FamilyModel {
     @JoinColumn(name = "updated_by")
     private UserModel updatedBy;
 
+    // NEW
 
+    @Column(name = "is_official")
+    private boolean official;
+
+    @Column(name = "cover_url")
+    private String coverUrl;
+
+    @Column(name = "created_at")
+    private Instant createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "visibility_id")
+    private Visibility visibility;
+
+    @Column(name = "share_token")
+    private UUID shareToken;
+
+    @Column(name = "share_token_expires_at")
+    private Instant shareTokenExpiresAt;
 }

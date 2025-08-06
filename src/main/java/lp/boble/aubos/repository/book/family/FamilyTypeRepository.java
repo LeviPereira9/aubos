@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.UUID;
 
-public interface FamilyTypeRepository extends JpaRepository<FamilyType, Long> {
+public interface FamilyTypeRepository extends JpaRepository<FamilyType, Integer> {
 
     @Query("""
     SELECT EXISTS (FROM FamilyModel f
