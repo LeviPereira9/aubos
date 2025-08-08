@@ -77,10 +77,16 @@ public class BookContributor {
         return contributors;
     }
 
+    @Override
     public boolean equals(Object o){
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         BookContributor that = (BookContributor) o;
         return Objects.equals(contributor, that.contributor) && Objects.equals(contributorRole, that.contributorRole);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(contributor, contributorRole);
     }
 }

@@ -2,9 +2,11 @@ package lp.boble.aubos.model.book.family;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lp.boble.aubos.model.book.relationships.BookFamilyModel;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -53,4 +55,7 @@ public class FamilyModel {
 
     @Column(name = "share_token_expires_at")
     private Instant shareTokenExpiresAt;
+
+    @OneToMany(mappedBy = "family", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookFamilyModel> families;
 }

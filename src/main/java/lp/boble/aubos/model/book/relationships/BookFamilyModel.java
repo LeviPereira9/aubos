@@ -7,12 +7,13 @@ import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "tb_book_family_membership")
 @Data
-public class BookFamilyMembershipModel {
+public class BookFamilyModel {
     @Id
     @GeneratedValue
     private UUID id;
@@ -41,4 +42,17 @@ public class BookFamilyMembershipModel {
     @ManyToOne
     @JoinColumn(name = "updated_by")
     private UserModel updatedBy;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookFamilyModel that = (BookFamilyModel) o;
+        return Objects.equals(orderInFamily, that.orderInFamily);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orderInFamily);
+    }
 }

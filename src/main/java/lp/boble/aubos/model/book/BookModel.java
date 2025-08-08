@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lp.boble.aubos.model.book.dependencies.*;
 import lp.boble.aubos.model.book.relationships.BookContributor;
+import lp.boble.aubos.model.book.relationships.BookFamilyModel;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.model.user.UserModel;
 
@@ -75,6 +76,9 @@ public class BookModel {
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookContributor> contributors;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<BookFamilyModel> families;
 
     //TODO: alternativesTitles
     //TODO: tags

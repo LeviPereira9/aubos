@@ -81,7 +81,7 @@ public class FamilyService {
                 .map(familyMapper::toTypeResponse).collect(Collectors.toList());
     }
 
-    private FamilyModel findFamilyOrThrow(UUID id){
+    public FamilyModel findFamilyOrThrow(UUID id){
         return familyRepository.findById(id).orElseThrow(CustomNotFoundException::family
         );
     };

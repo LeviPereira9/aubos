@@ -126,7 +126,7 @@ public class BookService {
         }
     }
 
-    private BookModel findBookOrThrow(UUID id){
+    public BookModel findBookOrThrow(UUID id){
         return bookRepository.findByIdAndSoftDeletedFalse(id)
                 .orElseThrow(CustomNotFoundException::book);
     }
