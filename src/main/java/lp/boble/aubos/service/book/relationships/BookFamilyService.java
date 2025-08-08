@@ -69,10 +69,16 @@ public class BookFamilyService {
         List<BatchContent<UUID>> successes = new ArrayList<>();
         List<BatchContent<UUID>> failures = new ArrayList<>();
 
+        int bigOrder = 0;
+
         FamilyModel family = familyService.findFamilyOrThrow(familyId);
 
         List<BookFamilyModel> currentFamily = this.findAllBooksInFamily(familyId);
         List<BookFamilyModel> toAdd = new ArrayList<>();
+
+        // TODO: Quando a ordem estiver errada, talvez seja melhor adicionar no final
+        // NOTE: Ex.: Se tiver adicionando e já tiver coisas na coleção, ele simplesmente adiciona no final.
+        // NOTE: Agora, se estiver errada e você errou na primeira requisição, não vai ser adicionado mesmo.
 
         // Ordens em uso
         Set<Integer> ordersInUse = currentFamily.stream()
@@ -92,7 +98,13 @@ public class BookFamilyService {
             boolean bookConflict = booksOnFamily.contains(bookId);
             boolean bookDontExist = !bookRepository.existsById(bookId);
 
-            if(!orderConflict && !bookConflict && !bookDontExist) {
+            if(!bookConflict && !bookDontExist) {
+
+                if(orderConflict){
+                    order = Collections.max(ordersInUse) + 1;
+                    ordersInUse.add(order);
+                }
+
                 BookFamilyModel bookToAdd = new BookFamilyModel();
                 bookToAdd.setBook(bookService.findBookOrThrow(bookId));
                 bookToAdd.setFamily(family);
@@ -104,7 +116,6 @@ public class BookFamilyService {
             } else {
                 StringBuilder errorMessage = new StringBuilder();
                 if(bookDontExist) errorMessage.append("Livro não encontrado. ");
-                if(orderConflict) errorMessage.append("Ordem do livro já está atribuída a outro livro. ");
                 if(bookConflict) errorMessage.append("Este livro já está na coleção.");
                 failures.add(BatchContent.failure(bookId, errorMessage.toString().trim()));
             }
@@ -208,11 +219,11 @@ public class BookFamilyService {
         List<BatchContent<UUID>> successes = new ArrayList<>();
         List<BatchContent<UUID>> failures = new ArrayList<>();
 
-        // TODO: Validar os swaps, pois oq pode ocorrer:
-        // TODO: A = 1, B = 2, C = 3
-        // TODO: Req = A > 2, B > 3
-        // TODO: A vai conseguir, pq B tbm está na req de troca, mas o B quer ir pro C, só que o C n quer trocar
-        // TODO: Ai o B vai falhar em trocar pq o C n quer e então o A vai dar um erro lá no MySql
+        // NOTE: Validar os swaps, pois oq pode ocorrer:
+        // NOTE: A = 1, B = 2, C = 3
+        // NOTE: Req = A > 2, B > 3
+        // NOTE: A vai conseguir, pq B tbm está na req de troca, mas o B quer ir pro C, só que o C n quer trocar
+        // NOTE: Ai o B vai falhar em trocar pq o C n quer e então o A vai dar um erro lá no MySql
         List<BookFamilyModel> toUpdate = new ArrayList<>();
 
         Map<UUID, Integer> requestMap = requests.stream()
