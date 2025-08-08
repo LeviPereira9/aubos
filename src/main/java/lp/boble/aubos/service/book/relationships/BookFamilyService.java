@@ -3,9 +3,11 @@ package lp.boble.aubos.service.book.relationships;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.BookFamilyCreateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamilyDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.BookFamilyUpdateRequest;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;
 import lp.boble.aubos.repository.book.BookRepository;
@@ -322,14 +324,53 @@ public class BookFamilyService {
 
 
 
-    public void removeBookFromFamily(UUID bookFamilyId) {
-        bookFamilyRepository.deleteById(bookFamilyId);
+    @Transactional
+    public void removeBookFromFamily(UUID familyId, BookFamilyDeleteRequest deleteRequest) {
+
+        UUID bookId = deleteRequest.bookId();
+
+        boolean exists = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, bookId);
+
+        if(!exists){
+            throw CustomNotFoundException.book();
+        }
+
+        bookFamilyRepository.deleteByFamilyIdAndBookId(familyId, bookId);
     }
 
-    public void removeBooksFromFamily(List<UUID> bookFamiliesId) {
-        for (UUID bookFamilyId : bookFamiliesId) {
+    @Transactional
+    public BatchTransporter<UUID> removeBooksFromFamily(UUID familyId, List<BookFamilyDeleteRequest> deleteRequests) {
+        List<BatchContent<UUID>> successes = new ArrayList<>();
+        List<BatchContent<UUID>> failures = new ArrayList<>();
 
+        List<BookFamilyModel> currentFamily = this.findAllBooksInFamily(familyId);
+        List<BookFamilyModel> toRemove = new ArrayList<>();
+
+        Map<UUID, BookFamilyModel> currentFamilyMap = currentFamily.stream()
+                .collect(Collectors.toMap(b -> b.getBook().getId(), Function.identity()));
+
+        Set<UUID> booksToRemove = new HashSet<>();
+
+        for(BookFamilyDeleteRequest deleteRequest : deleteRequests) {
+            UUID bookId = deleteRequest.bookId();
+
+            if(!booksToRemove.add(bookId)) {
+                failures.add(BatchContent.failure(bookId, "Livro duplicado na requisição"));
+                continue;
+            }
+
+            if(!currentFamilyMap.containsKey(bookId)) {
+                failures.add(BatchContent.failure(bookId, "Livro não pertence a essa coleção"));
+                continue;
+            }
+
+            toRemove.add(currentFamilyMap.get(bookId));
+            successes.add(BatchContent.success(bookId, "Livro removido com sucesso."));
         }
+
+        bookFamilyRepository.deleteAll(toRemove);
+
+        return new BatchTransporter<>(successes, failures);
     }
 
     public BookFamilyModel findBookFamilyOrThrow(UUID bookFamilyId) {
@@ -339,4 +380,5 @@ public class BookFamilyService {
     public List<BookFamilyModel> findAllBooksInFamily(UUID familyId){
         return bookFamilyRepository.findAllByFamilyId(familyId);
     }
+
 }

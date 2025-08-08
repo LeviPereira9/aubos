@@ -2,6 +2,7 @@ package lp.boble.aubos.controller.book;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.BookFamilyCreateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamilyDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.BookFamilyUpdateRequest;
 import lp.boble.aubos.response.batch.BatchResponse;
 import lp.boble.aubos.response.batch.BatchResponseBuilder;
@@ -76,10 +77,31 @@ public class BookFamilyController {
         return ResponseEntity.status(status).body(response);
     }
 
-    @DeleteMapping("/family/books/{bookFamilyId}")
-    public ResponseEntity<Void> removeBookFamily(@PathVariable("bookFamilyId") UUID bookFamilyId){
-        bookFamilyService.removeBookFromFamily(bookFamilyId);
+    @DeleteMapping("/family/{familyId}/books/")
+    public ResponseEntity<Void> removeBookFromFamily(
+            @PathVariable("familyId") UUID familyId,
+            @RequestBody BookFamilyDeleteRequest deleteRequest){
+        bookFamilyService.removeBookFromFamily(familyId, deleteRequest);
 
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/family/{familyId}/books/batch")
+    public ResponseEntity<BatchResponse<UUID>> removeBooksFromFamily(
+            @PathVariable("familyId") UUID familyId,
+            @RequestBody List<BookFamilyDeleteRequest> deleteRequests
+    ){
+        BatchTransporter<UUID> result = bookFamilyService.removeBooksFromFamily(familyId, deleteRequests);
+        int status = result.getStatus();
+
+        BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
+                .operation("DELETE")
+                .code(status)
+                .message("Success")
+                .successes(result.getSuccesses())
+                .failures(result.getFailures())
+                .build();
+
+        return ResponseEntity.status(status).body(response);
     }
 }
