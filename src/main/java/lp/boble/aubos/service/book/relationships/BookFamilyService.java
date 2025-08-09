@@ -4,9 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.BookFamilyCreateRequest;
 import lp.boble.aubos.dto.book.relationships.BookFamilyDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamilyResponse;
 import lp.boble.aubos.dto.book.relationships.BookFamilyUpdateRequest;
-import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
+import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
+import lp.boble.aubos.mapper.book.family.BookFamilyMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;
@@ -19,7 +21,6 @@ import lp.boble.aubos.service.book.family.FamilyService;
 import lp.boble.aubos.util.AuthUtil;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,55 +33,36 @@ public class BookFamilyService {
     private final FamilyService familyService;
     private final AuthUtil authUtil;
     private final BookRepository bookRepository;
+    private final BookFamilyMapper bookFamilyMapper;
 
-    public void addBookToFamily(UUID familyId, BookFamilyCreateRequest request) {
+    @Transactional
+    public BookFamilyResponse addBookToFamily(UUID familyId, BookFamilyCreateRequest request) {
 
-        BookFamilyModel bookToAdd = new BookFamilyModel();
-        bookToAdd.setBook(bookService.findBookOrThrow(request.bookId()));
-        bookToAdd.setFamily(familyService.findFamilyOrThrow(familyId));
-        bookToAdd.setNote(request.note());
-        bookToAdd.setOrderInFamily(request.order());
+        boolean bookConflict = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, request.bookId());
+        boolean orderConflict = bookFamilyRepository.existsByFamilyIdAndOrderInFamily(familyId, request.order());
+
+        if(bookConflict) throw CustomDuplicateFieldException.bookFamily();
+        if(orderConflict) throw CustomDuplicateFieldException.orderFamily();
+
+        BookModel book = bookService.findBookOrThrow(request.bookId());
+        FamilyModel family = familyService.findFamilyOrThrow(familyId);
+
+        BookFamilyModel bookToAdd = bookFamilyMapper.fromCreateToModel(request, book, family);
         bookToAdd.setCreatedBy(authUtil.getRequester());
 
-        bookFamilyRepository.save(bookToAdd);
+        return bookFamilyMapper.toResponse(bookFamilyRepository.save(bookToAdd));
     }
 
-    /*
-    * public BatchTransporter<UUID> addBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
-
-        List<BatchContent<UUID>> successes = new ArrayList<>();
-        List<BatchContent<UUID>> failures = new ArrayList<>();
-
-        for (BookFamilyCreateRequest request : requests) {
-            try{
-                this.addBookToFamily(familyId, request);
-                successes.add(BatchContent.success(request.bookId(), "Livro adicionado com sucesso."));
-            } catch (CustomNotFoundException e){
-                String message = e.getMessage().contains("Livro") ? "Livro não encontrado": "Coleção não encontrada.";
-                failures.add(BatchContent.failure(request.bookId(), message));
-            } catch (DataIntegrityViolationException e){
-                failures.add(BatchContent.failure(request.bookId(), "Ordem do livro duplicada."));
-            }
-        }
-
-        return new BatchTransporter<>(successes, failures);
-    }*/
-
+    @Transactional
     public BatchTransporter<UUID> addBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
 
         List<BatchContent<UUID>> successes = new ArrayList<>();
         List<BatchContent<UUID>> failures = new ArrayList<>();
 
-        int bigOrder = 0;
-
         FamilyModel family = familyService.findFamilyOrThrow(familyId);
 
         List<BookFamilyModel> currentFamily = this.findAllBooksInFamily(familyId);
         List<BookFamilyModel> toAdd = new ArrayList<>();
-
-        // TODO: Quando a ordem estiver errada, talvez seja melhor adicionar no final
-        // NOTE: Ex.: Se tiver adicionando e já tiver coisas na coleção, ele simplesmente adiciona no final.
-        // NOTE: Agora, se estiver errada e você errou na primeira requisição, não vai ser adicionado mesmo.
 
         // Ordens em uso
         Set<Integer> ordersInUse = currentFamily.stream()
@@ -106,14 +88,13 @@ public class BookFamilyService {
                     order = Collections.max(ordersInUse) + 1;
                     ordersInUse.add(order);
                 }
+                BookModel book = bookService.findBookOrThrow(bookId);
 
-                BookFamilyModel bookToAdd = new BookFamilyModel();
-                bookToAdd.setBook(bookService.findBookOrThrow(bookId));
-                bookToAdd.setFamily(family);
-                bookToAdd.setNote(request.note());
-                bookToAdd.setOrderInFamily(order);
+                BookFamilyModel bookToAdd = bookFamilyMapper.fromCreateToModel(request, book, family);
                 bookToAdd.setCreatedBy(authUtil.getRequester());
+
                 toAdd.add(bookToAdd);
+
                 successes.add(BatchContent.success(bookId, "Livro adicionado com sucesso."));
             } else {
                 StringBuilder errorMessage = new StringBuilder();
@@ -129,16 +110,20 @@ public class BookFamilyService {
     }
 
 
+    @Transactional
+    public BookFamilyResponse updateBookFamily(UUID familyId, BookFamilyUpdateRequest request) {
+        boolean orderConflict = bookFamilyRepository.existsByFamilyIdAndOrderInFamily(familyId, request.order());
+        boolean bookConflict = !bookFamilyRepository.existsByFamilyIdAndBookId(familyId, request.bookId());
 
-    public void updateBookFamily(UUID bookFamilyId, BookFamilyUpdateRequest request) {
-        BookFamilyModel bookToUpdate = this.findBookFamilyOrThrow(bookFamilyId);
+        if(orderConflict) throw CustomDuplicateFieldException.orderFamily();
+        if(bookConflict) throw CustomNotFoundException.bookFamily();
 
-        bookToUpdate.setOrderInFamily(request.order());
-        bookToUpdate.setNote(request.note());
+        BookFamilyModel bookToUpdate = this.findByFamilyAndBookOrThrow(familyId, request.bookId());
+
+        bookFamilyMapper.toUpdateFromRequest(bookToUpdate, request);
         bookToUpdate.setUpdatedBy(authUtil.getRequester());
-        bookToUpdate.setLastUpdate(Instant.now());
 
-        bookFamilyRepository.save(bookToUpdate);
+        return bookFamilyMapper.toResponse(bookFamilyRepository.save(bookToUpdate));
     }
 
     @Transactional
@@ -162,13 +147,12 @@ public class BookFamilyService {
             BookFamilyModel bookToUpdate = currentFamilyMap.get(bookId);
 
             if(bookToUpdate == null) {
-                throw new RuntimeException("Coleção de livros inválida.");
+                throw CustomNotFoundException.bookFamily();
             }
 
-            bookToUpdate.setNote(request.note());
-            bookToUpdate.setOrderInFamily(request.order());
+            bookFamilyMapper.toUpdateFromRequest(bookToUpdate, request);
+
             bookToUpdate.setUpdatedBy(authUtil.getRequester());
-            bookToUpdate.setLastUpdate(Instant.now());
             toUpdate.add(bookToUpdate);
             successes.add(BatchContent.success(request.bookId(), "Livro atualizado com sucesso."));
         }
@@ -202,17 +186,17 @@ public class BookFamilyService {
 
             // Livro não pertence a coleção.
             if (!currentBookOrder.containsKey(bookId)) {
-                throw new RuntimeException("Um livro não pertence a essa coleção.");
+                throw CustomNotFoundException.bookFamily();
             }
 
             // Livro duplicado
             if (!toUpdateBooks.add(bookId)) {
-                throw new RuntimeException("Livro duplicado na requisição");
+                throw CustomDuplicateFieldException.bookFamily();
             }
 
             // Ordem duplicado
             if (!toUpdateOrders.add(request.order())) {
-                throw new RuntimeException("Posição duplicada na requisição");
+                throw CustomDuplicateFieldException.orderFamily();
             }
         }
     }
@@ -371,6 +355,12 @@ public class BookFamilyService {
         bookFamilyRepository.deleteAll(toRemove);
 
         return new BatchTransporter<>(successes, failures);
+    }
+
+    public BookFamilyModel findByFamilyAndBookOrThrow(UUID familyId, UUID bookId){
+
+        return bookFamilyRepository.findByFamilyIdAndBookId(familyId, bookId)
+                .orElseThrow(CustomNotFoundException::bookFamily);
     }
 
     public BookFamilyModel findBookFamilyOrThrow(UUID bookFamilyId) {

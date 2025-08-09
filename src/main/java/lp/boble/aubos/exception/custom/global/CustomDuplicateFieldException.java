@@ -24,4 +24,12 @@ public class CustomDuplicateFieldException extends GlobalException {
         return new CustomDuplicateFieldException("O nome desse contribuidor já está em uso.");
     }
 
+    public static CustomDuplicateFieldException bookFamily(){
+        return new CustomDuplicateFieldException("Este livro já está na coleção.");
+    }
+
+    public static CustomDuplicateFieldException orderFamily(){
+        return new CustomDuplicateFieldException("Outro livro já ocupa está posição.");
+    }
+
 }

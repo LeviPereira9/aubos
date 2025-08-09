@@ -10,8 +10,7 @@ public class BatchResponseBuilder<T> {
     private String operation;
     private int code;
     private String message;
-    private List<BatchContent<T>> successes;
-    private List<BatchContent<T>> failures;
+    private BatchTransporter<T> data;
 
     public BatchResponseBuilder<T> operation(String operation) {
         this.operation = operation;
@@ -25,16 +24,12 @@ public class BatchResponseBuilder<T> {
         this.message = message;
         return this;
     }
-    public BatchResponseBuilder<T> successes(List<BatchContent<T>> successes) {
-        this.successes = successes;
-        return this;
-    }
-    public BatchResponseBuilder<T> failures(List<BatchContent<T>> failures) {
-        this.failures = failures;
+    public BatchResponseBuilder<T> data(BatchTransporter<T> data ) {
+        this.data = data;
         return this;
     }
 
     public BatchResponse<T> build() {
-        return new BatchResponse<>(operation, code, message, successes, failures);
+        return new BatchResponse<>(operation, code, message, data);
     }
 }

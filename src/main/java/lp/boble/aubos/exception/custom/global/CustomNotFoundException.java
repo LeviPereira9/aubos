@@ -43,4 +43,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException visibility(){
         return new CustomNotFoundException("Classificação de visibilidade da coleção não encontrado.");
     }
+
+    public static CustomNotFoundException bookFamily(){
+        return new CustomNotFoundException("O livro não foi encontrado na coleção.");
+    }
 }
