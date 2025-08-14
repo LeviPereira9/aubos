@@ -38,14 +38,14 @@ public class ApiKeyController {
     public ResponseEntity<SuccessResponse<ApiKeyCreateResponse>>
     createApiKey(@PathVariable String username) {
 
-        ApiKeyCreateResponse dataResponse = apiKeyService.generateAndStoreApiKey(username);
+        ApiKeyCreateResponse content = apiKeyService.generateAndStoreApiKey(username);
 
         SuccessResponse<ApiKeyCreateResponse> response =
                 new SuccessResponseBuilder<ApiKeyCreateResponse>()
                         .operation("POST")
                         .message("Chave gerada com sucesso.")
                         .code(HttpStatus.CREATED)
-                        .data(dataResponse)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -63,9 +63,9 @@ public class ApiKeyController {
             throw new CustomNotModifiedException();
         }
 
-        List<ApiKeyResponse> dataResponse = apiKeyService.findAllUserKeys(username);
+        List<ApiKeyResponse> content = apiKeyService.findAllUserKeys(username);
 
-        String messageResponse = dataResponse.isEmpty() ?
+        String message = content.isEmpty() ?
                 "Usuário não possui nenhuma chave." // true
                 :
                 "Chaves encontradas com sucesso."; // false
@@ -73,9 +73,9 @@ public class ApiKeyController {
         SuccessResponse<List<ApiKeyResponse>> response =
                 new SuccessResponseBuilder<List<ApiKeyResponse>>()
                         .operation("GET")
-                        .message(messageResponse)
+                        .message(message)
                         .code(HttpStatus.OK)
-                        .data(dataResponse)
+                        .content(content)
                         .build();
 
         return ResponseEntity
@@ -106,14 +106,14 @@ public class ApiKeyController {
     @PutMapping("/{publicId}/rotate-key")
     public ResponseEntity<SuccessResponse<ApiKeyCreateResponse>>
     rotateApiKey(@PathVariable String username, @PathVariable String publicId) {
-        ApiKeyCreateResponse data = apiKeyService.rotateKey(username, publicId);
+        ApiKeyCreateResponse content = apiKeyService.rotateKey(username, publicId);
 
         SuccessResponse<ApiKeyCreateResponse> response =
                 new SuccessResponseBuilder<ApiKeyCreateResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Chave rotacionada com sucesso. A chave anterior será desativada em 6 horas ou você pode revogar ela agora.")
-                        .data(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

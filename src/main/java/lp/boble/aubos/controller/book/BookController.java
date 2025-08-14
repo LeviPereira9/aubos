@@ -38,7 +38,7 @@ public class BookController {
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Livro adicionado com sucesso")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -62,7 +62,7 @@ public class BookController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Livro encontrado com sucesso")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.ok().cacheControl(CacheProfiles.bookPublic()).eTag(eTag).body(response);
@@ -90,7 +90,7 @@ public class BookController {
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Livro atualizado com sucesso")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

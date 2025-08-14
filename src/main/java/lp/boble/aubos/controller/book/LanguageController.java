@@ -27,7 +27,7 @@ public class LanguageController {
                 new SuccessResponseBuilder<LanguageResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
-                        .data(data)
+                        .content(data)
                         .message("Língua adicionada com sucesso")
                         .build();
 

@@ -44,7 +44,7 @@ public class DependenciesController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Dependências do livro encontradas com sucesso")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.ok()

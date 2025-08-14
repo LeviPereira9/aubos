@@ -53,7 +53,7 @@ public class UserController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Usuário encontrado com sucesso.")
-                        .data(responseData)
+                        .content(responseData)
                         .build();
 
 
@@ -83,7 +83,7 @@ public class UserController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Usuário encontrado com sucesso.")
-                        .data(responseData)
+                        .content(responseData)
                         .build();
 
         return ResponseEntity.ok()
@@ -135,7 +135,7 @@ public class UserController {
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Usuário atualizado com sucesso.")
-                        .data(responseData)
+                        .content(responseData)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -184,7 +184,7 @@ public class UserController {
                         .operation("PATCH")
                         .code(HttpStatus.OK)
                         .message("Senha alterada com sucesso.")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

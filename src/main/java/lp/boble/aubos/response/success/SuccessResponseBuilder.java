@@ -11,7 +11,7 @@ public class SuccessResponseBuilder<T> {
     private String operation;
     private int code;
     private String message;
-    private T data;
+    private T content;
     private List<ActionLink> actions = new ArrayList<ActionLink>();
 
     public SuccessResponseBuilder<T> operation(String operation) {
@@ -29,8 +29,8 @@ public class SuccessResponseBuilder<T> {
         return this;
     }
 
-    public SuccessResponseBuilder<T> data(T data) {
-        this.data = data;
+    public SuccessResponseBuilder<T> content(T data) {
+        this.content = data;
         return this;
     }
 
@@ -44,7 +44,7 @@ public class SuccessResponseBuilder<T> {
         return this;
     }
     public SuccessResponse<T> build() {
-        SuccessResponse<T> response = new SuccessResponse<>(operation, code, message, data);
+        SuccessResponse<T> response = new SuccessResponse<>(operation, code, message, content);
         response.setActions(actions);
 
         return response;

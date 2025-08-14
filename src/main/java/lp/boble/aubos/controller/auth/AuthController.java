@@ -32,7 +32,7 @@ public class AuthController {
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Usuário registrado com sucesso.")
-                        .data(responseData)
+                        .content(responseData)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -51,7 +51,7 @@ public class AuthController {
                         .operation("POST")
                         .code(HttpStatus.OK)
                         .message("Usuário logado com sucesso.")
-                        .data(responseData)
+                        .content(responseData)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

@@ -36,7 +36,7 @@ public class BookFamilyController {
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Livro adicionado à coleção.")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -73,7 +73,7 @@ public class BookFamilyController {
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Livro alterado com sucesso.")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

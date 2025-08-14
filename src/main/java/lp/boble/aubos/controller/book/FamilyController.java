@@ -31,7 +31,7 @@ public class FamilyController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Coleção encontrada com sucesso.")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.ok().eTag("").body(response);
@@ -47,7 +47,7 @@ public class FamilyController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Tipos encontrado com sucesso.")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.ok().eTag("").body(response);
@@ -62,7 +62,7 @@ public class FamilyController {
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Coleção criada com sucesso")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -77,7 +77,7 @@ public class FamilyController {
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Coleção oficial criada com sucesso")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -92,7 +92,7 @@ public class FamilyController {
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Coleção atualizada com sucesso")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

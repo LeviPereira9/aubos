@@ -46,7 +46,7 @@ public class ContributorController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Contribuidor encontrado com sucesso.")
-                        .data(data)
+                        .content(data)
                         .build();
 
 
@@ -80,7 +80,7 @@ public class ContributorController {
                        .operation("POST")
                        .code(HttpStatus.CREATED)
                        .message("Contribuidor criado com sucesso.")
-                       .data(data)
+                       .content(data)
                        .build();
 
        return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -97,7 +97,7 @@ public class ContributorController {
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Contribuidor atualizado com sucesso.")
-                        .data(data)
+                        .content(data)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
