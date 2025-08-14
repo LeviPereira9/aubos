@@ -12,7 +12,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,16 +27,16 @@ public class LanguageService {
 
     public List<LanguageResponse> getAllLanguages(){
         return languageRepository.findAll().stream()
-                .map(dependenciesMapper::fromModelToLanguageResponse)
+                .map(dependenciesMapper::fromLanguageModelToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     @CacheEvict(value = "dependencies", key = "'singleton'")
     public LanguageResponse createLanguage(LanguageRequest request){
-        LanguageModel language = dependenciesMapper.toLanguageModel(request);
+        LanguageModel language = dependenciesMapper.languageRequestToModel(request);
 
-        return dependenciesMapper.fromModelToLanguageResponse(languageRepository.save(language));
+        return dependenciesMapper.fromLanguageModelToResponse(languageRepository.save(language));
     }
 
 

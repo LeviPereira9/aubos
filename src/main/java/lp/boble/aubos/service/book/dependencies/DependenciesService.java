@@ -47,7 +47,7 @@ public class DependenciesService {
     public List<TypeResponse> getAllTypes(){
 
         return typeRepository.findAll().stream()
-                .map(dependenciesMapper::fromModelToTypeResponse)
+                .map(dependenciesMapper::fromTypeModelToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -58,7 +58,7 @@ public class DependenciesService {
 
     public List<StatusResponse> getAllStatus(){
         return statusRepository.findAll().stream()
-                .map(dependenciesMapper::fromModelToStatusResponse)
+                .map(dependenciesMapper::fromStatusModelToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +70,7 @@ public class DependenciesService {
     public List<RestrictionResponse> getAllRestriction(){
 
         return restrictionRepository.findAll().stream()
-                .map(dependenciesMapper::fromModelToRestrictionResponse)
+                .map(dependenciesMapper::fromRestrictionModelToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -81,7 +81,7 @@ public class DependenciesService {
 
     public List<LicenseResponse> getAllLicense(){
         return licenseRepository.findAll().stream()
-                .map(dependenciesMapper::fromModelToLicenseResponse)
+                .map(dependenciesMapper::fromLicenseModelToResponse)
                 .collect(Collectors.toList());
     }
 

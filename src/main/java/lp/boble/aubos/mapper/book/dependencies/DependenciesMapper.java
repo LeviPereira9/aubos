@@ -11,20 +11,20 @@ import org.mapstruct.Named;
 public interface DependenciesMapper {
 
     @Named("licenseMapper")
-    BookLicenseResponse toLicenseResponse(LicenseModel license);
+    BookLicenseResponse licenseModelToResponse(LicenseModel license);
 
     @Named("restrictionMapper")
-    BookRestrictionResponse toRestrictionResponse(RestrictionModel restriction);
+    BookRestrictionResponse restrictionModelToResponse(RestrictionModel restriction);
 
-    LanguageModel toLanguageModel(LanguageRequest request);
+    LanguageModel languageRequestToModel(LanguageRequest request);
 
-    LanguageResponse fromModelToLanguageResponse(LanguageModel language);
+    LanguageResponse fromLanguageModelToResponse(LanguageModel language);
 
-    LicenseResponse fromModelToLicenseResponse(LicenseModel license);
+    LicenseResponse fromLicenseModelToResponse(LicenseModel license);
 
-    TypeResponse fromModelToTypeResponse(TypeModel type);
+    TypeResponse fromTypeModelToResponse(TypeModel type);
 
-    StatusResponse fromModelToStatusResponse(StatusModel status);
+    StatusResponse fromStatusModelToResponse(StatusModel status);
 
-    RestrictionResponse fromModelToRestrictionResponse(RestrictionModel restriction);
+    RestrictionResponse fromRestrictionModelToResponse(RestrictionModel restriction);
 }
