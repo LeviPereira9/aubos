@@ -24,7 +24,6 @@ public interface FamilyMapper {
     @Mapping(target = "type", source = "type.value")
     @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "visibility", source = "visibility.value")
-    @Mapping(target = "shareToken", source = "shareToken")
     FamilyResponse toResponse(FamilyModel family);
 
     @Mapping(target = "id", ignore = true)
@@ -37,8 +36,6 @@ public interface FamilyMapper {
     @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "visibility", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "shareToken", ignore = true)
-    @Mapping(target = "shareTokenExpiresAt", ignore = true)
     void updateFamily(@MappingTarget FamilyModel family, FamilyRequest request);
 
     @Mapping(target = "id", source = "id")

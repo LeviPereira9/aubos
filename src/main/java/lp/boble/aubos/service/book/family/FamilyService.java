@@ -133,14 +133,6 @@ public class FamilyService {
     public void applyDataToFamily(FamilyModel target, FamilyRequest request) {
         FamilyData data = this.loadFamilyDependencies(target, request);
 
-        if(data.visibility().getId() == VisiblityEnum.LINK_ONLY.getId()){
-            target.setShareToken(UUID.randomUUID());
-            target.setShareTokenExpiresAt(Instant.now());
-        }else{
-            target.setShareToken(null);
-            target.setShareTokenExpiresAt(null);
-        }
-
         target.setVisibility(data.visibility());
         target.setType(data.type());
     }

@@ -50,12 +50,6 @@ public class FamilyModel {
     @JoinColumn(name = "visibility_id")
     private Visibility visibility;
 
-    @Column(name = "share_token")
-    private UUID shareToken;
-
-    @Column(name = "share_token_expires_at")
-    private Instant shareTokenExpiresAt;
-
     @OneToMany(mappedBy = "family", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookFamilyModel> families;
 }
