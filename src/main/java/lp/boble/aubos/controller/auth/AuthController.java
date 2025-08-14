@@ -25,14 +25,14 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<AuthResponse>>
     registerUser(@RequestBody AuthRegisterRequest registerRequest) {
 
-        AuthResponse responseData = authService.register(registerRequest);
+        AuthResponse content = authService.register(registerRequest);
 
         SuccessResponse<AuthResponse> response =
                 new SuccessResponseBuilder<AuthResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Usuário registrado com sucesso.")
-                        .content(responseData)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -43,7 +43,7 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<AuthResponse>>
     login(@RequestBody AuthLoginRequest loginRequest) {
 
-        AuthResponse responseData = authService.login(loginRequest);
+        AuthResponse content = authService.login(loginRequest);
 
 
         SuccessResponse<AuthResponse> response =
@@ -51,7 +51,7 @@ public class AuthController {
                         .operation("POST")
                         .code(HttpStatus.OK)
                         .message("Usuário logado com sucesso.")
-                        .content(responseData)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
