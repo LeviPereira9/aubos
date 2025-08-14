@@ -31,14 +31,14 @@ public class BookController {
     @PostMapping
     public ResponseEntity<SuccessResponse<BookResponse>> postBook(@RequestBody BookRequest book) {
 
-        BookResponse data = bookService.createBook(book);
+        BookResponse content = bookService.createBook(book);
 
         SuccessResponse<BookResponse> response =
                 new SuccessResponseBuilder<BookResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Livro adicionado com sucesso")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -55,14 +55,14 @@ public class BookController {
             throw new CustomNotModifiedException();
         }
 
-        BookResponse data = bookService.getBookById(id);
+        BookResponse content = bookService.getBookById(id);
 
         SuccessResponse<BookResponse> response =
                 new SuccessResponseBuilder<BookResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Livro encontrado com sucesso")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.ok().cacheControl(CacheProfiles.bookPublic()).eTag(eTag).body(response);
@@ -83,14 +83,14 @@ public class BookController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SuccessResponse<BookResponse>>  updateBook(@PathVariable UUID id, @RequestBody BookRequest book){
-        BookResponse data = bookService.updateBook(id, book);
+        BookResponse content = bookService.updateBook(id, book);
 
         SuccessResponse<BookResponse> response =
                 new SuccessResponseBuilder<BookResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Livro atualizado com sucesso")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
