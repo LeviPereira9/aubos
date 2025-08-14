@@ -18,19 +18,19 @@ public final class CacheProfiles {
         return CacheControl.maxAge(5, TimeUnit.MINUTES).cachePrivate();
     }
 
-    public static CacheControl book(){
+    public static CacheControl bookPublic(){
         return CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
     }
 
-    public static CacheControl contributor(){
+    public static CacheControl contributorPublic(){
         return CacheControl.maxAge(15, TimeUnit.MINUTES).cachePublic();
     }
 
-    public static CacheControl search(){
+    public static CacheControl searchFieldPublic(){
         return CacheControl.maxAge(15, TimeUnit.SECONDS).cachePublic();
     }
 
-    public static CacheControl dependencies(){
+    public static CacheControl dependenciesPublic(){
         return CacheControl.maxAge(7, TimeUnit.DAYS).mustRevalidate().cachePublic();
     }
 }

@@ -49,7 +49,7 @@ public class DependenciesController {
 
         return ResponseEntity.ok()
                 .eTag(eTag)
-                .cacheControl(CacheProfiles.dependencies())
+                .cacheControl(CacheProfiles.dependenciesPublic())
                 .body(response);
     }
 

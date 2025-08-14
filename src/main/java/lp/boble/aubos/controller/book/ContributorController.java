@@ -3,7 +3,6 @@ package lp.boble.aubos.controller.book;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
-import lp.boble.aubos.dto.contributor.ContributorPageProjection;
 import lp.boble.aubos.dto.contributor.ContributorPageResponse;
 import lp.boble.aubos.dto.contributor.ContributorRequest;
 import lp.boble.aubos.dto.contributor.ContributorResponse;
@@ -13,8 +12,6 @@ import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
@@ -22,9 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -58,7 +52,7 @@ public class ContributorController {
 
         return ResponseEntity.ok()
                 .eTag(eTag)
-                .cacheControl(CacheProfiles.contributor())
+                .cacheControl(CacheProfiles.contributorPublic())
                 .body(response);
     }
 
@@ -71,7 +65,7 @@ public class ContributorController {
         PageResponse<ContributorPageResponse> data = contributorService.getContributorSuggestions(search, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.search())
+                .cacheControl(CacheProfiles.searchFieldPublic())
                 .body(data);
     }
 

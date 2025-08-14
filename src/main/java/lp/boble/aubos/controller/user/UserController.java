@@ -102,7 +102,7 @@ public class UserController {
         PageResponse<UserAutocompletePageResponse> response = userService.getUserAutocomplete(query, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.search())
+                .cacheControl(CacheProfiles.searchFieldPublic())
                 .body(response);
     }
 
@@ -118,7 +118,7 @@ public class UserController {
                 userService.getUserSuggestion(query, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.search())
+                .cacheControl(CacheProfiles.searchFieldPublic())
                 .body(response);
     }
 

@@ -3,18 +3,15 @@ package lp.boble.aubos.controller.book;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
-import lp.boble.aubos.dto.book.BookPageProjection;
 import lp.boble.aubos.dto.book.BookPageResponse;
 import lp.boble.aubos.dto.book.BookRequest;
 import lp.boble.aubos.dto.book.BookResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
-import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.book.BookService;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
@@ -22,9 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -71,7 +65,7 @@ public class BookController {
                         .data(data)
                         .build();
 
-        return ResponseEntity.ok().cacheControl(CacheProfiles.book()).eTag(eTag).body(response);
+        return ResponseEntity.ok().cacheControl(CacheProfiles.bookPublic()).eTag(eTag).body(response);
     }
 
     @GetMapping("/suggestions")
@@ -83,7 +77,7 @@ public class BookController {
         PageResponse<BookPageResponse> response = bookService.getBookBySearch(search, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.search())
+                .cacheControl(CacheProfiles.searchFieldPublic())
                 .body(response);
     }
 
