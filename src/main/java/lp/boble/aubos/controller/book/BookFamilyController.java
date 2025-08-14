@@ -29,14 +29,14 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyCreateRequest request){
 
-        BookFamilyResponse data = bookFamilyService.addBookToFamily(familyId, request);
+        BookFamilyResponse content = bookFamilyService.addBookToFamily(familyId, request);
 
         SuccessResponse<BookFamilyResponse> response =
                 new SuccessResponseBuilder<BookFamilyResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Livro adicionado à coleção.")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -48,14 +48,14 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyCreateRequest> requests
             ){
 
-        BatchTransporter<UUID> result = bookFamilyService.addBooksToFamily(familyId, requests);
-        int status = result.getStatus();
+        BatchTransporter<UUID> content = bookFamilyService.addBooksToFamily(familyId, requests);
+        HttpStatus status = content.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("POST")
                 .code(status)
                 .message("Requisição concluída com sucesso.")
-                .data(result)
+                .content(content)
                 .build();
 
         return ResponseEntity.status(status).body(response);
@@ -66,14 +66,14 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyUpdateRequest request){
 
-        BookFamilyResponse data = bookFamilyService.updateBookFamily(familyId, request);
+        BookFamilyResponse content = bookFamilyService.updateBookFamily(familyId, request);
 
         SuccessResponse<BookFamilyResponse> response =
                 new SuccessResponseBuilder<BookFamilyResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Livro alterado com sucesso.")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -85,13 +85,13 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyUpdateRequest> requests
     ){
         BatchTransporter<UUID> result = bookFamilyService.updateBookFamilies(familyId, requests);
-        int status = result.getStatus();
+        HttpStatus status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("PUT")
                 .code(status)
                 .message("Requisição concluída com sucesso.")
-                .data(result)
+                .content(result)
                 .build();
 
         return ResponseEntity.status(status).body(response);
@@ -118,13 +118,13 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyDeleteRequest> deleteRequests
     ){
         BatchTransporter<UUID> result = bookFamilyService.removeBooksFromFamily(familyId, deleteRequests);
-        int status = result.getStatus();
+        HttpStatus status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("DELETE")
                 .code(status)
                 .message("Requisição concluída com sucesso.")
-                .data(result)
+                .content(result)
                 .build();
 
         return ResponseEntity.status(status).body(response);

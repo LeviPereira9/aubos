@@ -30,9 +30,9 @@ public class DependenciesController {
     public ResponseEntity<SuccessResponse<DependencyResponse>> getDependencies(
             HttpServletRequest request
     ) {
-        DependencyResponse data = dependenciesService.loadDependencyResponse();
+        DependencyResponse content = dependenciesService.loadDependencyResponse();
 
-        String eTag = generateEtag(data);
+        String eTag = generateEtag(content);
         String ifNoneMatch = request.getHeader("If-None-Match");
 
         if(eTag.equals(ifNoneMatch)) {
@@ -44,7 +44,7 @@ public class DependenciesController {
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Dependências do livro encontradas com sucesso")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.ok()

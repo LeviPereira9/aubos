@@ -39,14 +39,14 @@ public class ContributorController {
             throw new CustomNotModifiedException();
         }
 
-        ContributorResponse data = contributorService.getContributor(id);
+        ContributorResponse content = contributorService.getContributor(id);
 
         SuccessResponse<ContributorResponse> response =
                 new SuccessResponseBuilder<ContributorResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Contribuidor encontrado com sucesso.")
-                        .content(data)
+                        .content(content)
                         .build();
 
 
@@ -62,11 +62,11 @@ public class ContributorController {
             @RequestParam String search,
             @RequestParam(defaultValue = "0") int page){
 
-        PageResponse<ContributorPageResponse> data = contributorService.getContributorSuggestions(search, page);
+        PageResponse<ContributorPageResponse> content = contributorService.getContributorSuggestions(search, page);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheProfiles.searchFieldPublic())
-                .body(data);
+                .body(content);
     }
 
     @PostMapping
@@ -90,14 +90,14 @@ public class ContributorController {
     public ResponseEntity<SuccessResponse<ContributorResponse>> updateContributor(
             @PathVariable UUID id, @RequestBody ContributorRequest contributorRequest
     ){
-        ContributorResponse data = contributorService.updateContributor(id, contributorRequest);
+        ContributorResponse content = contributorService.updateContributor(id, contributorRequest);
 
         SuccessResponse<ContributorResponse> response =
                 new SuccessResponseBuilder<ContributorResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Contribuidor atualizado com sucesso.")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

@@ -24,14 +24,14 @@ public class FamilyController {
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<FamilyResponse>> getFamily(@PathVariable("id") UUID id) {
 
-        FamilyResponse data = familyService.getFamily(id);
+        FamilyResponse content = familyService.getFamily(id);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Coleção encontrada com sucesso.")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.ok().eTag("").body(response);
@@ -40,14 +40,14 @@ public class FamilyController {
     @GetMapping("/types")
     public ResponseEntity<SuccessResponse<List<FamilyTypeResponse>>>
     getFamilyTypes(HttpServletRequest request) {
-        List<FamilyTypeResponse> data = familyService.getAllTypes();
+        List<FamilyTypeResponse> content = familyService.getAllTypes();
 
         SuccessResponse<List<FamilyTypeResponse>> response =
                 new SuccessResponseBuilder<List<FamilyTypeResponse>>()
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Tipos encontrado com sucesso.")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.ok().eTag("").body(response);
@@ -55,14 +55,14 @@ public class FamilyController {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<FamilyResponse>> createFamily(@RequestBody FamilyRequest request) {
-        FamilyResponse data = familyService.createFamily(request, false);
+        FamilyResponse content = familyService.createFamily(request, false);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Coleção criada com sucesso")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -70,14 +70,14 @@ public class FamilyController {
 
     @PostMapping("/official")
     public ResponseEntity<SuccessResponse<FamilyResponse>> createOfficialFamily(@RequestBody FamilyRequest request) {
-        FamilyResponse data = familyService.createFamily(request, true);
+        FamilyResponse content = familyService.createFamily(request, true);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
                         .message("Coleção oficial criada com sucesso")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -85,14 +85,14 @@ public class FamilyController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SuccessResponse<FamilyResponse>> updateFamily(@PathVariable UUID id, @RequestBody FamilyRequest request) {
-        FamilyResponse data = familyService.updateFamily(id, request);
+        FamilyResponse content = familyService.updateFamily(id, request);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Coleção atualizada com sucesso")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

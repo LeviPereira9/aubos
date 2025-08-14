@@ -2,6 +2,7 @@ package lp.boble.aubos.response.batch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -17,9 +18,9 @@ public class BatchTransporter<T> {
     }
 
     @JsonIgnore
-    public int getStatus(){
+    public HttpStatus getStatus(){
         boolean hasFailure = !failures.isEmpty();
         boolean hasSuccess = !successes.isEmpty();
-        return hasFailure && hasSuccess ? 207 : hasFailure ? 400 : 200;
+        return hasFailure && hasSuccess ? HttpStatus.MULTI_STATUS : hasFailure ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
     }
 }

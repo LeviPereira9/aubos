@@ -1,22 +1,20 @@
 package lp.boble.aubos.response.batch;
 
 import lombok.Data;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.http.HttpStatus;
 
 @Data
 public class BatchResponseBuilder<T> {
     private String operation;
-    private int code;
+    private HttpStatus code;
     private String message;
-    private BatchTransporter<T> data;
+    private BatchTransporter<T> content;
 
     public BatchResponseBuilder<T> operation(String operation) {
         this.operation = operation;
         return this;
     }
-    public BatchResponseBuilder<T> code(int code) {
+    public BatchResponseBuilder<T> code(HttpStatus code) {
         this.code = code;
         return this;
     }
@@ -24,12 +22,12 @@ public class BatchResponseBuilder<T> {
         this.message = message;
         return this;
     }
-    public BatchResponseBuilder<T> data(BatchTransporter<T> data ) {
-        this.data = data;
+    public BatchResponseBuilder<T> content(BatchTransporter<T> content ) {
+        this.content = content;
         return this;
     }
 
     public BatchResponse<T> build() {
-        return new BatchResponse<>(operation, code, message, data);
+        return new BatchResponse<>(operation, code, message, content);
     }
 }

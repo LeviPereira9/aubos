@@ -21,13 +21,13 @@ public class LanguageController {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<LanguageResponse>> addLanguage(@RequestBody LanguageRequest request){
-        LanguageResponse data = languageService.createLanguage(request);
+        LanguageResponse content = languageService.createLanguage(request);
 
         SuccessResponse<LanguageResponse> response =
                 new SuccessResponseBuilder<LanguageResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
-                        .content(data)
+                        .content(content)
                         .message("Língua adicionada com sucesso")
                         .build();
 
