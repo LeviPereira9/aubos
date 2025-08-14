@@ -46,14 +46,14 @@ public class UserController {
             throw new CustomNotModifiedException();
         }
 
-        UserResponse responseData = userService.getUserInfo(username);
+        UserResponse content = userService.getUserInfo(username);
 
         SuccessResponse<UserResponse> response =
                 new SuccessResponseBuilder<UserResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Usuário encontrado com sucesso.")
-                        .content(responseData)
+                        .content(content)
                         .build();
 
 
@@ -76,14 +76,14 @@ public class UserController {
             throw new CustomNotModifiedException();
         }
 
-        UserShortResponse responseData = userService.getUserShortInfo(username);
+        UserShortResponse content = userService.getUserShortInfo(username);
 
         SuccessResponse<UserShortResponse> response =
                 new SuccessResponseBuilder<UserShortResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
                         .message("Usuário encontrado com sucesso.")
-                        .content(responseData)
+                        .content(content)
                         .build();
 
         return ResponseEntity.ok()
@@ -128,14 +128,14 @@ public class UserController {
     updateUser(@PathVariable String username,
                @RequestBody UserUpdateRequest updateRequest){
 
-        UserResponse responseData = userService.updateUser(username, updateRequest);
+        UserResponse content = userService.updateUser(username, updateRequest);
 
         SuccessResponse<UserResponse> response =
                 new SuccessResponseBuilder<UserResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
                         .message("Usuário atualizado com sucesso.")
-                        .content(responseData)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -177,14 +177,14 @@ public class UserController {
     @PatchMapping("/{username}/change-password")
     public ResponseEntity<SuccessResponse<AuthResponse>>
     changePassword(@PathVariable String username, @RequestBody AuthChangePasswordRequest changePasswordRequest){
-        AuthResponse data = userService.changePassword(username, changePasswordRequest);
+        AuthResponse content = userService.changePassword(username, changePasswordRequest);
 
         SuccessResponse<AuthResponse> response =
                 new SuccessResponseBuilder<AuthResponse>()
                         .operation("PATCH")
                         .code(HttpStatus.OK)
                         .message("Senha alterada com sucesso.")
-                        .content(data)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
