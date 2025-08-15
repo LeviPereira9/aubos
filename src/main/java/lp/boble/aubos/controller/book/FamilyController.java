@@ -40,7 +40,7 @@ public class FamilyController {
     @GetMapping("/types")
     public ResponseEntity<SuccessResponse<List<FamilyTypeResponse>>>
     getFamilyTypes(HttpServletRequest request) {
-        List<FamilyTypeResponse> content = familyService.getAllTypes();
+        List<FamilyTypeResponse> content = familyService.getAllFamilyTypes();
 
         SuccessResponse<List<FamilyTypeResponse>> response =
                 new SuccessResponseBuilder<List<FamilyTypeResponse>>()

@@ -14,12 +14,10 @@ import lp.boble.aubos.repository.book.depedencies.ContributorRepository;
 import lp.boble.aubos.repository.book.depedencies.ContributorRoleRepository;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.util.AuthUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -43,42 +41,42 @@ public class ContributorService {
 
     public ContributorResponse createContributor(ContributorRequest request){
 
-        this.validateNameOrThrow(request.name());
+        this.validateContributorNameOrThrow(request.name());
 
-        ContributorModel contributor = contributorMapper.fromRequestToModel(request);
-        contributor.setCreatedBy(authUtil.getRequester());
+        ContributorModel contributorToSave = contributorMapper.fromRequestToModel(request);
+        contributorToSave.setCreatedBy(authUtil.getRequester());
 
-        return contributorMapper.fromModelToResponse(contributorRepository.save(contributor));
+        return contributorMapper.fromModelToResponse(contributorRepository.save(contributorToSave));
     }
 
     @CachePut(value = "contributor", key = "#id")
     @CacheEvict(value = "contributorSearch", allEntries = true)
     public ContributorResponse updateContributor(UUID id, ContributorRequest request){
 
-        ContributorModel contributor = this.getContributorOrThrow(id);
+        ContributorModel contributorToUpdate = this.getContributorOrThrow(id);
 
-        if(!contributor.getName().equals(request.name())){
-            this.validateNameOrThrow(request.name());
+        if(!contributorToUpdate.getName().equals(request.name())){
+            this.validateContributorNameOrThrow(request.name());
         }
 
-        contributorMapper.updateModelFromRequest(contributor, request);
-        contributor.setUpdatedBy(authUtil.getRequester());
+        contributorMapper.updateModelFromRequest(contributorToUpdate, request);
+        contributorToUpdate.setUpdatedBy(authUtil.getRequester());
 
-        return contributorMapper.fromModelToResponse(contributorRepository.save(contributor));
+        return contributorMapper.fromModelToResponse(contributorRepository.save(contributorToUpdate));
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "contributor", key = "#id"),
+            @CacheEvict(value = "contributor", key = "#contributorId"),
             @CacheEvict(value = "contributorSearch", allEntries = true)}
     )
-    public void deleteContributor(UUID id){
-        this.validateCreatorOrThrow(id);
+    public void deleteContributor(UUID contributorId){
+        this.validateCreatedByOrThrow(contributorId);
 
-        ContributorModel contributor = this.getContributorOrThrow(id);
-        contributor.setLastUpdate(Instant.now());
-        contributor.setSoftDeleted(true);
+        ContributorModel contributorToDelete = this.getContributorOrThrow(contributorId);
+        contributorToDelete.setLastUpdate(Instant.now());
+        contributorToDelete.setSoftDeleted(true);
 
-        contributorRepository.save(contributor);
+        contributorRepository.save(contributorToDelete);
     }
 
     @Cacheable(value = "contributorSearch", key = "'search=' + #search + ',page=' + #page")
@@ -93,7 +91,7 @@ public class ContributorService {
         return pagesFound.map(p -> new ContributorPageResponse(p.getId(), p.getName()));
     }
 
-    private void validateCreatorOrThrow(UUID id){
+    private void validateCreatedByOrThrow(UUID id){
         boolean isOwner = contributorRepository.isOwner(id, authUtil.getRequester());
         boolean isAdmin = authUtil.isAdmin();
 
@@ -102,7 +100,7 @@ public class ContributorService {
         }
     }
 
-    private void validateNameOrThrow(String name){
+    private void validateContributorNameOrThrow(String name){
         boolean isNameAvailable = contributorRepository.nameIsAvailable(name);
 
         if(isNameAvailable){

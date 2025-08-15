@@ -30,7 +30,7 @@ public class DependenciesController {
     public ResponseEntity<SuccessResponse<DependencyResponse>> getDependencies(
             HttpServletRequest request
     ) {
-        DependencyResponse content = dependenciesService.loadDependencyResponse();
+        DependencyResponse content = dependenciesService.loadBookDependencyResponse();
 
         String eTag = generateEtag(content);
         String ifNoneMatch = request.getHeader("If-None-Match");

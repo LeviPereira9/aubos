@@ -21,7 +21,7 @@ public class LanguageService {
     private final DependenciesMapper dependenciesMapper;
 
 
-    public LanguageModel getLanguage(int id){
+    public LanguageModel getBookLanguage(int id){
         return this.findLanguageOrThrow(id);
     }
 

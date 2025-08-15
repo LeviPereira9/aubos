@@ -2,7 +2,7 @@ package lp.boble.aubos.service.book.family;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.family.FamilyData;
+import lp.boble.aubos.dto.book.family.FamilyDependenciesData;
 import lp.boble.aubos.dto.book.family.FamilyRequest;
 import lp.boble.aubos.dto.book.family.FamilyResponse;
 import lp.boble.aubos.dto.book.family.FamilyTypeResponse;
@@ -36,32 +36,32 @@ public class FamilyService {
 
     @Transactional
     public FamilyResponse createFamily(FamilyRequest request, boolean isOfficial) {
-        FamilyModel family = familyMapper.fromRequestToModel(request);
-        family.setCreatedBy(authUtil.getRequester());
-        family.setCreatedAt(Instant.now());
+        FamilyModel familyToCreate = familyMapper.fromRequestToModel(request);
+        familyToCreate.setCreatedBy(authUtil.getRequester());
+        familyToCreate.setCreatedAt(Instant.now());
 
-        this.applyDataToFamily(family, request);
+        this.applyDependenciesToFamily(familyToCreate, request);
 
         System.out.println(authUtil.getRequester().getAuthorities());
 
         if(isOfficial){
-            family.setOfficial(true);
+            familyToCreate.setOfficial(true);
         }
 
 
-        return familyMapper.fromModelToResponse(familyRepository.save(family));
+        return familyMapper.fromModelToResponse(familyRepository.save(familyToCreate));
     }
 
     @Transactional
     public FamilyResponse updateFamily(UUID id, FamilyRequest familyRequest) {
-        FamilyModel family = this.findFamilyOrThrow(id);
-        family.setUpdatedBy(authUtil.getRequester());
+        FamilyModel familyToUpdate = this.findFamilyOrThrow(id);
+        familyToUpdate.setUpdatedBy(authUtil.getRequester());
 
-        familyMapper.toUpdateFromRequest(family, familyRequest);
+        familyMapper.toUpdateFromRequest(familyToUpdate, familyRequest);
 
-        this.applyDataToFamily(family, familyRequest);
+        this.applyDependenciesToFamily(familyToUpdate, familyRequest);
 
-        return familyMapper.fromModelToResponse(familyRepository.save(family));
+        return familyMapper.fromModelToResponse(familyRepository.save(familyToUpdate));
     }
 
     @Transactional
@@ -75,7 +75,7 @@ public class FamilyService {
         return familyMapper.fromModelToResponse(this.findFamilyOrThrow(id));
     }
 
-    public List<FamilyTypeResponse> getAllTypes() {
+    public List<FamilyTypeResponse> getAllFamilyTypes() {
         return familyTypeRepository.findAll().stream()
                 .map(familyMapper::fromFamilyTypeModelToResponse).collect(Collectors.toList());
     }
@@ -99,40 +99,41 @@ public class FamilyService {
         }
     }
 
-    private FamilyData loadFamilyDependencies(FamilyModel model, FamilyRequest request){
-        int currentTypeId = model.getType() != null ? model.getType().getId() : 0;
+    private FamilyDependenciesData loadFamilyDependencies(FamilyModel current, FamilyRequest request){
+        int currentTypeId = current.getType() != null ? current.getType().getId() : 0;
         int requestTypeId = request.type() != 0 ? request.type() : 0;
 
-
-        FamilyType type = model.getType();
-        if(!Objects.equals(currentTypeId, requestTypeId)){
+        FamilyType type = current.getType();
+        boolean typeDontMatch = !Objects.equals(currentTypeId, requestTypeId);
+        if(typeDontMatch){
             type = this.findFamilyTypeOrThrow(requestTypeId);
         }
 
-        // Se o CURRENT não existir, coloca o ID padrão, se não pega o da geladeira
-        // Se o REQUEST for null adiciona o padrão.
-        int currentVisibilityId = model.getVisibility() != null ? model.getVisibility().getId() : 0;
+        // TODO: Default public no 0
+        int currentVisibilityId = current.getVisibility() != null ? current.getVisibility().getId() : 0;
         int requestVisibilityId = request.visibility() != 0 ? request.visibility() : VisiblityEnum.PUBLIC.getId();
 
-        if(model.isOfficial()){
+        if(current.isOfficial()){
             requestVisibilityId = VisiblityEnum.PUBLIC.getId();
         }
 
-        Visibility visibility = model.getVisibility();
-        if(visibility == null || !Objects.equals(currentVisibilityId, requestVisibilityId)){
+        Visibility visibility = current.getVisibility();
+        boolean visibilityDontMatch = !Objects.equals(currentVisibilityId, requestVisibilityId);
+
+        if(visibility == null || visibilityDontMatch ){
             visibility = this.findVisibilityOrThrow(requestVisibilityId);
         }
 
-        return new FamilyData(
+        return new FamilyDependenciesData(
                 type,
                 visibility
         );
     }
 
-    public void applyDataToFamily(FamilyModel target, FamilyRequest request) {
-        FamilyData data = this.loadFamilyDependencies(target, request);
+    public void applyDependenciesToFamily(FamilyModel target, FamilyRequest source) {
+        FamilyDependenciesData dependenciesData = this.loadFamilyDependencies(target, source);
 
-        target.setVisibility(data.visibility());
-        target.setType(data.type());
+        target.setVisibility(dependenciesData.visibility());
+        target.setType(dependenciesData.type());
     }
 }

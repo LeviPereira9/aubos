@@ -25,21 +25,12 @@ public class DependenciesService {
     private final DependenciesMapper dependenciesMapper;
     private final LanguageService languageService;
 
-    public ContributorRole getRole(Integer id){
-        return contributorRoleRepository.findById(id)
+    public ContributorRole getContributorRole(Integer roleId){
+        return contributorRoleRepository.findById(roleId)
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<ContributorRole> getAllRoles(){
-        return contributorRoleRepository.findAll();
-    }
-
-    public LanguageModel getLanguage(Integer id){
-        return languageRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
-    }
-
-    public TypeModel getType(Integer id){
+    public TypeModel getBookType(Integer id){
         return typeRepository.findById(id)
                 .orElseThrow(CustomNotFoundException::user);
     }
@@ -51,7 +42,7 @@ public class DependenciesService {
                 .collect(Collectors.toList());
     }
 
-    public StatusModel getStatus(Integer id){
+    public StatusModel getBookStatus(Integer id){
         return statusRepository.findById(id)
                 .orElseThrow(CustomNotFoundException::user);
     }
@@ -62,7 +53,7 @@ public class DependenciesService {
                 .collect(Collectors.toList());
     }
 
-    public RestrictionModel getRestriction(Integer id){
+    public RestrictionModel getBookRestriction(Integer id){
         return restrictionRepository.findById(id)
                 .orElseThrow(CustomNotFoundException::user);
     }
@@ -74,7 +65,7 @@ public class DependenciesService {
                 .collect(Collectors.toList());
     }
 
-    public LicenseModel getLicense(Integer id){
+    public LicenseModel getBookLicense(Integer id){
         return licenseRepository.findById(id)
                 .orElseThrow(CustomNotFoundException::user);
     }
@@ -85,19 +76,19 @@ public class DependenciesService {
                 .collect(Collectors.toList());
     }
 
-    public DependencyData loadDependencyData(BookRequest book){
+    public DependencyData loadBookDependencyData(BookRequest book){
 
-        LanguageModel language = languageService.getLanguage(book.languageId());
-        TypeModel type = this.getType(book.typeId());
-        StatusModel status = this.getStatus(book.statusId());
-        RestrictionModel restriction = this.getRestriction(book.restrictionId());
-        LicenseModel license = this.getLicense(book.licenseId());
+        LanguageModel language = languageService.getBookLanguage(book.languageId());
+        TypeModel type = this.getBookType(book.typeId());
+        StatusModel status = this.getBookStatus(book.statusId());
+        RestrictionModel restriction = this.getBookRestriction(book.restrictionId());
+        LicenseModel license = this.getBookLicense(book.licenseId());
 
         return new DependencyData(language, type, status, restriction, license) ;
     }
 
     @Cacheable(value = "dependencies", key = "'singleton'")
-    public DependencyResponse loadDependencyResponse(){
+    public DependencyResponse loadBookDependencyResponse(){
         return new DependencyResponse(
                 languageService.getAllLanguages(),
                 this.getAllLicense(),

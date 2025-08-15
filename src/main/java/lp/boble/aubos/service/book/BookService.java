@@ -46,22 +46,22 @@ public class BookService {
 
         validateAuthor(book.contributors());
 
-        DependencyData dependencyData = dependenciesService.loadDependencyData(book);
-        BookModel bookToSave = bookMapper.fromCreateRequestToModel(book, dependencyData);
-        RelationshipsData relationshipsData = relationshipsService.loadRelationshipsData(bookToSave, book);
+        DependencyData dependencyData = dependenciesService.loadBookDependencyData(book);
+        BookModel bookToCreate = bookMapper.fromCreateRequestToModel(book, dependencyData);
+        RelationshipsData relationshipsData = relationshipsService.loadBookRelationshipsData(bookToCreate, book);
 
-        bookToSave.setCreatedBy(authUtil.getRequester());
-        bookToSave.setContributors(relationshipsData.contributors());
-        bookToSave.setAvailableLanguages(relationshipsData.availableLanguages());
+        bookToCreate.setCreatedBy(authUtil.getRequester());
+        bookToCreate.setContributors(relationshipsData.contributors());
+        bookToCreate.setAvailableLanguages(relationshipsData.availableLanguages());
 
-        return bookMapper.toResponse(bookRepository.save(bookToSave));
+        return bookMapper.toResponse(bookRepository.save(bookToCreate));
     }
 
-    @Cacheable(value = "book", key = "#id")
-    public BookResponse getBookById(UUID id){
-        BookModel book = findBookOrThrow(id);
+    @Cacheable(value = "book", key = "#bookId")
+    public BookResponse getBookById(UUID bookId){
+        BookModel bookFound = findBookOrThrow(bookId);
 
-        return bookMapper.toResponse(book);
+        return bookMapper.toResponse(bookFound);
     }
 
     @CachePut(value = "book", key = "#id")
@@ -72,33 +72,31 @@ public class BookService {
 
         BookModel bookToUpdate = findBookOrThrow(id);
 
-        DependencyData dependencyData = dependenciesService.loadDependencyData(book);
+        DependencyData dependencyData = dependenciesService.loadBookDependencyData(book);
         bookMapper.fromUpdateToModel(bookToUpdate, book, dependencyData);
 
-        relationshipsService.updateRelationships(bookToUpdate, book);
+        relationshipsService.updateBookRelationships(bookToUpdate, book);
 
         bookToUpdate.setUpdatedBy(authUtil.getRequester());
 
-        BookModel savedBook = bookRepository.save(bookToUpdate);
-
-        return bookMapper.toResponse(savedBook);
+        return bookMapper.toResponse(bookRepository.save(bookToUpdate));
     }
 
     @Caching(
             evict = {
-                    @CacheEvict(value = "book", key = "#id"),
+                    @CacheEvict(value = "book", key = "#bookId"),
                     @CacheEvict(value = "bookSearch", allEntries = true)}
     )
     @Transactional
-    public void deleteBook(UUID id){
-        BookModel book = bookRepository.findByIdAndSoftDeletedFalse(id)
+    public void deleteBook(UUID bookId){
+        BookModel bookToDelete = bookRepository.findByIdAndSoftDeletedFalse(bookId)
                 .orElseThrow(CustomNotFoundException::book);
 
-        book.setSoftDeleted(true);
-        book.setLastUpdated(Instant.now());
-        book.setUpdatedBy(authUtil.getRequester());
+        bookToDelete.setSoftDeleted(true);
+        bookToDelete.setLastUpdated(Instant.now());
+        bookToDelete.setUpdatedBy(authUtil.getRequester());
 
-        bookRepository.save(book);
+        bookRepository.save(bookToDelete);
     }
 
     @Cacheable(value = "bookSearch", key = "'search=' + #search + ',page=' + #page")

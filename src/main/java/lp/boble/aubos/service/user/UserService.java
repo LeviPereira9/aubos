@@ -57,10 +57,10 @@ public class UserService {
 
         authUtil.isNotSelfOrAdmin(username);
 
-        UserModel found = userRepository.findByUsername(username)
+        UserModel userFound = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
-        return userMapper.fromModelToResponse(found);
+        return userMapper.fromModelToResponse(userFound);
     }
 
     /**
@@ -143,14 +143,14 @@ public class UserService {
 
         authUtil.isNotSelfOrAdmin(username);
 
-        UserModel found = userRepository.findByUsername(username)
+        UserModel userToUpdate = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
-        userMapper.toUpdateFromRequest(request, found);
+        userMapper.toUpdateFromRequest(request, userToUpdate);
 
-        found.setUpdatedAt(Instant.now());
+        userToUpdate.setUpdatedAt(Instant.now());
 
-        return userMapper.fromModelToResponse(userRepository.save(found));
+        return userMapper.fromModelToResponse(userRepository.save(userToUpdate));
     }
 
     /**
@@ -184,14 +184,14 @@ public class UserService {
     public void sendConfirmationEmail(String username){
         authUtil.isNotSelfOrAdmin(username);
 
-        UserModel user = userRepository.findByUsername(username)
+        UserModel userToSendEmail = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
-        if(user.getIsVerified()){
+        if(userToSendEmail.getIsVerified()){
             throw new CustomEmailAlreadyVerified();
         }
 
-        authService.sendConfirmationEmail(user);
+        authService.sendConfirmationEmail(userToSendEmail);
     }
 
     /**
@@ -221,23 +221,21 @@ public class UserService {
             throw CustomPasswordException.sameAsCurrent();
         }
 
-        UserModel user = userRepository.findByUsername(username)
+        UserModel userToChangePassword = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        if(passwordEncoder.matches(newPassword, user.getPassword())){
+        if(passwordEncoder.matches(newPassword, userToChangePassword.getPassword())){
             throw CustomPasswordException.dontMatch();
         }
 
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
-        user.setTokenId(UUID.randomUUID());
+        userToChangePassword.setPasswordHash(passwordEncoder.encode(newPassword));
+        userToChangePassword.setTokenId(UUID.randomUUID());
 
-        userRepository.save(user);
+        userRepository.save(userToChangePassword);
 
-        return new AuthResponse("Bearer " + tokenService.generateToken(user));
+        return new AuthResponse("Bearer " + tokenService.generateToken(userToChangePassword));
     }
-
-
 
 }
