@@ -96,7 +96,7 @@ public class AuthController {
             @RequestBody AuthChangePasswordRequest request
     ){
 
-        authService.changePassword(token, request);
+        authService.changeUserPassword(token, request);
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()

@@ -86,11 +86,11 @@ public class AuthService {
     public void globalLogout(String username){
         authUtil.isNotSelfOrAdmin(username);
 
-        UserModel target = userRepository.findByUsername(username)
+        UserModel userToLogout = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
-        target.setTokenId(UUID.randomUUID());
-        userRepository.save(target);
+        userToLogout.setTokenId(UUID.randomUUID());
+        userRepository.save(userToLogout);
     }
 
     /**
@@ -114,11 +114,11 @@ public class AuthService {
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(registerRequest.password());
-        UserModel user = userMapper.fromRegisterRequestToModel(registerRequest);
-        user.setPasswordHash(encryptedPassword);
-        user.setUpdatedAt(Instant.now());
-        user.setTokenId(UUID.randomUUID());
-        UserModel createdUser = userRepository.save(user);
+        UserModel userToRegister = userMapper.fromRegisterRequestToModel(registerRequest);
+        userToRegister.setPasswordHash(encryptedPassword);
+        userToRegister.setUpdatedAt(Instant.now());
+        userToRegister.setTokenId(UUID.randomUUID());
+        UserModel createdUser = userRepository.save(userToRegister);
 
         this.sendConfirmationEmail(createdUser);
 
@@ -134,32 +134,32 @@ public class AuthService {
      * - Algum problema com o envio de e-mail.
      * */
     public void forgotPassword(AuthForgotPasswordRequest forgotPasswordRequest){
-        UserModel user;
+        UserModel userToSendEmail;
 
         if(forgotPasswordRequest.login().contains("@")){
-            user = userRepository.findByEmail(forgotPasswordRequest.login())
+            userToSendEmail = userRepository.findByEmail(forgotPasswordRequest.login())
                     .orElseThrow(CustomNotFoundException::user);
         } else {
-            user = userRepository.findByUsername(forgotPasswordRequest.login())
+            userToSendEmail = userRepository.findByUsername(forgotPasswordRequest.login())
                     .orElseThrow(CustomNotFoundException::user);
         }
 
         emailService.sendPasswordResetEmail(
-                user.getEmail(),
-                this.createToken(user, 15, resetTypeToken));
+                userToSendEmail.getEmail(),
+                this.createToken(userToSendEmail, 15, resetTypeToken));
 
     }
     /**
      * Envia o código de confirmação de e-mail, para o e-mail do sujeito.
-     * @param user {@link UserModel}
+     * @param userToSendEmail {@link UserModel}
      * @throws CustomEmailException Em caso de: <br>
      * - Algum erro no envio.
      *
      * */
-    public void sendConfirmationEmail(UserModel user){
+    public void sendConfirmationEmail(UserModel userToSendEmail){
         emailService.sendVerifyEmail(
-                user.getEmail(),
-                this.createToken(user, 60, emailTypeToken)
+                userToSendEmail.getEmail(),
+                this.createToken(userToSendEmail, 60, emailTypeToken)
         );
     }
 
@@ -176,7 +176,7 @@ public class AuthService {
      * - Usuário não encontrado.
      * */
     @Transactional
-    public void changePassword(
+    public void changeUserPassword(
             String token,
             AuthChangePasswordRequest changePasswordRequest){
 
@@ -191,19 +191,19 @@ public class AuthService {
         TokenModel resetToken = tokenRepository.findByToken(token, resetTypeToken.getId())
                 .orElseThrow(CustomNotFoundException::token);
 
-        UserModel user = userRepository.findById(resetToken.getUser().getId())
+        UserModel userToChangePassword = userRepository.findById(resetToken.getUser().getId())
                 .orElseThrow(CustomNotFoundException::user);
 
-        user.setTokenId(UUID.randomUUID());
+        userToChangePassword.setTokenId(UUID.randomUUID());
 
         String encryptedPassword = new BCryptPasswordEncoder()
                 .encode(changePasswordRequest.newPassword());
 
-        user.setPasswordHash(encryptedPassword);
+        userToChangePassword.setPasswordHash(encryptedPassword);
         resetToken.setUsed(true);
         resetToken.setUpdatedAt(Instant.now());
 
-        userRepository.save(user);
+        userRepository.save(userToChangePassword);
         tokenRepository.save(resetToken);
     }
 
@@ -221,15 +221,15 @@ public class AuthService {
         TokenModel emailToken = tokenRepository.findByToken(token, emailTypeToken.getId())
                 .orElseThrow(CustomNotFoundException::token);
 
-        UserModel user = userRepository.findById(emailToken.getUser().getId())
+        UserModel emailOwner = userRepository.findById(emailToken.getUser().getId())
                 .orElseThrow(CustomNotFoundException::user);
 
-        user.setIsVerified(true);
-        user.setUpdatedAt(Instant.now());
+        emailOwner.setIsVerified(true);
+        emailOwner.setUpdatedAt(Instant.now());
         emailToken.setUsed(true);
         emailToken.setUpdatedAt(Instant.now());
 
-        userRepository.save(user);
+        userRepository.save(emailOwner);
         tokenRepository.save(emailToken);
     }
 
@@ -265,13 +265,13 @@ public class AuthService {
         String tokenGenerated;
 
         do{
-            tokenGenerated = generateToken();
+            tokenGenerated = generateCodeToken();
         }while(tokenRepository.alreadyUsed(tokenGenerated, type.getId()));
 
         TokenModel token = new TokenModel();
         token.setToken(tokenGenerated);
         token.setUser(user);
-        token.setExpiresAt(this.generateExpirationDate(minutesToExpire));
+        token.setExpiresAt(this.generateTokenExpirationDate(minutesToExpire));
         token.setType(type);
         token.setCreatedAt(Instant.now());
 
@@ -284,7 +284,7 @@ public class AuthService {
      * Gera o token
      * @return token (String)
      * */
-    private String generateToken(){
+    private String generateCodeToken(){
         SecureRandom random = new SecureRandom();
 
         int code = 100000+random.nextInt(900000);
@@ -297,7 +297,7 @@ public class AuthService {
      * @param minutes em int
      * @return Instant
      * */
-    private Instant generateExpirationDate(int minutes){
+    private Instant generateTokenExpirationDate(int minutes){
         return LocalDateTime.now().plusMinutes(minutes).toInstant(ZoneOffset.of("-03"));
     }
 
