@@ -47,10 +47,10 @@ public class BookFamilyService {
         BookModel book = bookService.findBookOrThrow(request.bookId());
         FamilyModel family = familyService.findFamilyOrThrow(familyId);
 
-        BookFamilyModel bookToAdd = bookFamilyMapper.fromCreateToModel(request, book, family);
+        BookFamilyModel bookToAdd = bookFamilyMapper.fromCreateRequestToModel(request, book, family);
         bookToAdd.setCreatedBy(authUtil.getRequester());
 
-        return bookFamilyMapper.toResponse(bookFamilyRepository.save(bookToAdd));
+        return bookFamilyMapper.fromModelToResponse(bookFamilyRepository.save(bookToAdd));
     }
 
     @Transactional
@@ -90,7 +90,7 @@ public class BookFamilyService {
                 }
                 BookModel book = bookService.findBookOrThrow(bookId);
 
-                BookFamilyModel bookToAdd = bookFamilyMapper.fromCreateToModel(request, book, family);
+                BookFamilyModel bookToAdd = bookFamilyMapper.fromCreateRequestToModel(request, book, family);
                 bookToAdd.setCreatedBy(authUtil.getRequester());
 
                 toAdd.add(bookToAdd);
@@ -123,7 +123,7 @@ public class BookFamilyService {
         bookFamilyMapper.toUpdateFromRequest(bookToUpdate, request);
         bookToUpdate.setUpdatedBy(authUtil.getRequester());
 
-        return bookFamilyMapper.toResponse(bookFamilyRepository.save(bookToUpdate));
+        return bookFamilyMapper.fromModelToResponse(bookFamilyRepository.save(bookToUpdate));
     }
 
     @Transactional

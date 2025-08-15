@@ -13,7 +13,7 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
 
     @Mapping(target = "passwordHash", ignore = true)
-    UserModel fromRegisterToModel(AuthRegisterRequest authRegisterRequest);
+    UserModel fromRegisterRequestToModel(AuthRegisterRequest authRegisterRequest);
 
     @Mapping(target = "role", source = "role.name")
     @Mapping(target = "status", source = "status.name")
@@ -23,7 +23,7 @@ public interface UserMapper {
     @Mapping(target = "status", source = "status.name")
     UserShortResponse fromModelToShortResponse(UserModel userModel);
 
-    void fromUpdateToModel(UserUpdateRequest request, @MappingTarget UserModel target);
+    void toUpdateFromRequest(UserUpdateRequest request, @MappingTarget UserModel target);
 
     UserAutocompletePageResponse fromAutocompleteProjectionToResponse(UserAutocompletePageProjection userAutocompletePageProjection);
 

@@ -16,7 +16,7 @@ public interface BookFamilyMapper {
     @Mapping(target = "bookId", source = "book.id")
     @Mapping(target = "order", source = "orderInFamily")
     @Mapping(target = "title", source = "book.title")
-    BookFamilyResponse toResponse(BookFamilyModel model);
+    BookFamilyResponse fromModelToResponse(BookFamilyModel model);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -25,7 +25,7 @@ public interface BookFamilyMapper {
     @Mapping(target = "family", source = "family")
     @Mapping(target = "orderInFamily", source = "request.order")
     @Mapping(target = "note", source = "request.note")
-    BookFamilyModel fromCreateToModel(
+    BookFamilyModel fromCreateRequestToModel(
             BookFamilyCreateRequest request,
             BookModel book,
             FamilyModel family);

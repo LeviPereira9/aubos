@@ -114,7 +114,7 @@ public class AuthService {
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(registerRequest.password());
-        UserModel user = userMapper.fromRegisterToModel(registerRequest);
+        UserModel user = userMapper.fromRegisterRequestToModel(registerRequest);
         user.setPasswordHash(encryptedPassword);
         user.setUpdatedAt(Instant.now());
         user.setTokenId(UUID.randomUUID());

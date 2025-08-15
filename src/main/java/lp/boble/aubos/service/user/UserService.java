@@ -146,7 +146,7 @@ public class UserService {
         UserModel found = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
-        userMapper.fromUpdateToModel(request, found);
+        userMapper.toUpdateFromRequest(request, found);
 
         found.setUpdatedAt(Instant.now());
 

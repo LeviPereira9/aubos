@@ -13,7 +13,6 @@ import lp.boble.aubos.model.Enum.VisiblityEnum;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.family.FamilyType;
 import lp.boble.aubos.model.book.family.Visibility;
-import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.book.family.FamilyRepository;
 import lp.boble.aubos.repository.book.family.FamilyTypeRepository;
 import lp.boble.aubos.repository.book.family.VisibilityRepository;
@@ -37,7 +36,7 @@ public class FamilyService {
 
     @Transactional
     public FamilyResponse createFamily(FamilyRequest request, boolean isOfficial) {
-        FamilyModel family = familyMapper.toModel(request);
+        FamilyModel family = familyMapper.fromRequestToModel(request);
         family.setCreatedBy(authUtil.getRequester());
         family.setCreatedAt(Instant.now());
 
@@ -50,7 +49,7 @@ public class FamilyService {
         }
 
 
-        return familyMapper.toResponse(familyRepository.save(family));
+        return familyMapper.fromModelToResponse(familyRepository.save(family));
     }
 
     @Transactional
@@ -58,11 +57,11 @@ public class FamilyService {
         FamilyModel family = this.findFamilyOrThrow(id);
         family.setUpdatedBy(authUtil.getRequester());
 
-        familyMapper.updateFamily(family, familyRequest);
+        familyMapper.toUpdateFromRequest(family, familyRequest);
 
         this.applyDataToFamily(family, familyRequest);
 
-        return familyMapper.toResponse(familyRepository.save(family));
+        return familyMapper.fromModelToResponse(familyRepository.save(family));
     }
 
     @Transactional
@@ -73,12 +72,12 @@ public class FamilyService {
     }
 
     public FamilyResponse getFamily(UUID id) {
-        return familyMapper.toResponse(this.findFamilyOrThrow(id));
+        return familyMapper.fromModelToResponse(this.findFamilyOrThrow(id));
     }
 
     public List<FamilyTypeResponse> getAllTypes() {
         return familyTypeRepository.findAll().stream()
-                .map(familyMapper::toTypeResponse).collect(Collectors.toList());
+                .map(familyMapper::fromFamilyTypeModelToResponse).collect(Collectors.toList());
     }
 
     public FamilyModel findFamilyOrThrow(UUID id){

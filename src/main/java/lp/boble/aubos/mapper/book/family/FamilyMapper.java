@@ -5,7 +5,6 @@ import lp.boble.aubos.dto.book.family.FamilyResponse;
 import lp.boble.aubos.dto.book.family.FamilyTypeResponse;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.family.FamilyType;
-import org.hibernate.type.descriptor.jdbc.JdbcTypeFamilyInformation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -17,14 +16,14 @@ public interface FamilyMapper {
     @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "type", ignore = true)
     @Mapping(target = "visibility", ignore = true)
-    FamilyModel toModel(FamilyRequest request);
+    FamilyModel fromRequestToModel(FamilyRequest request);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "type", source = "type.value")
     @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "visibility", source = "visibility.value")
-    FamilyResponse toResponse(FamilyModel family);
+    FamilyResponse fromModelToResponse(FamilyModel family);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "name")
@@ -36,9 +35,9 @@ public interface FamilyMapper {
     @Mapping(target = "coverUrl", source = "coverUrl")
     @Mapping(target = "visibility", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    void updateFamily(@MappingTarget FamilyModel family, FamilyRequest request);
+    void toUpdateFromRequest(@MappingTarget FamilyModel family, FamilyRequest request);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "value", source = "value")
-    FamilyTypeResponse toTypeResponse(FamilyType type);
+    FamilyTypeResponse fromFamilyTypeModelToResponse(FamilyType type);
 }
