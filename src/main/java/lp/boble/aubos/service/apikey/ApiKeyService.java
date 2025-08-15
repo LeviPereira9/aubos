@@ -4,12 +4,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.apikey.ApiKeyCreateResponse;
 import lp.boble.aubos.dto.apikey.ApiKeyResponse;
-import lp.boble.aubos.exception.custom.apikey.ApiKeyException;
 import lp.boble.aubos.exception.custom.apikey.CustomApiKeyGenerationException;
 import lp.boble.aubos.exception.custom.apikey.CustomApiKeyValidationException;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.auth.CustomHashGenerationException;
-import lp.boble.aubos.exception.custom.global.CustomDeactivatedException;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.apikey.ApiKeyMapper;
@@ -31,7 +29,6 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -46,6 +43,7 @@ public class ApiKeyService {
     private static final String KEY_DELIMITER = "\\.";
     private static final String KEY_PREFIX = "client_";
     private static final int MAX_KEYS_PER_USER = 1;
+    private static final Duration REVOCATION_GRACE_PERIOD = Duration.ofHours(6);
 
     private final SecureRandom secureRandom = new SecureRandom();
     private final ApiKeyRepository apiKeyRepository;
@@ -65,16 +63,16 @@ public class ApiKeyService {
      * @throws CustomNotFoundException em casos de:
      * * Usuário não encontrado.
     */
-    public ApiKeyCreateResponse generateAndStoreApiKey(String username) {
+    public ApiKeyCreateResponse generateApiKey(String username) {
 
         authUtil.isNotSelfOrAdmin(username);
 
         // 1 - Buscar o usuário que quer criar a chave.
-        UserModel user = userRepository.findByUsername(username)
+        UserModel owner = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);
 
         // Verificar o limite de chaves do usuário
-        validateKeyLimit(username);
+        validateKeyLimit(owner.getUsername());
 
         // 2 - Cria o rawSecret em 32 Bytes
         byte[] randomBytes = new byte[SECRET_LENGTH];
@@ -84,26 +82,26 @@ public class ApiKeyService {
         String rawSecret = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
 
         // 4 - Cria o secret adicionando o salt
-        String hashedSecret = hashSecret(rawSecret);
+        String hashedSecret = generateHashSecret(rawSecret);
 
         // 5 - Gera o publicId, que será o único identificador daqui pra frente.
         String publicId = KEY_PREFIX + UUID.randomUUID().toString().replaceAll("-", "");
 
         // 6 - Cria a entidade para armazenamento
-        ApiKeyModel apiKey = new ApiKeyModel();
-        apiKey.setPublicId(publicId);
-        apiKey.setHashedSecret(hashedSecret);
-        apiKey.setOwner(user);
-        apiKey.setCreatedAt(Instant.now());
-        apiKey.setResetAt(generateResetTime());
-        apiKey.setExpiresAt(calculateExpiryDate());
+        ApiKeyModel apiKeyToSave = new ApiKeyModel();
+        apiKeyToSave.setPublicId(publicId);
+        apiKeyToSave.setHashedSecret(hashedSecret);
+        apiKeyToSave.setOwner(owner);
+        apiKeyToSave.setCreatedAt(Instant.now());
+        apiKeyToSave.setResetAt(generateResetTime());
+        apiKeyToSave.setExpiresAt(generateApiKeyExpiryDate());
 
-        ApiKeyModel created = apiKeyRepository.save(apiKey);
+        ApiKeyModel apiKeyCreated = apiKeyRepository.save(apiKeyToSave);
 
         // 7 - Retorna a resposta com a chave para o usuário.
         return new ApiKeyCreateResponse(
-            created.getId(),
-            created.getPublicId() + ":" + rawSecret
+            apiKeyCreated.getId(),
+            apiKeyCreated.getPublicId() + ":" + rawSecret
         );
     }
 
@@ -114,7 +112,7 @@ public class ApiKeyService {
      * @return String no formato "saltBase64.hashBase64" pronto para armazenamento seguro
 
     */
-    private String hashSecret(String secret){
+    private String generateHashSecret(String secret){
         try {
             // 1 - Gerar salt
             byte[] salt = generateSalt();
@@ -333,7 +331,7 @@ public class ApiKeyService {
     /**
      * Calcula data de expiração padrão (1 ano).
      */
-    private Instant calculateExpiryDate() {
+    private Instant generateApiKeyExpiryDate() {
         return Instant.now().plus(365, ChronoUnit.DAYS);
     }
 
@@ -372,7 +370,7 @@ public class ApiKeyService {
      * @throws CustomNotFoundException em caso de: <br>
      * - Não achar a Chave pelo public id
      * */
-    public void deleteApiKey(String username, String publicId) {
+    public void disableApiKey(String username, String publicId) {
 
         authUtil.isNotSelfOrAdmin(username);
 
@@ -412,7 +410,7 @@ public class ApiKeyService {
 
         String rawSecret = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
 
-        String hashedSecret = hashSecret(rawSecret);
+        String hashedSecret = generateHashSecret(rawSecret);
 
         key.setPreviousHashedSecret(key.getHashedSecret());
         key.setHashedSecret(hashedSecret);
@@ -428,8 +426,8 @@ public class ApiKeyService {
 
     @Transactional
     @Scheduled(cron = "0 0 */1 * * *")
-    public void rotateKeyRevokePrevious(){
-        Instant sixHoursAgo = Instant.now().minus(6, ChronoUnit.HOURS);
+    public void scheduleToRevokePreviousHash(){
+        Instant sixHoursAgo = Instant.now().minus(REVOCATION_GRACE_PERIOD);
         apiKeyRepository.revokePreviousHash(sixHoursAgo);
     }
 

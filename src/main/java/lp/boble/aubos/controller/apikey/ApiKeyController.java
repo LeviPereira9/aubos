@@ -38,7 +38,7 @@ public class ApiKeyController {
     public ResponseEntity<SuccessResponse<ApiKeyCreateResponse>>
     createApiKey(@PathVariable String username) {
 
-        ApiKeyCreateResponse content = apiKeyService.generateAndStoreApiKey(username);
+        ApiKeyCreateResponse content = apiKeyService.generateApiKey(username);
 
         SuccessResponse<ApiKeyCreateResponse> response =
                 new SuccessResponseBuilder<ApiKeyCreateResponse>()
@@ -90,7 +90,7 @@ public class ApiKeyController {
     @DeleteMapping("/{publicId}")
     public ResponseEntity<SuccessResponse<Void>> deleteApiKey
     (@PathVariable String username, @PathVariable String publicId) {
-        apiKeyService.deleteApiKey(username, publicId);
+        apiKeyService.disableApiKey(username, publicId);
 
         SuccessResponse<Void> successResponse =
                 new SuccessResponseBuilder<Void>()
