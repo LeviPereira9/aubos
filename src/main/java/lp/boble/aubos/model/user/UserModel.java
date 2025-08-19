@@ -110,6 +110,11 @@ public class UserModel implements UserDetails {
 
     }
 
+    public void setNewPassword(String newPassword) {
+        this.passwordHash = newPassword;
+        this.setTokenId(UUID.randomUUID());
+    }
+
     @Override
     public String getPassword() {
         return getPasswordHash();

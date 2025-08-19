@@ -84,7 +84,7 @@ public class AuthService {
      * - Usuário não encontrado.
      * */
     public void globalLogout(String username){
-        authUtil.isNotSelfOrAdmin(username);
+        authUtil.requestIsNotSelfOrByAdmin(username);
 
         UserModel userToLogout = userRepository.findByUsername(username)
                 .orElseThrow(CustomNotFoundException::user);

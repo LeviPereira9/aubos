@@ -65,7 +65,7 @@ public class ApiKeyService {
     */
     public ApiKeyCreateResponse generateApiKey(String username) {
 
-        authUtil.isNotSelfOrAdmin(username);
+        authUtil.requestIsNotSelfOrByAdmin(username);
 
         // 1 - Buscar o usuário que quer criar a chave.
         UserModel owner = userRepository.findByUsername(username)
@@ -347,7 +347,7 @@ public class ApiKeyService {
      * */
     public List<ApiKeyResponse> findAllUserKeys(String username){
 
-        authUtil.isNotSelfOrAdmin(username);
+        authUtil.requestIsNotSelfOrByAdmin(username);
 
         List<ApiKeyModel> keys = apiKeyRepository.findAllByOwner(username);
 
@@ -372,7 +372,7 @@ public class ApiKeyService {
      * */
     public void disableApiKey(String username, String publicId) {
 
-        authUtil.isNotSelfOrAdmin(username);
+        authUtil.requestIsNotSelfOrByAdmin(username);
 
         if(publicId.isBlank()){
             throw CustomFieldNotProvided.key();
@@ -400,7 +400,7 @@ public class ApiKeyService {
      * - Não ser ADM ou Requester
      * */
     public ApiKeyCreateResponse rotateKey(String username, String publicId){
-        authUtil.isNotSelfOrAdmin(username);
+        authUtil.requestIsNotSelfOrByAdmin(username);
 
         ApiKeyModel key = apiKeyRepository.findByPublicIdAndOwnerUsername(publicId, username)
                 .orElseThrow(CustomNotFoundException::key);
@@ -445,7 +445,7 @@ public class ApiKeyService {
      * - Não ser ADM ou Requester
      * */
     public void revokePreviousHashSecret(String username, String publicId){
-        authUtil.isNotSelfOrAdmin(username);
+        authUtil.requestIsNotSelfOrByAdmin(username);
 
         ApiKeyModel key = apiKeyRepository.findByPublicIdAndOwnerUsername(publicId, username)
                 .orElseThrow(CustomNotFoundException::key);

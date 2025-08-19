@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.time.Instant;
+
 @Mapper(
         componentModel = "spring"
 )
@@ -23,10 +25,16 @@ public interface UserMapper {
     @Mapping(target = "status", source = "status.name")
     UserShortResponse fromModelToShortResponse(UserModel userModel);
 
-    void toUpdateFromRequest(UserUpdateRequest request, @MappingTarget UserModel target);
+
+    @Mapping(target = "updatedAt", expression = "java(now())")
+    void toUpdateFromRequest(@MappingTarget UserModel target, UserUpdateRequest request);
 
     UserAutocompletePageResponse fromAutocompleteProjectionToResponse(UserAutocompletePageProjection userAutocompletePageProjection);
 
     UserSuggestionPageResponse fromSuggestionProjectionToResponse(UserSuggestionPageProjection userSuggestionPageProjection);
+
+    default Instant now(){
+        return Instant.now();
+    }
 
 }

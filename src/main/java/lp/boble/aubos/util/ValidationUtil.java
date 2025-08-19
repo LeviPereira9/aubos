@@ -25,7 +25,7 @@ public class ValidationUtil {
             throw CustomFieldNotProvided.username();
         }
 
-        authUtil.isNotSelfOrAdmin(username);
+        authUtil.requestIsNotSelfOrByAdmin(username);
     }
 
     /**

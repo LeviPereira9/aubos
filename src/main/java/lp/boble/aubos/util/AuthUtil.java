@@ -45,7 +45,7 @@ public class AuthUtil {
      * @throws CustomForbiddenActionException em caso de:
      * - Não é o requester nem um ADMIN
      * */
-    public void isNotSelfOrAdmin(String username){
+    public void requestIsNotSelfOrByAdmin(String username){
         if(username.isBlank()){
             throw CustomFieldNotProvided.username();
         }

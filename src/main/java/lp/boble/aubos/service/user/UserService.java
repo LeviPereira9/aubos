@@ -27,18 +27,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final ValidationUtil validationUtil;
     private final AuthUtil authUtil;
-    private final EmailService emailService;
     private final AuthService authService;
     private final TokenService tokenService;
 
@@ -55,10 +50,7 @@ public class UserService {
      * */
     public UserResponse getUserInfo(String username){
 
-        authUtil.isNotSelfOrAdmin(username);
-
-        UserModel userFound = userRepository.findByUsername(username)
-                .orElseThrow(CustomNotFoundException::user);
+        UserModel userFound = this.findUserIfIsSelfOrAdmin(username);
 
         return userMapper.fromModelToResponse(userFound);
     }
@@ -72,14 +64,10 @@ public class UserService {
      * */
     @Cacheable(value = "userShort", key = "#username")
     public UserShortResponse getUserShortInfo(String username){
-        if(username.isBlank()){
-            throw CustomFieldNotProvided.username();
-        }
 
-        UserModel found = userRepository.findByUsername(username)
-                .orElseThrow(CustomNotFoundException::user);
+        UserModel userFound = this.findUser(username);
 
-        return userMapper.fromModelToShortResponse(found);
+        return userMapper.fromModelToShortResponse(userFound);
     }
 
     /**
@@ -91,8 +79,6 @@ public class UserService {
      * */
     @Cacheable(value = "userAutocomplete", key = "'search=' + #search + ',page=' + #page")
     public PageResponse<UserAutocompletePageResponse> getUserAutocomplete(String search, int page){
-
-        validationUtil.validateSearchRequest(search, page);
 
         PageRequest pageRequest = PageRequest.of(
                 page,
@@ -114,8 +100,6 @@ public class UserService {
      * */
     @Cacheable(value = "userSearch", key = "'search=' + #search + ',page=' + #page")
     public PageResponse<UserSuggestionPageResponse> getUserSuggestion(String search, int page){
-
-        validationUtil.validateSearchRequest(search, page);
 
         PageRequest pageRequest = PageRequest.of(
                 page,
@@ -141,14 +125,9 @@ public class UserService {
     @CachePut(value = "userShort", key = "#username")
     public UserResponse updateUser(String username, UserUpdateRequest request){
 
-        authUtil.isNotSelfOrAdmin(username);
+        UserModel userToUpdate = this.findUserIfIsSelfOrAdmin(username);
 
-        UserModel userToUpdate = userRepository.findByUsername(username)
-                .orElseThrow(CustomNotFoundException::user);
-
-        userMapper.toUpdateFromRequest(request, userToUpdate);
-
-        userToUpdate.setUpdatedAt(Instant.now());
+        userMapper.toUpdateFromRequest(userToUpdate, request);
 
         return userMapper.fromModelToResponse(userRepository.save(userToUpdate));
     }
@@ -163,10 +142,7 @@ public class UserService {
     @Transactional
     public void deleteUser(String username){
 
-        authUtil.isNotSelfOrAdmin(username);
-
-        UserModel userToDelete = userRepository.findByUsername(username)
-                .orElseThrow(CustomNotFoundException::user);
+        UserModel userToDelete = this.findUserIfIsSelfOrAdmin(username);
 
         userToDelete.setSoftDeleted(true);
 
@@ -182,10 +158,8 @@ public class UserService {
      * - Algum erro no envio.
      * */
     public void sendConfirmationEmail(String username){
-        authUtil.isNotSelfOrAdmin(username);
 
-        UserModel userToSendEmail = userRepository.findByUsername(username)
-                .orElseThrow(CustomNotFoundException::user);
+        UserModel userToSendEmail = this.findUserIfIsSelfOrAdmin(username);
 
         if(userToSendEmail.getIsVerified()){
             throw new CustomEmailAlreadyVerified();
@@ -209,10 +183,36 @@ public class UserService {
      * - Usuário não encontrado
      * */
     @Transactional
-    public AuthResponse changePassword(String username, AuthChangePasswordRequest changePasswordRequest){
-        if(!authUtil.getRequester().getUsername().equals(username)){
-            throw CustomForbiddenActionException.notTheRequester();
-        }
+    public AuthResponse changePasswordAndGenerateAuthToken(String username, AuthChangePasswordRequest changePasswordRequest){
+
+        UserModel userToChangePassword = this.findUserIfIsSelfOrAdmin(username);
+
+        String currentUserPasswordHash = userToChangePassword.getPasswordHash();
+
+        String newPassword = this.validateAndEncodePassword(changePasswordRequest, currentUserPasswordHash);
+
+        userToChangePassword.setNewPassword(newPassword);
+
+        userRepository.save(userToChangePassword);
+
+        return new AuthResponse("Bearer " + tokenService.generateToken(userToChangePassword));
+    }
+
+    private UserModel findUser(String username){
+        authUtil.requestIsNotSelfOrByAdmin(username);
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(CustomNotFoundException::user);
+    }
+
+    private UserModel findUserIfIsSelfOrAdmin(String username){
+        authUtil.requestIsNotSelfOrByAdmin(username);
+
+        return this.findUser(username);
+    }
+
+    private String validateAndEncodePassword(AuthChangePasswordRequest changePasswordRequest, String currentPasswordHash){
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         String newPassword = changePasswordRequest.newPassword();
         String confirmPassword = changePasswordRequest.confirmPassword();
@@ -221,21 +221,11 @@ public class UserService {
             throw CustomPasswordException.sameAsCurrent();
         }
 
-        UserModel userToChangePassword = userRepository.findByUsername(username)
-                .orElseThrow(CustomNotFoundException::user);
-
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-        if(passwordEncoder.matches(newPassword, userToChangePassword.getPassword())){
+        if(passwordEncoder.matches(changePasswordRequest.newPassword(), currentPasswordHash)){
             throw CustomPasswordException.dontMatch();
         }
 
-        userToChangePassword.setPasswordHash(passwordEncoder.encode(newPassword));
-        userToChangePassword.setTokenId(UUID.randomUUID());
-
-        userRepository.save(userToChangePassword);
-
-        return new AuthResponse("Bearer " + tokenService.generateToken(userToChangePassword));
+        return passwordEncoder.encode(changePasswordRequest.newPassword());
     }
 
 }

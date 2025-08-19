@@ -177,7 +177,7 @@ public class UserController {
     @PatchMapping("/{username}/change-password")
     public ResponseEntity<SuccessResponse<AuthResponse>>
     changePassword(@PathVariable String username, @RequestBody AuthChangePasswordRequest changePasswordRequest){
-        AuthResponse content = userService.changePassword(username, changePasswordRequest);
+        AuthResponse content = userService.changePasswordAndGenerateAuthToken(username, changePasswordRequest);
 
         SuccessResponse<AuthResponse> response =
                 new SuccessResponseBuilder<AuthResponse>()
