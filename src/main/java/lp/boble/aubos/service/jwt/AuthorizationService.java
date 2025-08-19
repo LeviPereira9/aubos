@@ -19,26 +19,30 @@ public class AuthorizationService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserModel loadUserByUsername(String usernameOrEmail){
+    public UserModel loadUserByUsername(String login){
 
-        if(usernameOrEmail.isBlank() || usernameOrEmail.equals("NONE_PROVIDED")){
+        if(login.isBlank() || login.equals("NONE_PROVIDED")){
             throw CustomFieldNotProvided.login();
         }
 
-        Optional<UserModel> optionalUser;
-
-        if(usernameOrEmail.contains("@")){
-            optionalUser = userRepository.findByEmail(usernameOrEmail);
-        } else {
-            optionalUser = userRepository.findByUsername(usernameOrEmail);
-        }
-
-        UserModel user = optionalUser.orElseThrow(CustomNotFoundException::user);
+        UserModel user = this.findUserByLogin(login);
 
         if(user.getSoftDeleted()){
             throw new CustomNotFoundException("Usuário inativo.");
         }
 
         return user;
+    }
+
+    private UserModel findUserByLogin(String login){
+        Optional<UserModel> optionalUser;
+
+        if(login.contains("@")){
+            optionalUser = userRepository.findByEmail(login);
+        } else {
+            optionalUser = userRepository.findByUsername(login);
+        }
+
+        return optionalUser.orElseThrow(CustomNotFoundException::user);
     }
 }
