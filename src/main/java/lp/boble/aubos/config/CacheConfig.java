@@ -3,8 +3,12 @@ package lp.boble.aubos.config;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,10 +29,27 @@ public class CacheConfig {
 
    @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+
+       ObjectMapper objectMapper = new ObjectMapper()
+               .registerModule(new ParameterNamesModule())
+               .registerModule(new Jdk8Module())
+               .registerModule(new JavaTimeModule())
+               .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+       PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+               .allowIfSubType(Object.class)
+               .build();
+
+       objectMapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+
+       Jackson2JsonRedisSerializer<Object> serializer =
+               new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
+
+
        //Configuração padrão
        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
-                       new GenericJackson2JsonRedisSerializer()//Serializa para JSON
+                       serializer
                ))
                .entryTtl(Duration.ofMinutes(30));
 

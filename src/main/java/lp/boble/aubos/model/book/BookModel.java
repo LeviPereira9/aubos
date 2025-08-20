@@ -7,6 +7,7 @@ import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.model.user.UserModel;
+import lp.boble.aubos.util.AuthUtil;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -82,5 +83,11 @@ public class BookModel {
 
     //TODO: alternativesTitles
     //TODO: tags
+
+    public void softDelete(UserModel requester){
+        this.softDeleted = true;
+        this.lastUpdated = Instant.now();
+        this.updatedBy = requester;
+    }
 
 }

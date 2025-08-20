@@ -1,7 +1,8 @@
 package lp.boble.aubos.service.book.dependencies;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.BookRequest;
+import lp.boble.aubos.dto.book.BookContextRequest;
+import lp.boble.aubos.dto.book.BookCreateRequest;
 import lp.boble.aubos.dto.book.dependencies.*;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
@@ -76,13 +77,13 @@ public class DependenciesService {
                 .collect(Collectors.toList());
     }
 
-    public DependencyData loadBookDependencyData(BookRequest book){
+    public DependencyData loadBookDependencyData(BookContextRequest contextRequest){
 
-        LanguageModel language = languageService.getBookLanguage(book.languageId());
-        TypeModel type = this.getBookType(book.typeId());
-        StatusModel status = this.getBookStatus(book.statusId());
-        RestrictionModel restriction = this.getBookRestriction(book.restrictionId());
-        LicenseModel license = this.getBookLicense(book.licenseId());
+        LanguageModel language = languageService.getBookLanguage(contextRequest.languageId());
+        TypeModel type = this.getBookType(contextRequest.typeId());
+        StatusModel status = this.getBookStatus(contextRequest.statusId());
+        RestrictionModel restriction = this.getBookRestriction(contextRequest.restrictionId());
+        LicenseModel license = this.getBookLicense(contextRequest.licenseId());
 
         return new DependencyData(language, type, status, restriction, license) ;
     }

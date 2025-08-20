@@ -1,7 +1,7 @@
 package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.BookRequest;
+import lp.boble.aubos.dto.book.BookCreateRequest;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.model.book.BookModel;
@@ -47,16 +47,16 @@ public class RelationshipsService {
                 .collect(Collectors.toList());
     }
 
-    public RelationshipsData loadBookRelationshipsData(BookModel bookModel, BookRequest bookRequest){
+    public RelationshipsData loadBookRelationshipsData(BookModel bookModel, BookCreateRequest bookCreateRequest){
 
         return new RelationshipsData(
-                this.getBookContributors(bookModel, bookRequest.contributors()),
-                this.getBookAvailableLanguages(bookModel, bookRequest.availableLanguagesId())
+                this.getBookContributors(bookModel, bookCreateRequest.contributors()),
+                this.getBookAvailableLanguages(bookModel, bookCreateRequest.availableLanguagesId())
         );
     }
 
-    public void updateBookRelationships(BookModel bookModel, BookRequest bookRequest){
-        RelationshipsData relationshipsData = this.loadBookRelationshipsData(bookModel, bookRequest);
+    public void updateBookRelationships(BookModel bookModel, BookCreateRequest bookCreateRequest){
+        RelationshipsData relationshipsData = this.loadBookRelationshipsData(bookModel, bookCreateRequest);
 
         this.updateBookLanguages(bookModel, relationshipsData.availableLanguages());
         this.updateBookContributors(bookModel, relationshipsData.contributors());

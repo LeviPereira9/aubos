@@ -62,4 +62,21 @@ public class AuthUtil {
     public boolean isAdmin(){
         return requester.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MOD"));
     }
+
+    public static UserModel requester(){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null || !authentication.isAuthenticated()){
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if(principal instanceof UserModel user){
+            return user;
+        }
+
+        return null;
+    }
 }

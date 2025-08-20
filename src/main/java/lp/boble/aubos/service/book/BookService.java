@@ -2,10 +2,7 @@ package lp.boble.aubos.service.book;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.BookPageProjection;
-import lp.boble.aubos.dto.book.BookPageResponse;
-import lp.boble.aubos.dto.book.BookRequest;
-import lp.boble.aubos.dto.book.BookResponse;
+import lp.boble.aubos.dto.book.*;
 import lp.boble.aubos.dto.book.dependencies.*;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
@@ -19,7 +16,6 @@ import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.service.book.dependencies.DependenciesService;
 import lp.boble.aubos.service.book.relationships.RelationshipsService;
 import lp.boble.aubos.util.AuthUtil;
-import lp.boble.aubos.util.ValidationUtil;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,7 +23,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -39,45 +34,30 @@ public class BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
     private final RelationshipsService relationshipsService;
-    private final ValidationUtil validationUtil;
 
     @Transactional
-    public BookResponse createBook(BookRequest book) {
+    public BookResponse createAndPersistBook(BookCreateRequest createRequest) {
 
-        validateAuthor(book.contributors());
-
-        DependencyData dependencyData = dependenciesService.loadBookDependencyData(book);
-        BookModel bookToCreate = bookMapper.fromCreateRequestToModel(book, dependencyData);
-        RelationshipsData relationshipsData = relationshipsService.loadBookRelationshipsData(bookToCreate, book);
-
-        bookToCreate.setCreatedBy(authUtil.getRequester());
-        bookToCreate.setContributors(relationshipsData.contributors());
-        bookToCreate.setAvailableLanguages(relationshipsData.availableLanguages());
+        BookModel bookToCreate = this.generateBookToPersist(createRequest);
 
         return bookMapper.toResponse(bookRepository.save(bookToCreate));
     }
 
     @Cacheable(value = "book", key = "#bookId")
     public BookResponse getBookById(UUID bookId){
-        BookModel bookFound = findBookOrThrow(bookId);
+        BookModel bookFound = this.findBookOrThrow(bookId);
 
         return bookMapper.toResponse(bookFound);
     }
 
     @CachePut(value = "book", key = "#id")
     @Transactional
-    public BookResponse updateBook(UUID id, BookRequest book) {
+    public BookResponse updateBook(UUID id, BookUpdateRequest bookUpdateRequest) {
+        BookModel bookToUpdate = this.findBookOrThrow(id);
 
-        validateAuthor(book.contributors());
+        BookUpdateData bookUpdateData = this.loadBookUpdateData(bookUpdateRequest);
 
-        BookModel bookToUpdate = findBookOrThrow(id);
-
-        DependencyData dependencyData = dependenciesService.loadBookDependencyData(book);
-        bookMapper.fromUpdateToModel(bookToUpdate, book, dependencyData);
-
-        relationshipsService.updateBookRelationships(bookToUpdate, book);
-
-        bookToUpdate.setUpdatedBy(authUtil.getRequester());
+        bookMapper.fromUpdateToModel(bookToUpdate, bookUpdateData);
 
         return bookMapper.toResponse(bookRepository.save(bookToUpdate));
     }
@@ -89,19 +69,15 @@ public class BookService {
     )
     @Transactional
     public void deleteBook(UUID bookId){
-        BookModel bookToDelete = bookRepository.findByIdAndSoftDeletedFalse(bookId)
-                .orElseThrow(CustomNotFoundException::book);
+        BookModel bookToSoftDelete = this.findBookOrThrow(bookId);
 
-        bookToDelete.setSoftDeleted(true);
-        bookToDelete.setLastUpdated(Instant.now());
-        bookToDelete.setUpdatedBy(authUtil.getRequester());
+        bookToSoftDelete.softDelete(authUtil.getRequester());
 
-        bookRepository.save(bookToDelete);
+        bookRepository.save(bookToSoftDelete);
     }
 
     @Cacheable(value = "bookSearch", key = "'search=' + #search + ',page=' + #page")
     public PageResponse<BookPageResponse> getBookBySearch(String search, int page){
-        validationUtil.validateSearchRequest(search, page);
 
         PageRequest pageRequest = PageRequest.of(
                 page,
@@ -115,7 +91,7 @@ public class BookService {
         return pageFound.map(bookMapper::fromProjectionToResponse);
     }
 
-    private void validateAuthor(List<BookAddContributor> contributors){
+    private void validateRequestHasAuthor(List<BookAddContributor> contributors){
         boolean hasAuthor = contributors.stream()
                 .anyMatch(c -> c.contributorRoleId() == ContributorRoleEnum.AUTHOR.getId());
 
@@ -127,6 +103,26 @@ public class BookService {
     public BookModel findBookOrThrow(UUID id){
         return bookRepository.findByIdAndSoftDeletedFalse(id)
                 .orElseThrow(CustomNotFoundException::book);
+    }
+
+    private BookUpdateData loadBookUpdateData(BookUpdateRequest bookUpdateRequest){
+        DependencyData dependencyData = dependenciesService.loadBookDependencyData(bookUpdateRequest.contextRequest());
+
+        return bookMapper.fromUpdateToPreparation(bookUpdateRequest, dependencyData);
+    }
+
+    private BookModel generateBookToPersist(BookCreateRequest createRequest){
+        validateRequestHasAuthor(createRequest.contributors());
+
+        DependencyData dependencyData = dependenciesService.loadBookDependencyData(createRequest.contextRequest());
+        BookModel bookToPersist = bookMapper.fromCreateRequestToModel(createRequest, dependencyData);
+        RelationshipsData relationshipsData = relationshipsService.loadBookRelationshipsData(bookToPersist, createRequest);
+
+        bookToPersist.setCreatedBy(authUtil.getRequester());
+        bookToPersist.setContributors(relationshipsData.contributors());
+        bookToPersist.setAvailableLanguages(relationshipsData.availableLanguages());
+
+        return bookToPersist;
     }
 
 

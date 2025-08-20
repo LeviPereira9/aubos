@@ -1,15 +1,14 @@
 package lp.boble.aubos.mapper.book;
 
-import lp.boble.aubos.dto.book.BookPageProjection;
-import lp.boble.aubos.dto.book.BookPageResponse;
-import lp.boble.aubos.dto.book.BookRequest;
-import lp.boble.aubos.dto.book.BookResponse;
+import lp.boble.aubos.dto.book.*;
 import lp.boble.aubos.dto.book.parts.BookContributorResponse;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.relationships.BookContributor;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
+import lp.boble.aubos.model.user.UserModel;
+import lp.boble.aubos.util.AuthUtil;
 import org.mapstruct.*;
 
 import java.util.*;
@@ -29,20 +28,33 @@ public interface BookMapper {
     @Mapping(target = "status", source = "dp.status")
     @Mapping(target = "restriction", source = "dp.restriction")
     @Mapping(target = "license", source = "dp.license")
-    BookModel fromCreateRequestToModel(BookRequest bookRequest, DependencyData dp);
+    BookModel fromCreateRequestToModel(BookCreateRequest bookCreateRequest, DependencyData dp);
 
     @Mapping(target = "softDeleted", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "lastUpdated", expression = "java(java.time.Instant.now())")
-    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "updatedBy", expression = "java(requester())")
+    @Mapping(target = "language", source = "language")
+    @Mapping(target = "type", source = "type")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "restriction", source = "restriction")
+    @Mapping(target = "license", source = "license")
+    @Mapping(target = "contributors", ignore = true)
+    @Mapping(target = "availableLanguages", ignore = true)
+    void fromUpdateToModel(@MappingTarget BookModel bookModel, BookUpdateData bud);
+
+    @Mapping(target = "coverUrl", source = "bur.coverUrl")
+    @Mapping(target = "title", source = "bur.title")
+    @Mapping(target = "subtitle", source = "bur.subtitle")
+    @Mapping(target = "synopsis", source = "bur.synopsis")
+    @Mapping(target = "publishedOn", source = "bur.publishedOn")
+    @Mapping(target = "finishedOn", source = "bur.finishedOn")
     @Mapping(target = "language", source = "dp.language")
     @Mapping(target = "type", source = "dp.type")
     @Mapping(target = "status", source = "dp.status")
     @Mapping(target = "restriction", source = "dp.restriction")
     @Mapping(target = "license", source = "dp.license")
-    @Mapping(target = "contributors", ignore = true)
-    @Mapping(target = "availableLanguages", ignore = true)
-    void fromUpdateToModel(@MappingTarget BookModel bookModel, BookRequest br, DependencyData dp);
+    BookUpdateData fromUpdateToPreparation(BookUpdateRequest bur, DependencyData dp);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "coverUrl", source = "coverUrl")
@@ -79,7 +91,9 @@ public interface BookMapper {
 
     BookPageResponse fromProjectionToResponse(BookPageProjection bookPageProjection);
 
-
+    default UserModel requester(){
+        return AuthUtil.requester();
+    }
 
 
 }

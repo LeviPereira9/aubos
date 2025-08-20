@@ -3,9 +3,7 @@ package lp.boble.aubos.controller.book;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
-import lp.boble.aubos.dto.book.BookPageResponse;
-import lp.boble.aubos.dto.book.BookRequest;
-import lp.boble.aubos.dto.book.BookResponse;
+import lp.boble.aubos.dto.book.*;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.response.pages.PageResponse;
@@ -29,9 +27,9 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    public ResponseEntity<SuccessResponse<BookResponse>> postBook(@RequestBody BookRequest book) {
+    public ResponseEntity<SuccessResponse<BookResponse>> postBook(@RequestBody BookCreateRequest book) {
 
-        BookResponse content = bookService.createBook(book);
+        BookResponse content = bookService.createAndPersistBook(book);
 
         SuccessResponse<BookResponse> response =
                 new SuccessResponseBuilder<BookResponse>()
@@ -82,7 +80,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SuccessResponse<BookResponse>>  updateBook(@PathVariable UUID id, @RequestBody BookRequest book){
+    public ResponseEntity<SuccessResponse<BookResponse>>  updateBook(@PathVariable UUID id, @RequestBody BookUpdateRequest book){
         BookResponse content = bookService.updateBook(id, book);
 
         SuccessResponse<BookResponse> response =
