@@ -89,6 +89,29 @@ public class BookFamilyService {
         return getSuccessesAndFailures(validationResult);
     }
 
+    private FamilyValidationResult validateBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
+        FamilyValidationResult validationResult = new FamilyValidationResult();
+
+        List<UUID> booksOnCurrentFamily = bookFamilyRepository.findAllBookIdsByFamilyId(familyId);
+
+        for (BookFamilyCreateRequest request : requests) {
+            UUID bookId = request.bookId();
+
+            boolean bookConflict = booksOnCurrentFamily.contains(bookId);
+            boolean bookDontExist = !bookRepository.existsById(bookId);
+
+            if(!bookConflict && !bookDontExist) {
+                validationResult.addValid(request);
+                continue;
+            }
+
+            if(bookConflict) validationResult.addFailure(bookId, "Este livro já está na coleção.");
+            if(bookDontExist) validationResult.addFailure(bookId, "Livro não encontrado.");
+        }
+
+        return validationResult;
+    }
+
     private List<BookFamilyModel> createBooksToFamily(UUID familyId, FamilyValidationResult validationResult) {
         List<BookFamilyModel> booksToAddInFamily = new ArrayList<>();
 
@@ -129,28 +152,7 @@ public class BookFamilyService {
         return new BatchTransporter<>(successes, failures);
     }
 
-    private FamilyValidationResult validateBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
-        FamilyValidationResult validationResult = new FamilyValidationResult();
 
-        List<UUID> booksOnCurrentFamily = bookFamilyRepository.findAllBookIdsByFamilyId(familyId);
-
-        for (BookFamilyCreateRequest request : requests) {
-            UUID bookId = request.bookId();
-
-            boolean bookConflict = booksOnCurrentFamily.contains(bookId);
-            boolean bookDontExist = !bookRepository.existsById(bookId);
-
-            if(!bookConflict && !bookDontExist) {
-                validationResult.addValid(request);
-                continue;
-            }
-
-            if(bookConflict) validationResult.addFailure(bookId, "Este livro já está na coleção.");
-            if(bookDontExist) validationResult.addFailure(bookId, "Livro não encontrado.");
-        }
-
-        return validationResult;
-    }
 
     @Transactional
     public BookFamilyResponse updateBookFamily(UUID familyId, BookFamilyUpdateRequest request) {
