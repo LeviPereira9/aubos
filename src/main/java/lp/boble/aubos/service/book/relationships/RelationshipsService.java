@@ -55,38 +55,4 @@ public class RelationshipsService {
         );
     }
 
-    public void updateBookRelationships(BookModel bookModel, BookCreateRequest bookCreateRequest){
-        RelationshipsData relationshipsData = this.loadBookRelationshipsData(bookModel, bookCreateRequest);
-
-        this.updateBookLanguages(bookModel, relationshipsData.availableLanguages());
-        this.updateBookContributors(bookModel, relationshipsData.contributors());
-    }
-
-    public void updateBookLanguages(BookModel bookModel, List<BookLanguage> rawLanguages) {
-        Set<BookLanguage> currentLanguages = new HashSet<>(bookModel.getAvailableLanguages());
-        Set<BookLanguage> incomingLanguages = new HashSet<>(rawLanguages);
-
-        Set<BookLanguage> languagesToRemove = new HashSet<>(currentLanguages);
-        languagesToRemove.removeAll(incomingLanguages);
-
-        Set<BookLanguage> languagesToAdd = new HashSet<>(incomingLanguages);
-        languagesToAdd.removeAll(currentLanguages);
-
-        bookModel.getAvailableLanguages().removeAll(languagesToRemove);
-        bookModel.getAvailableLanguages().addAll(languagesToAdd);
-    }
-
-    public void updateBookContributors(BookModel bookModel, List<BookContributor> rawContributors) {
-        Set<BookContributor> currentContributors = new HashSet<>(bookModel.getContributors());
-        Set<BookContributor> incomingContributors = new HashSet<>(rawContributors);
-
-        Set<BookContributor> contributorsToRemove = new HashSet<>(currentContributors);
-        contributorsToRemove.removeAll(incomingContributors);
-
-        Set<BookContributor> contributorsToAdd = new HashSet<>(incomingContributors);
-        contributorsToAdd.removeAll(currentContributors);
-
-        bookModel.getContributors().removeAll(contributorsToRemove);
-        bookModel.getContributors().addAll(contributorsToAdd);
-    }
 }

@@ -7,6 +7,8 @@ import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -42,6 +44,19 @@ public class BookFamilyModel {
     @ManyToOne
     @JoinColumn(name = "updated_by")
     private UserModel updatedBy;
+
+
+    public void adjustOrderToAvoidConflict(List<Integer> ordersInUse){
+        int orderToAdd = this.getOrderInFamily();
+        boolean orderConflict = ordersInUse.contains(orderToAdd);
+
+        if(orderConflict){
+            orderToAdd = Collections.max(ordersInUse) + 1;
+            this.setOrderInFamily(orderToAdd);
+        }
+
+        ordersInUse.add(orderToAdd);
+    }
 
     @Override
     public boolean equals(Object o) {

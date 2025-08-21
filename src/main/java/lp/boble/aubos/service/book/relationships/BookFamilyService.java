@@ -19,6 +19,7 @@ import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.service.book.BookService;
 import lp.boble.aubos.service.book.family.FamilyService;
 import lp.boble.aubos.util.AuthUtil;
+import lp.boble.aubos.util.FamilyValidationResult;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -38,77 +39,118 @@ public class BookFamilyService {
     @Transactional
     public BookFamilyResponse addBookToFamily(UUID familyId, BookFamilyCreateRequest request) {
 
-        boolean bookConflict = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, request.bookId());
-        boolean orderConflict = bookFamilyRepository.existsByFamilyIdAndOrderInFamily(familyId, request.order());
+        this.validateBookConflict(familyId, request.bookId());
 
-        if(bookConflict) throw CustomDuplicateFieldException.bookFamily();
-        if(orderConflict) throw CustomDuplicateFieldException.orderFamily();
+        BookFamilyModel bookFamilyToAdd = this.createBookFamily(familyId, request);
 
-        BookModel bookToAdd = bookService.findBookOrThrow(request.bookId());
-        FamilyModel destinationFamily = familyService.findFamilyOrThrow(familyId);
-
-        BookFamilyModel bookFamilyToCreate = bookFamilyMapper.fromCreateRequestToModel(request, bookToAdd, destinationFamily);
-        bookFamilyToCreate.setCreatedBy(authUtil.getRequester());
-
-        return bookFamilyMapper.fromModelToResponse(bookFamilyRepository.save(bookFamilyToCreate));
+        return bookFamilyMapper.fromModelToResponse(bookFamilyRepository.save(bookFamilyToAdd));
     }
+
+    private void validateBookConflict(UUID familyId, UUID bookId) {
+        boolean hasConflict = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, bookId);
+        if(hasConflict) throw CustomDuplicateFieldException.bookFamily();
+    }
+
+    private BookFamilyModel createBookFamily(UUID familyId, BookFamilyCreateRequest request){
+        BookModel bookToAdd = bookService.findBookOrThrow(request.bookId());
+        FamilyModel familyDestination = familyService.findFamilyOrThrow(familyId);
+
+        BookFamilyModel bookFamilyToAdd = bookFamilyMapper.fromCreateRequestToModel(request, bookToAdd, familyDestination);
+
+        bookFamilyToAdd.setOrderInFamily(
+                this.calculateAvailableOrderForFamily(
+                        familyId,
+                        bookFamilyToAdd.getOrderInFamily()
+                )
+        );
+
+        return bookFamilyToAdd;
+    }
+
+    private int calculateAvailableOrderForFamily(UUID familyId, int requestedOrder) {
+        boolean orderConflict = bookFamilyRepository.existsByFamilyIdAndOrderInFamily(familyId, requestedOrder);
+
+        if(orderConflict){
+            return bookFamilyRepository.findMaxOrderInFamilyByFamilyId(familyId) + 1;
+        }
+
+        return requestedOrder;
+    }
+
 
     @Transactional
     public BatchTransporter<UUID> addBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
+        FamilyValidationResult validationResult = this.validateBooksToFamily(familyId, requests);
+
+        List<BookFamilyModel> booksToAddInFamily = this.createBooksToFamily(familyId, validationResult);
+
+        bookFamilyRepository.saveAll(booksToAddInFamily);
+
+        return getSuccessesAndFailures(validationResult);
+    }
+
+    private List<BookFamilyModel> createBooksToFamily(UUID familyId, FamilyValidationResult validationResult) {
+        List<BookFamilyModel> booksToAddInFamily = new ArrayList<>();
+
+        FamilyModel familyDestination = familyService.findFamilyOrThrow(familyId);
+
+        List<Integer> ordersInUse = bookFamilyRepository.findAllOrderInFamilyByFamilyId(familyId);
+
+        for(BookFamilyCreateRequest request: validationResult.getValidRequests()){
+
+            BookModel bookToAdd = bookService.findBookOrThrow(request.bookId());
+            BookFamilyModel bookFamilyToAdd = bookFamilyMapper.fromCreateRequestToModel(
+                    request,
+                    bookToAdd,
+                    familyDestination);
+
+            bookFamilyToAdd.adjustOrderToAvoidConflict(ordersInUse);
+
+            booksToAddInFamily.add(bookFamilyToAdd);
+        }
+
+        return booksToAddInFamily;
+    }
+
+    private BatchTransporter<UUID> getSuccessesAndFailures(
+            FamilyValidationResult validationResult){
 
         List<BatchContent<UUID>> successes = new ArrayList<>();
         List<BatchContent<UUID>> failures = new ArrayList<>();
 
-        FamilyModel destinationFamily = familyService.findFamilyOrThrow(familyId);
-
-        List<BookFamilyModel> currentBooksInFamily = this.findAllBooksInFamily(familyId);
-        List<BookFamilyModel> bookFamiliesToAdd = new ArrayList<>();
-
-        // Ordens em uso
-        Set<Integer> ordersInUse = currentBooksInFamily.stream()
-                .map(BookFamilyModel::getOrderInFamily)
-                .collect(Collectors.toSet());
-
-        // Livros que já estão na coleção
-        Set<UUID> booksIdOnCurrentFamily = currentBooksInFamily.stream()
-                .map( c -> c.getBook().getId())
-                .collect(Collectors.toSet());
-
-        for (BookFamilyCreateRequest request : requests) {
-            UUID bookId = request.bookId();
-            int order = request.order();
-
-            boolean orderConflict = ordersInUse.contains(order);
-            boolean bookConflict = booksIdOnCurrentFamily.contains(bookId);
-            boolean bookDontExist = !bookRepository.existsById(bookId);
-
-            if(!bookConflict && !bookDontExist) {
-
-                if(orderConflict){
-                    order = Collections.max(ordersInUse) + 1;
-                    ordersInUse.add(order);
-                }
-                BookModel bookToAdd = bookService.findBookOrThrow(bookId);
-
-                BookFamilyModel bookFamilyToAdd = bookFamilyMapper.fromCreateRequestToModel(request, bookToAdd, destinationFamily);
-                bookFamilyToAdd.setCreatedBy(authUtil.getRequester());
-
-                bookFamiliesToAdd.add(bookFamilyToAdd);
-
-                successes.add(BatchContent.success(bookId, "Livro adicionado com sucesso."));
-            } else {
-                StringBuilder errorMessage = new StringBuilder();
-                if(bookDontExist) errorMessage.append("Livro não encontrado. ");
-                if(bookConflict) errorMessage.append("Este livro já está na coleção.");
-                failures.add(BatchContent.failure(bookId, errorMessage.toString().trim()));
-            }
+        for(UUID bookId: validationResult.getSuccess()){
+            successes.add(BatchContent.success(bookId, "Livro adicionado com sucesso."));
         }
 
-        bookFamilyRepository.saveAll(bookFamiliesToAdd);
+        for(Map.Entry<UUID, String> failure: validationResult.getFailures().entrySet()){
+            failures.add(BatchContent.failure(failure.getKey(), failure.getValue()));
+        }
 
         return new BatchTransporter<>(successes, failures);
     }
 
+    private FamilyValidationResult validateBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
+        FamilyValidationResult validationResult = new FamilyValidationResult();
+
+        List<UUID> booksOnCurrentFamily = bookFamilyRepository.findAllBookIdsByFamilyId(familyId);
+
+        for (BookFamilyCreateRequest request : requests) {
+            UUID bookId = request.bookId();
+
+            boolean bookConflict = booksOnCurrentFamily.contains(bookId);
+            boolean bookDontExist = !bookRepository.existsById(bookId);
+
+            if(!bookConflict && !bookDontExist) {
+                validationResult.addValid(request);
+                continue;
+            }
+
+            if(bookConflict) validationResult.addFailure(bookId, "Este livro já está na coleção.");
+            if(bookDontExist) validationResult.addFailure(bookId, "Livro não encontrado.");
+        }
+
+        return validationResult;
+    }
 
     @Transactional
     public BookFamilyResponse updateBookFamily(UUID familyId, BookFamilyUpdateRequest request) {
@@ -201,113 +243,6 @@ public class BookFamilyService {
         }
     }
 
-    /*public BatchTransporter<UUID> updateBookFamilyOrders(UUID familyId, List<BookFamilyUpdateRequest> requests) {
-        List<BatchContent<UUID>> successes = new ArrayList<>();
-        List<BatchContent<UUID>> failures = new ArrayList<>();
-
-        // NOTE: Validar os swaps, pois oq pode ocorrer:
-        // NOTE: A = 1, B = 2, C = 3
-        // NOTE: Req = A > 2, B > 3
-        // NOTE: A vai conseguir, pq B tbm está na req de troca, mas o B quer ir pro C, só que o C n quer trocar
-        // NOTE: Ai o B vai falhar em trocar pq o C n quer e então o A vai dar um erro lá no MySql
-        List<BookFamilyModel> toUpdate = new ArrayList<>();
-
-        Map<UUID, Integer> requestMap = requests.stream()
-                .collect(Collectors.toMap(BookFamilyUpdateRequest::bookId, BookFamilyUpdateRequest::order));
-
-
-
-        // Coleção atual
-        List<BookFamilyModel> currentFamily = this.findAllBooksInFamily(familyId);
-
-        //Map para validações
-        // Livro > Ordem
-        Map<UUID, Integer> currentBookOrder = currentFamily.stream()
-                .collect(Collectors.toMap(b -> b.getBook().getId(), BookFamilyModel::getOrderInFamily));
-        // Ordem > Livro
-        Map<Integer, UUID> currentOrderBook = currentFamily.stream()
-                .collect(Collectors.toMap(BookFamilyModel::getOrderInFamily, b -> b.getBook().getId()));
-        // Livro > Registro na coleção.
-        Map<UUID, BookFamilyModel> currentFamilyMap = currentFamily.stream()
-                .collect(Collectors.toMap(b -> b.getBook().getId(), Function.identity()));
-
-        // Sets para detectar requisições com duplicatas
-        Set<UUID> toUpdateBooks = new HashSet<>();
-        Set<Integer> toUpdateOrders = new HashSet<>();
-
-
-        for(BookFamilyUpdateRequest request : requests) {
-            UUID bookId = request.bookId();
-            int newOrder = request.order();
-
-            // Livro não pertence a coleção.
-            if(!currentBookOrder.containsKey(bookId)) {
-                failures.add(BatchContent.failure(bookId,"Livro não pertence a essa coleção."));
-                continue;
-            }
-
-            // Livro duplicado
-            if(!toUpdateBooks.add(bookId)) {
-                failures.add(BatchContent.failure(bookId, "Livro duplicado na requisição"));
-                continue;
-            }
-
-            // Ordem duplicado
-            if(!toUpdateOrders.add(request.order())) {
-                failures.add(BatchContent.failure(bookId, "Posição duplicada na requisição"));
-                continue;
-            }
-
-            // Posição antiga (atual)
-            int oldOrder = currentBookOrder.get(bookId);
-
-            // Verifica se teve mudança.
-            // newOrder = requisição.order
-            if(oldOrder != newOrder) {
-                // Pega o livro na coleção atual que está ocupando a nova posição desejada
-                UUID bookTarget = currentOrderBook.get(newOrder);
-
-                // Não pode ser estar vázio.
-                if(bookTarget == null) {
-                    failures.add(BatchContent.failure(bookId,"Posição " + newOrder + " é inválida."));
-                    continue;
-                }
-
-                // Verifica se o livro que queremos trocar de posição está na requisição também.
-                boolean otherInRequest = requests.stream()
-                        .anyMatch( r -> r.bookId().equals(bookTarget));
-
-                if(!bookTarget.equals(request.bookId()) && !otherInRequest) {
-                    failures.add(BatchContent.failure(bookId, "Posição " + newOrder + " já pertence a outro livro e ele não está na requisição para troca."));
-                    continue;
-                }
-            }
-
-            // Atualiza
-
-            BookFamilyModel bookToUpdate = currentFamilyMap.get(bookId);
-
-            if(bookToUpdate == null) {
-                failures.add(BatchContent.failure(bookId, "Livro não encontrado para atualização."));
-                continue;
-            }
-            bookToUpdate.setOrderInFamily(request.order());
-            bookToUpdate.setNote(request.note());
-            bookToUpdate.setUpdatedBy(authUtil.getRequester());
-            bookToUpdate.setLastUpdate(Instant.now());
-            toUpdate.add(bookToUpdate);
-            successes.add(BatchContent.success(request.bookId(), "Livro atualizado com sucesso."));
-        }
-
-        if(!toUpdate.isEmpty()){
-            bookFamilyRepository.saveAll(toUpdate);
-        }
-
-        return new BatchTransporter<>(successes, failures);
-    }*/
-
-
-
     @Transactional
     public void removeBookFromFamily(UUID familyId, BookFamilyDeleteRequest deleteRequest) {
 
@@ -361,10 +296,6 @@ public class BookFamilyService {
 
         return bookFamilyRepository.findByFamilyIdAndBookId(familyId, bookId)
                 .orElseThrow(CustomNotFoundException::bookFamily);
-    }
-
-    public BookFamilyModel findBookFamilyOrThrow(UUID bookFamilyId) {
-        return bookFamilyRepository.findById(bookFamilyId).orElseThrow();
     }
 
     public List<BookFamilyModel> findAllBooksInFamily(UUID familyId){

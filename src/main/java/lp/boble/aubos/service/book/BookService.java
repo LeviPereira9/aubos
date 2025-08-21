@@ -59,7 +59,7 @@ public class BookService {
 
         bookMapper.fromUpdateToModel(bookToUpdate, bookUpdateData);
 
-        return bookMapper.toResponse(bookRepository.save(bookToUpdate));
+        return bookMapper.toResponse(this.saveBook(bookToUpdate));
     }
 
     @Caching(
@@ -73,7 +73,7 @@ public class BookService {
 
         bookToSoftDelete.softDelete(authUtil.getRequester());
 
-        bookRepository.save(bookToSoftDelete);
+        this.saveBook(bookToSoftDelete);
     }
 
     @Cacheable(value = "bookSearch", key = "'search=' + #search + ',page=' + #page")
@@ -125,6 +125,8 @@ public class BookService {
         return bookToPersist;
     }
 
-
+    private BookModel saveBook(BookModel bookToSave){
+        return bookRepository.save(bookToSave);
+    }
 
 }

@@ -6,6 +6,8 @@ import lp.boble.aubos.dto.book.relationships.BookFamilyUpdateRequest;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;
+import lp.boble.aubos.model.user.UserModel;
+import lp.boble.aubos.util.AuthUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -19,7 +21,7 @@ public interface BookFamilyMapper {
     BookFamilyResponse fromModelToResponse(BookFamilyModel model);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdBy", expression = "java(requester())")
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "book", source = "book")
     @Mapping(target = "family", source = "family")
@@ -31,10 +33,25 @@ public interface BookFamilyMapper {
             FamilyModel family);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdBy", expression = "java(requester())")
     @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "book", ignore = true)
+    @Mapping(target = "family", ignore = true)
+    @Mapping(target = "orderInFamily", source = "order")
+    @Mapping(target = "note", source = "note")
+    BookFamilyModel toModelWithoutDependencies(BookFamilyCreateRequest request);
+
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", expression = "java(requester())")
     @Mapping(target = "orderInFamily", source = "order")
     @Mapping(target = "note", source = "note")
     @Mapping(target = "lastUpdate", expression = "java(java.time.Instant.now())")
     void toUpdateFromRequest(@MappingTarget BookFamilyModel model, BookFamilyUpdateRequest request);
+
+    default UserModel requester(){
+        return AuthUtil.requester();
+    }
+
 }
