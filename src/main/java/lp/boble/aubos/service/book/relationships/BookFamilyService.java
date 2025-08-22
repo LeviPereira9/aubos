@@ -23,7 +23,6 @@ import lp.boble.aubos.util.ValidationResult;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -335,51 +334,63 @@ public class BookFamilyService {
 
     @Transactional
     public void removeBookFromFamily(UUID familyId, BookFamilyDeleteRequest deleteRequest) {
-
         UUID bookId = deleteRequest.bookId();
 
+        this.validateBookToRemove(familyId, bookId);
+
+        bookFamilyRepository.deleteByFamilyIdAndBookId(familyId, bookId);
+    }
+
+    private void validateBookToRemove(UUID familyId, UUID bookId){
         boolean bookFamilyExists = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, bookId);
 
         if(!bookFamilyExists){
             throw CustomNotFoundException.book();
         }
-
-        bookFamilyRepository.deleteByFamilyIdAndBookId(familyId, bookId);
     }
 
     @Transactional
     public BatchTransporter<UUID> removeBooksFromFamily(UUID familyId, List<BookFamilyDeleteRequest> deleteRequests) {
-        List<BatchContent<UUID>> successes = new ArrayList<>();
-        List<BatchContent<UUID>> failures = new ArrayList<>();
+        ValidationResult<BookFamilyDeleteRequest> validationResult = this.validateDeleteBookBatch(familyId, deleteRequests);
 
-        List<BookFamilyModel> currenFamilyMembers = this.findAllBooksInFamily(familyId);
-        List<BookFamilyModel> bookFamiliesToRemove = new ArrayList<>();
+        List<UUID> booksToRemove = this.prepareBookIdsToRemove(validationResult);
 
-        Map<UUID, BookFamilyModel> currentFamilyMembersByBookId = currenFamilyMembers.stream()
-                .collect(Collectors.toMap(b -> b.getBook().getId(), Function.identity()));
+        bookFamilyRepository.deleteAllById(booksToRemove);
 
+        return this.getSuccessesAndFailures(validationResult);
+    }
+
+    private List<UUID> prepareBookIdsToRemove(ValidationResult<BookFamilyDeleteRequest> validationResult) {
+
+        return validationResult.getValidRequests().stream().map(BookFamilyDeleteRequest::bookId).toList();
+    }
+
+    private ValidationResult<BookFamilyDeleteRequest> validateDeleteBookBatch(
+            UUID familyId,
+            List<BookFamilyDeleteRequest> deleteRequests){
+        ValidationResult<BookFamilyDeleteRequest> validationResult = new ValidationResult<>();
+
+        List<UUID> bookIdsInFamily = bookFamilyRepository.findAllBookIdsByFamilyId(familyId);
         Set<UUID> booksToRemoveFromFamily = new HashSet<>();
 
         for(BookFamilyDeleteRequest deleteRequest : deleteRequests) {
             UUID bookId = deleteRequest.bookId();
 
             if(!booksToRemoveFromFamily.add(bookId)) {
-                failures.add(BatchContent.failure(bookId, "Livro duplicado na requisição"));
+                validationResult.addFailure(bookId, "Livro duplicado na requisição");
                 continue;
             }
 
-            if(!currentFamilyMembersByBookId.containsKey(bookId)) {
-                failures.add(BatchContent.failure(bookId, "Livro não pertence a essa coleção"));
+            if(!bookIdsInFamily.contains(bookId)) {
+                validationResult.addFailure(bookId, "Livro não pertence a essa coleção");
                 continue;
             }
 
-            bookFamiliesToRemove.add(currentFamilyMembersByBookId.get(bookId));
-            successes.add(BatchContent.success(bookId, "Livro removido com sucesso."));
+            validationResult.addSuccess(bookId, "Livro removido com sucesso.");
+            validationResult.addValid(deleteRequest);
         }
 
-        bookFamilyRepository.deleteAll(bookFamiliesToRemove);
-
-        return new BatchTransporter<>(successes, failures);
+        return validationResult;
     }
 
     public BookFamilyModel findBookInFamily(UUID familyId, UUID bookId){
