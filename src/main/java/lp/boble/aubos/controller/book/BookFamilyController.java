@@ -84,7 +84,7 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody List<BookFamilyUpdateRequest> requests
     ){
-        BatchTransporter<UUID> result = bookFamilyService.updateBookFamilies(familyId, requests);
+        BatchTransporter<UUID> result = bookFamilyService.updateBooksBatch(familyId, requests);
         HttpStatus status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
