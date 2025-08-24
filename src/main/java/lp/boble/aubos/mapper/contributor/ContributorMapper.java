@@ -3,15 +3,19 @@ package lp.boble.aubos.mapper.contributor;
 import lp.boble.aubos.dto.contributor.ContributorRequest;
 import lp.boble.aubos.dto.contributor.ContributorResponse;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
+import lp.boble.aubos.model.user.UserModel;
+import lp.boble.aubos.util.AuthUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import java.time.Instant;
 
 @Mapper(componentModel = "spring")
 public interface ContributorMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdBy", expression = "java(requester())")
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "lastUpdate", ignore = true)
     @Mapping(target = "books", ignore = true)
@@ -31,4 +35,12 @@ public interface ContributorMapper {
     @Mapping(target = "softDeleted", ignore = true)
     @Mapping(target = "name", source = "name")
     void updateModelFromRequest(@MappingTarget ContributorModel contributorModel, ContributorRequest cr);
+
+    default Instant now(){
+        return Instant.now();
+    }
+
+    default UserModel requester(){
+        return AuthUtil.requester();
+    }
 }

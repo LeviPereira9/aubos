@@ -5,13 +5,11 @@ import lp.boble.aubos.dto.contributor.ContributorPageProjection;
 import lp.boble.aubos.dto.contributor.ContributorPageResponse;
 import lp.boble.aubos.dto.contributor.ContributorRequest;
 import lp.boble.aubos.dto.contributor.ContributorResponse;
-import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.contributor.ContributorMapper;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.repository.book.depedencies.ContributorRepository;
-import lp.boble.aubos.repository.book.depedencies.ContributorRoleRepository;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.util.AuthUtil;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,11 +26,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ContributorService {
     private final ContributorRepository contributorRepository;
-    private final ContributorRoleRepository contributorRoleRepository;
     private final ContributorMapper contributorMapper;
     private final AuthUtil authUtil;
-
-
 
     @Cacheable(value = "contributor", key = "#id", unless = "#result == null")
     public ContributorResponse getContributor(UUID id){
@@ -41,28 +36,40 @@ public class ContributorService {
 
     public ContributorResponse createContributor(ContributorRequest request){
 
-        this.validateContributorNameOrThrow(request.name());
-
-        ContributorModel contributorToSave = contributorMapper.fromRequestToModel(request);
-        contributorToSave.setCreatedBy(authUtil.getRequester());
+        ContributorModel contributorToSave = this.generateContributor(request);
 
         return contributorMapper.fromModelToResponse(contributorRepository.save(contributorToSave));
+    }
+
+    public ContributorModel generateContributor(ContributorRequest request){
+        this.validateContributorNameOrThrow(request.name());
+
+        return contributorMapper.fromRequestToModel(request);
     }
 
     @CachePut(value = "contributor", key = "#id")
     @CacheEvict(value = "contributorSearch", allEntries = true)
     public ContributorResponse updateContributor(UUID id, ContributorRequest request){
 
-        ContributorModel contributorToUpdate = this.getContributorOrThrow(id);
-
-        if(!contributorToUpdate.getName().equals(request.name())){
-            this.validateContributorNameOrThrow(request.name());
-        }
-
-        contributorMapper.updateModelFromRequest(contributorToUpdate, request);
-        contributorToUpdate.setUpdatedBy(authUtil.getRequester());
+        ContributorModel contributorToUpdate = this.loadContributorToUpdate(id, request);
 
         return contributorMapper.fromModelToResponse(contributorRepository.save(contributorToUpdate));
+    }
+
+    private ContributorModel loadContributorToUpdate(UUID id, ContributorRequest request){
+        ContributorModel contributorToUpdate = this.getContributorOrThrow(id);
+
+        this.validateContributorUpdate(contributorToUpdate.getName(), request.name());
+
+        contributorMapper.updateModelFromRequest(contributorToUpdate, request);
+
+        return contributorToUpdate;
+    }
+
+    private void validateContributorUpdate(String currentName, String requestedName){
+        if(!currentName.equals(requestedName)){
+            this.validateContributorNameOrThrow(requestedName);
+        }
     }
 
     @Caching(evict = {
@@ -70,13 +77,18 @@ public class ContributorService {
             @CacheEvict(value = "contributorSearch", allEntries = true)}
     )
     public void deleteContributor(UUID contributorId){
-        this.validateCreatedByOrThrow(contributorId);
 
-        ContributorModel contributorToDelete = this.getContributorOrThrow(contributorId);
-        contributorToDelete.setLastUpdate(Instant.now());
-        contributorToDelete.setSoftDeleted(true);
+        ContributorModel contributor = this.markContributorAsDeleted(contributorId);
 
-        contributorRepository.save(contributorToDelete);
+        contributorRepository.save(contributor);
+    }
+
+    public ContributorModel markContributorAsDeleted(UUID contributorId){
+        ContributorModel contributor = this.getContributorOrThrow(contributorId);
+        contributor.setLastUpdate(Instant.now());
+        contributor.setSoftDeleted(true);
+
+        return contributor;
     }
 
     @Cacheable(value = "contributorSearch", key = "'search=' + #search + ',page=' + #page")
@@ -91,14 +103,6 @@ public class ContributorService {
         return pagesFound.map(p -> new ContributorPageResponse(p.getId(), p.getName()));
     }
 
-    private void validateCreatedByOrThrow(UUID id){
-        boolean isOwner = contributorRepository.isOwner(id, authUtil.getRequester());
-        boolean isAdmin = authUtil.isAdmin();
-
-        if(!isOwner && isAdmin){
-            throw CustomForbiddenActionException.notSelfOrAdmin();
-        }
-    }
 
     private void validateContributorNameOrThrow(String name){
         boolean isNameAvailable = contributorRepository.nameIsAvailable(name);
