@@ -30,7 +30,7 @@ public class FamilyController {
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("GET")
                         .code(HttpStatus.OK)
-                        .message("Coleção encontrada com sucesso.")
+                        .message("Família encontrada com sucesso.")
                         .content(content)
                         .build();
 
@@ -55,13 +55,13 @@ public class FamilyController {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<FamilyResponse>> createFamily(@RequestBody FamilyRequest request) {
-        FamilyResponse content = familyService.createFamily(request, false);
+        FamilyResponse content = familyService.createFamily(request);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
-                        .message("Coleção criada com sucesso")
+                        .message("Família criada com sucesso")
                         .content(content)
                         .build();
 
@@ -70,13 +70,13 @@ public class FamilyController {
 
     @PostMapping("/official")
     public ResponseEntity<SuccessResponse<FamilyResponse>> createOfficialFamily(@RequestBody FamilyRequest request) {
-        FamilyResponse content = familyService.createFamily(request, true);
+        FamilyResponse content = familyService.createOfficialFamily(request);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("POST")
                         .code(HttpStatus.CREATED)
-                        .message("Coleção oficial criada com sucesso")
+                        .message("Família oficial criada com sucesso")
                         .content(content)
                         .build();
 
@@ -91,7 +91,7 @@ public class FamilyController {
                 new SuccessResponseBuilder<FamilyResponse>()
                         .operation("PUT")
                         .code(HttpStatus.OK)
-                        .message("Coleção atualizada com sucesso")
+                        .message("Família atualizada com sucesso")
                         .content(content)
                         .build();
 
@@ -106,7 +106,7 @@ public class FamilyController {
                 new SuccessResponseBuilder<Void>()
                         .operation("DELETE")
                         .code(HttpStatus.OK)
-                        .message("Coleção excluída com sucesso.")
+                        .message("Família excluída com sucesso.")
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

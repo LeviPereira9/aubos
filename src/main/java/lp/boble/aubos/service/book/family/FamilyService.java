@@ -10,6 +10,7 @@ import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.family.FamilyMapper;
 import lp.boble.aubos.model.Enum.VisiblityEnum;
+import lp.boble.aubos.model.book.dependencies.TypeModel;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.family.FamilyType;
 import lp.boble.aubos.model.book.family.Visibility;
@@ -19,7 +20,6 @@ import lp.boble.aubos.repository.book.family.VisibilityRepository;
 import lp.boble.aubos.util.AuthUtil;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -35,33 +35,41 @@ public class FamilyService {
     private final VisibilityRepository visibilityRepository;
 
     @Transactional
-    public FamilyResponse createFamily(FamilyRequest request, boolean isOfficial) {
-        FamilyModel familyToCreate = familyMapper.fromRequestToModel(request);
-        familyToCreate.setCreatedBy(authUtil.getRequester());
-        familyToCreate.setCreatedAt(Instant.now());
-
-        this.applyDependenciesToFamily(familyToCreate, request);
-
-        System.out.println(authUtil.getRequester().getAuthorities());
-
-        if(isOfficial){
-            familyToCreate.setOfficial(true);
-        }
-
+    public FamilyResponse createFamily(FamilyRequest request) {
+        FamilyModel familyToCreate = this.generateFamilyToCreate(request);
 
         return familyMapper.fromModelToResponse(familyRepository.save(familyToCreate));
     }
 
     @Transactional
+    public FamilyResponse createOfficialFamily(FamilyRequest request) {
+        FamilyModel familyToCreate = this.generateFamilyToCreate(request);
+        familyToCreate.setOfficial(true);
+
+        return familyMapper.fromModelToResponse(familyRepository.save(familyToCreate));
+    }
+
+    private FamilyModel generateFamilyToCreate(FamilyRequest request) {
+        FamilyModel familyToCreate = familyMapper.fromRequestToModel(request);
+
+        this.applyDependenciesToFamily(familyToCreate, request);
+
+        return familyToCreate;
+    }
+
+    @Transactional
     public FamilyResponse updateFamily(UUID id, FamilyRequest familyRequest) {
         FamilyModel familyToUpdate = this.findFamilyOrThrow(id);
-        familyToUpdate.setUpdatedBy(authUtil.getRequester());
 
+        this.updateFamilyFromRequest(familyToUpdate, familyRequest);
+
+        return familyMapper.fromModelToResponse(familyRepository.save(familyToUpdate));
+    }
+
+    private void updateFamilyFromRequest(FamilyModel familyToUpdate, FamilyRequest familyRequest) {
         familyMapper.toUpdateFromRequest(familyToUpdate, familyRequest);
 
         this.applyDependenciesToFamily(familyToUpdate, familyRequest);
-
-        return familyMapper.fromModelToResponse(familyRepository.save(familyToUpdate));
     }
 
     @Transactional
@@ -100,34 +108,44 @@ public class FamilyService {
     }
 
     private FamilyDependenciesData loadFamilyDependencies(FamilyModel current, FamilyRequest request){
+
+        return new FamilyDependenciesData(
+                this.loadType(current, request),
+                this.loadVisibility(current, request)
+        );
+    }
+
+    public FamilyType loadType(FamilyModel current, FamilyRequest request){
         int currentTypeId = current.getType() != null ? current.getType().getId() : 0;
-        int requestTypeId = request.type() != 0 ? request.type() : 0;
+        int requestTypeId = request.type();
 
         FamilyType type = current.getType();
         boolean typeDontMatch = !Objects.equals(currentTypeId, requestTypeId);
+
         if(typeDontMatch){
             type = this.findFamilyTypeOrThrow(requestTypeId);
         }
 
-        // TODO: Default public no 0
+        return type;
+    }
+
+    public Visibility loadVisibility(FamilyModel current, FamilyRequest request){
+
         int currentVisibilityId = current.getVisibility() != null ? current.getVisibility().getId() : 0;
-        int requestVisibilityId = request.visibility() != 0 ? request.visibility() : VisiblityEnum.PUBLIC.getId();
+        int requestedVisibilityId = request.visibility() != 0 ? request.visibility() : VisiblityEnum.PUBLIC.getId();
 
         if(current.isOfficial()){
-            requestVisibilityId = VisiblityEnum.PUBLIC.getId();
+            requestedVisibilityId = VisiblityEnum.PUBLIC.getId();
         }
 
         Visibility visibility = current.getVisibility();
-        boolean visibilityDontMatch = !Objects.equals(currentVisibilityId, requestVisibilityId);
+        boolean visibilityDontMatch = !Objects.equals(currentVisibilityId, requestedVisibilityId);
 
         if(visibility == null || visibilityDontMatch ){
-            visibility = this.findVisibilityOrThrow(requestVisibilityId);
+            visibility = this.findVisibilityOrThrow(requestedVisibilityId);
         }
 
-        return new FamilyDependenciesData(
-                type,
-                visibility
-        );
+        return visibility;
     }
 
     public void applyDependenciesToFamily(FamilyModel target, FamilyRequest source) {
@@ -136,4 +154,5 @@ public class FamilyService {
         target.setVisibility(dependenciesData.visibility());
         target.setType(dependenciesData.type());
     }
+
 }
