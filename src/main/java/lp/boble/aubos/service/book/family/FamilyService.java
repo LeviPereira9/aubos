@@ -10,7 +10,6 @@ import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.family.FamilyMapper;
 import lp.boble.aubos.model.Enum.VisiblityEnum;
-import lp.boble.aubos.model.book.dependencies.TypeModel;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.family.FamilyType;
 import lp.boble.aubos.model.book.family.Visibility;
@@ -59,17 +58,19 @@ public class FamilyService {
 
     @Transactional
     public FamilyResponse updateFamily(UUID id, FamilyRequest familyRequest) {
-        FamilyModel familyToUpdate = this.findFamilyOrThrow(id);
-
-        this.updateFamilyFromRequest(familyToUpdate, familyRequest);
+        FamilyModel familyToUpdate = this.applyUpdateRequest(id, familyRequest);
 
         return familyMapper.fromModelToResponse(familyRepository.save(familyToUpdate));
     }
 
-    private void updateFamilyFromRequest(FamilyModel familyToUpdate, FamilyRequest familyRequest) {
+    private FamilyModel applyUpdateRequest(UUID id, FamilyRequest familyRequest) {
+        FamilyModel familyToUpdate = this.findFamilyOrThrow(id);
+
         familyMapper.toUpdateFromRequest(familyToUpdate, familyRequest);
 
         this.applyDependenciesToFamily(familyToUpdate, familyRequest);
+
+        return familyToUpdate;
     }
 
     @Transactional
