@@ -116,17 +116,25 @@ public class BookService {
 
         DependencyData dependencyData = dependenciesService.loadBookDependencyData(createRequest.contextRequest());
         BookModel bookToPersist = bookMapper.fromCreateRequestToModel(createRequest, dependencyData);
+        this.applyRelationships(bookToPersist, createRequest);
+
+        return bookToPersist;
+    }
+
+    private void applyRelationships(BookModel bookToPersist, BookCreateRequest createRequest){
         RelationshipsData relationshipsData = relationshipsService.loadBookRelationshipsData(bookToPersist, createRequest);
 
         bookToPersist.setCreatedBy(authUtil.getRequester());
         bookToPersist.setContributors(relationshipsData.contributors());
         bookToPersist.setAvailableLanguages(relationshipsData.availableLanguages());
-
-        return bookToPersist;
     }
 
     private BookModel saveBook(BookModel bookToSave){
         return bookRepository.save(bookToSave);
+    }
+
+    public boolean bookExistsById(UUID bookId){
+        return bookRepository.existsById(bookId);
     }
 
 }

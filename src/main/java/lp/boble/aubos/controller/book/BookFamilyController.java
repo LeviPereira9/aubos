@@ -10,6 +10,7 @@ import lp.boble.aubos.response.batch.BatchResponseBuilder;
 import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.relationships.BookFamilyBatchService;
 import lp.boble.aubos.service.book.relationships.BookFamilyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BookFamilyController {
     private final BookFamilyService bookFamilyService;
+    private final BookFamilyBatchService bookFamilyBatchService;
 
     @PostMapping("/family/{familyId}/books")
     public ResponseEntity<SuccessResponse<BookFamilyResponse>> addBookFamily(
@@ -48,7 +50,7 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyCreateRequest> requests
             ){
 
-        BatchTransporter<UUID> content = bookFamilyService.addBooksToFamily(familyId, requests);
+        BatchTransporter<UUID> content = bookFamilyBatchService.addBooksToFamily(familyId, requests);
         HttpStatus status = content.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
@@ -84,7 +86,7 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody List<BookFamilyUpdateRequest> requests
     ){
-        BatchTransporter<UUID> result = bookFamilyService.updateBooksBatch(familyId, requests);
+        BatchTransporter<UUID> result = bookFamilyBatchService.updateBooksBatch(familyId, requests);
         HttpStatus status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
@@ -117,7 +119,7 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody List<BookFamilyDeleteRequest> deleteRequests
     ){
-        BatchTransporter<UUID> result = bookFamilyService.removeBooksFromFamily(familyId, deleteRequests);
+        BatchTransporter<UUID> result = bookFamilyBatchService.removeBooksFromFamily(familyId, deleteRequests);
         HttpStatus status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
