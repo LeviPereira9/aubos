@@ -13,7 +13,7 @@ import java.util.*;
 @Entity
 @Table(name = "tb_book_contributor")
 @Data
-public class BookContributor {
+public class BookContributorModel {
     @Id
     @GeneratedValue
     private UUID id;
@@ -32,7 +32,7 @@ public class BookContributor {
     @JoinColumn(name = "contributor_role_id")
     private ContributorRole contributorRole;
 
-    public BookContributor(
+    public BookContributorModel(
             BookModel book,
             ContributorModel contributor,
             ContributorRole contributorRole) {
@@ -41,7 +41,7 @@ public class BookContributor {
         this.contributorRole = contributorRole;
     }
 
-    public BookContributor(){}
+    public BookContributorModel(){}
 
     public boolean isAuthor(){
         return contributorRole != null && "autor".equals(contributorRole.getName());
@@ -59,7 +59,7 @@ public class BookContributor {
         return contributorRole != null && "publicadora".equals(contributorRole.getName());
     }
 
-    public static Map<String, List<BookContributorResponse>> arrangeContributors(List<BookContributor> rawContributors){
+    public static Map<String, List<BookContributorResponse>> arrangeContributors(List<BookContributorModel> rawContributors){
         Map<String, List<BookContributorResponse>> contributors = new HashMap<>();
         contributors.put("autor", new ArrayList<>());
         contributors.put("editor", new ArrayList<>());
@@ -81,7 +81,7 @@ public class BookContributor {
     public boolean equals(Object o){
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        BookContributor that = (BookContributor) o;
+        BookContributorModel that = (BookContributorModel) o;
         return Objects.equals(contributor, that.contributor) && Objects.equals(contributorRole, that.contributorRole);
     }
 

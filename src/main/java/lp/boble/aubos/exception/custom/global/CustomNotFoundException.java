@@ -47,4 +47,12 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException bookFamily(){
         return new CustomNotFoundException("O livro não foi encontrado na coleção.");
     }
+
+    public static CustomNotFoundException bookContributor(String role){
+        return new CustomNotFoundException("Este livro não possuí nenhum contribuidor no cargo de " + role);
+    }
+
+    public static CustomNotFoundException bookContributor(){
+        return new CustomNotFoundException("Este livro não possuí nenhum contribuidor.");
+    }
 }

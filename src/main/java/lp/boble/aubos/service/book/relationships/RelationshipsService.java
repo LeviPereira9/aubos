@@ -6,16 +6,14 @@ import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;
-import lp.boble.aubos.model.book.relationships.BookContributor;
+import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.repository.book.depedencies.LanguageRepository;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
 import lp.boble.aubos.service.book.dependencies.DependenciesService;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,11 +33,11 @@ public class RelationshipsService {
                 )).collect(Collectors.toList());
     }
 
-    public List<BookContributor> getBookContributors(
+    public List<BookContributorModel> getBookContributors(
             BookModel book,
             List<BookAddContributor> contributors){
         return contributors.stream()
-                .map(c -> new BookContributor(
+                .map(c -> new BookContributorModel(
                         book,
                         contributorService.getContributorOrThrow(c.contributorId()),
                         dependenciesService.getContributorRole(c.contributorRoleId())

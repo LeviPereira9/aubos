@@ -3,11 +3,10 @@ package lp.boble.aubos.model.book;
 import jakarta.persistence.*;
 import lombok.Data;
 import lp.boble.aubos.model.book.dependencies.*;
-import lp.boble.aubos.model.book.relationships.BookContributor;
+import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.model.user.UserModel;
-import lp.boble.aubos.util.AuthUtil;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -76,7 +75,7 @@ public class BookModel {
     private List<BookLanguage> availableLanguages;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookContributor> contributors;
+    private List<BookContributorModel> contributors;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BookFamilyModel> families;

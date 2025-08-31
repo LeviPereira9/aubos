@@ -1,10 +1,9 @@
 package lp.boble.aubos.model.book.dependencies;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
-import lp.boble.aubos.model.book.relationships.BookContributor;
+import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.model.user.UserModel;
 
 import java.time.Instant;
@@ -35,7 +34,7 @@ public class ContributorModel {
 
     @OneToMany(mappedBy = "contributor")
     @JsonIgnore
-    private List<BookContributor> books;
+    private List<BookContributorModel> books;
 
     @Column(name = "soft_deleted")
     private boolean softDeleted;
