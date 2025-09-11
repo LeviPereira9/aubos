@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface BookContributorRepository extends JpaRepository<BookContributorModel, UUID> {
 
-    List<BookContributorModel> findAllByBookIdAndContributorRoleName(UUID bookId, String contributorRoleName);
+    List<BookContributorModel> findAllByBookIdAndContributorRoleId(UUID bookId, int contributorRoleId);
 
     List<BookContributorModel> findAllByBookId(UUID bookId);
 }

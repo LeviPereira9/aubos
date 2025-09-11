@@ -1,4 +1,4 @@
-package lp.boble.aubos.dto.book.relationships;
+package lp.boble.aubos.dto.book.relationships.BookContributor;
 
 import lombok.Builder;
 import lombok.Data;

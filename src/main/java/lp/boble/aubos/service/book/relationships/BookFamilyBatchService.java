@@ -2,9 +2,9 @@ package lp.boble.aubos.service.book.relationships;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookFamilyCreateRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamilyDeleteRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamilyUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyCreateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyUpdateRequest;
 import lp.boble.aubos.mapper.book.family.BookFamilyMapperImpl;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.family.FamilyModel;

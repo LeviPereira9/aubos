@@ -2,28 +2,22 @@ package lp.boble.aubos.service.book.relationships;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookFamilyCreateRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamilyDeleteRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamilyResponse;
-import lp.boble.aubos.dto.book.relationships.BookFamilyUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyCreateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyResponse;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyUpdateRequest;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.family.BookFamilyMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;
-import lp.boble.aubos.repository.book.BookRepository;
 import lp.boble.aubos.repository.book.relationships.BookFamilyRepository;
-import lp.boble.aubos.response.batch.BatchContent;
-import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.service.book.BookService;
 import lp.boble.aubos.service.book.family.FamilyService;
-import lp.boble.aubos.util.AuthUtil;
-import lp.boble.aubos.util.ValidationResult;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

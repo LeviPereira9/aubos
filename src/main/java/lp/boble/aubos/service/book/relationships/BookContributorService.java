@@ -1,12 +1,21 @@
 package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookContributorResponse;
-import lp.boble.aubos.dto.book.relationships.BookContributorsResponse;
+import lp.boble.aubos.dto.book.parts.BookAddContributor;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorPayload;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.relationships.BookContributorMapper;
+import lp.boble.aubos.model.book.BookModel;
+import lp.boble.aubos.model.book.dependencies.ContributorModel;
+import lp.boble.aubos.model.book.dependencies.ContributorRole;
 import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
+import lp.boble.aubos.service.book.BookService;
+import lp.boble.aubos.service.book.dependencies.ContributorService;
+import lp.boble.aubos.service.book.dependencies.DependenciesService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +30,11 @@ public class BookContributorService {
 
     private final BookContributorRepository bookContributorRepository;
     private final BookContributorMapper bookContributorMapper;
+    private final BookService bookService;
+    private final ContributorService contributorService;
+    private final DependenciesService dependenciesService;
 
-    public List<BookContributorResponse> findContributorsByRole(UUID bookId, String role) {
+    public List<BookContributorResponse> findContributorsByRole(UUID bookId, int role) {
         List<BookContributorModel> bookContributors = this.findContributorsByBookAndRoleOrThrow(bookId, role);
 
         return bookContributors.stream()
@@ -30,17 +42,17 @@ public class BookContributorService {
                 .toList();
     }
 
-    private List<BookContributorModel> findContributorsByBookAndRoleOrThrow(UUID bookId, String role) {
-        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBookIdAndContributorRoleName(bookId, role);
+    private List<BookContributorModel> findContributorsByBookAndRoleOrThrow(UUID bookId, int role) {
+        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBookIdAndContributorRoleId(bookId, role);
 
         if(bookContributors.isEmpty()){
-            throw CustomNotFoundException.bookContributor(role);
+            throw CustomNotFoundException.bookContributor("" + role);
         }
 
         return bookContributors;
     }
 
-    public BookContributorsResponse findContributorsByBook(UUID bookId) {
+    public BookContributorsResponse findContributors(UUID bookId) {
         List<BookContributorModel> bookContributors = this.findContributorsByBookOrThrow(bookId);
 
         return bookContributorMapper.fromModelToResponse(bookContributors);
@@ -56,5 +68,46 @@ public class BookContributorService {
         return bookContributors;
     }
 
+    public void addContributorToBook(UUID bookId, BookAddContributor request){
+        BookContributorModel bookContributor = this.generateBookContributor(bookId, request);
 
+        bookContributorRepository.save(bookContributor);
+    }
+
+    private BookContributorModel generateBookContributor(UUID bookId, BookAddContributor request){
+        BookModel book = bookService.findBookOrThrow(bookId);
+        ContributorModel contributor = contributorService.findContributorOrThrow(request.contributorId());
+        ContributorRole contributorRole = dependenciesService.getContributorRole(request.contributorRoleId());
+
+        return new BookContributorModel(book, contributor, contributorRole);
+    }
+
+    public void updateContributorOnBook(UUID id, BookContributorUpdateRequest request){
+        BookContributorModel bookContributor = this.findBookContributorOrThrow(id);
+        ContributorRole role = dependenciesService.getContributorRole(request.contributorRoleId());
+
+        bookContributorMapper.updateBookContributor(bookContributor, role);
+
+        bookContributorRepository.save(bookContributor);
+    }
+
+
+    public void deleteContributorFromBook(UUID id){
+        bookContributorRepository.deleteById(id);
+    }
+
+    private BookContributorModel findBookContributorOrThrow(UUID bookContributorId) {
+        return bookContributorRepository.findById(bookContributorId)
+                .orElseThrow(CustomNotFoundException::bookContributor);
+    }
+
+
+
+    private BookContributorPayload getBookContributor(BookContributorUpdateRequest request){
+
+        ContributorModel contributor = contributorService.findContributorOrThrow(request.contributorId());
+        ContributorRole contributorRole = dependenciesService.getContributorRole(request.contributorRoleId());
+
+        return new BookContributorPayload(contributor, contributorRole);
+    }
 }

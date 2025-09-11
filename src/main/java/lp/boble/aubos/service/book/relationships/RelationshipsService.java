@@ -39,7 +39,7 @@ public class RelationshipsService {
         return contributors.stream()
                 .map(c -> new BookContributorModel(
                         book,
-                        contributorService.getContributorOrThrow(c.contributorId()),
+                        contributorService.findContributorOrThrow(c.contributorId()),
                         dependenciesService.getContributorRole(c.contributorRoleId())
                 ))
                 .collect(Collectors.toList());

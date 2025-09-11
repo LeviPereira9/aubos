@@ -31,7 +31,7 @@ public class ContributorService {
 
     @Cacheable(value = "contributor", key = "#id", unless = "#result == null")
     public ContributorResponse getContributor(UUID id){
-        return contributorMapper.fromModelToResponse(this.getContributorOrThrow(id));
+        return contributorMapper.fromModelToResponse(this.findContributorOrThrow(id));
     }
 
     public ContributorResponse createContributor(ContributorRequest request){
@@ -57,7 +57,7 @@ public class ContributorService {
     }
 
     private ContributorModel loadContributorToUpdate(UUID id, ContributorRequest request){
-        ContributorModel contributorToUpdate = this.getContributorOrThrow(id);
+        ContributorModel contributorToUpdate = this.findContributorOrThrow(id);
 
         this.validateContributorUpdate(contributorToUpdate.getName(), request.name());
 
@@ -84,7 +84,7 @@ public class ContributorService {
     }
 
     public ContributorModel markContributorAsDeleted(UUID contributorId){
-        ContributorModel contributor = this.getContributorOrThrow(contributorId);
+        ContributorModel contributor = this.findContributorOrThrow(contributorId);
         contributor.setLastUpdate(Instant.now());
         contributor.setSoftDeleted(true);
 
@@ -112,7 +112,7 @@ public class ContributorService {
         }
     }
 
-    public ContributorModel getContributorOrThrow(UUID id){
+    public ContributorModel findContributorOrThrow(UUID id){
         return contributorRepository.findContributorById(id)
                 .orElseThrow(CustomNotFoundException::user);
     }

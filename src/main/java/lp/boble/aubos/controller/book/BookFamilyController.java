@@ -1,10 +1,10 @@
 package lp.boble.aubos.controller.book;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookFamilyCreateRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamilyDeleteRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamilyResponse;
-import lp.boble.aubos.dto.book.relationships.BookFamilyUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyCreateRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyResponse;
+import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyUpdateRequest;
 import lp.boble.aubos.response.batch.BatchResponse;
 import lp.boble.aubos.response.batch.BatchResponseBuilder;
 import lp.boble.aubos.response.batch.BatchTransporter;
