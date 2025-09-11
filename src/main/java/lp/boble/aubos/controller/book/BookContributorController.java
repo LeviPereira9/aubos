@@ -98,8 +98,9 @@ public class BookContributorController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    public ResponseEntity<SuccessResponse<Void>> deleteBookContributor(@PathVariable UUID bookId){
-        bookContributorService.deleteContributorFromBook(bookId);
+    @DeleteMapping("/{bookContributorId}")
+    public ResponseEntity<SuccessResponse<Void>> deleteBookContributor(@PathVariable UUID bookId, @PathVariable UUID bookContributorId){
+        bookContributorService.deleteContributorFromBook(bookId, bookContributorId);
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()

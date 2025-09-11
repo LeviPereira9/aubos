@@ -3,7 +3,6 @@ package lp.boble.aubos.service.book.relationships;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorPayload;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
@@ -92,8 +91,15 @@ public class BookContributorService {
     }
 
 
-    public void deleteContributorFromBook(UUID id){
-        bookContributorRepository.deleteById(id);
+    public void deleteContributorFromBook(UUID bookId, UUID bookContributorId){
+
+        BookContributorModel bookContributor = this.findBookContributorOrThrow(bookContributorId);
+
+        if(!bookContributor.belongsToBook(bookId)){
+            throw CustomNotFoundException.bookContributor();
+        }
+
+        bookContributorRepository.deleteById(bookContributorId);
     }
 
     private BookContributorModel findBookContributorOrThrow(UUID bookContributorId) {
@@ -103,11 +109,11 @@ public class BookContributorService {
 
 
 
-    private BookContributorPayload getBookContributor(BookContributorUpdateRequest request){
+    /*private BookContributorPayload getBookContributor(BookContributorUpdateRequest request){
 
         ContributorModel contributor = contributorService.findContributorOrThrow(request.contributorId());
         ContributorRole contributorRole = dependenciesService.getContributorRole(request.contributorRoleId());
 
         return new BookContributorPayload(contributor, contributorRole);
-    }
+    }*/
 }
