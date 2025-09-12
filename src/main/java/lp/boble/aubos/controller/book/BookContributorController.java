@@ -1,14 +1,18 @@
 package lp.boble.aubos.controller.book;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateBatchRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
+import lp.boble.aubos.response.batch.BatchResponse;
+import lp.boble.aubos.response.batch.BatchResponseBuilder;
+import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.relationships.BookContributorBatchService;
 import lp.boble.aubos.service.book.relationships.BookContributorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +28,7 @@ public class BookContributorController {
 
 
     private final BookContributorService bookContributorService;
+    private final BookContributorBatchService bookContributorBatchService;
 
     @GetMapping
     public ResponseEntity<SuccessResponse<BookContributorsResponse>>
@@ -110,5 +115,50 @@ public class BookContributorController {
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchResponse<UUID>> addBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookAddContributor> requests){
+        BatchTransporter<UUID> result = bookContributorBatchService.addContributorsToBook(bookId, requests);
+        HttpStatus code = result.getStatus();
+
+        BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
+                .operation("POST")
+                .code(code)
+                .message("Requisição de POST concluída com sucesso.")
+                .content(result)
+                .build();
+
+        return ResponseEntity.status(code).body(response);
+    }
+
+    @PatchMapping("/batch")
+    public ResponseEntity<BatchResponse<UUID>> updateBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorUpdateBatchRequest> requests){
+        BatchTransporter<UUID> result = bookContributorBatchService.updateBatch(bookId, requests);
+        HttpStatus code = result.getStatus();
+
+        BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
+                .operation("PATCH")
+                .code(code)
+                .message("Requisição de POST concluída com sucesso.")
+                .content(result)
+                .build();
+
+        return ResponseEntity.status(code).body(response);
+    }
+
+    @PatchMapping("/batch")
+    public ResponseEntity<BatchResponse<UUID>> deleteBatchContributors(@PathVariable UUID bookId, @RequestBody List<UUID> requests){
+        BatchTransporter<UUID> result = bookContributorBatchService.deleteBatch(bookId, requests);
+        HttpStatus code = result.getStatus();
+
+        BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
+                .operation("DELETE")
+                .code(code)
+                .message("Requisição de POST concluída com sucesso.")
+                .content(result)
+                .build();
+
+        return ResponseEntity.status(code).body(response);
     }
 }

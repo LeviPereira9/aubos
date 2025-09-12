@@ -5,6 +5,7 @@ import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
+import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.relationships.BookContributorMapper;
 import lp.boble.aubos.model.book.BookModel;
@@ -13,6 +14,7 @@ import lp.boble.aubos.model.book.dependencies.ContributorRole;
 import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
 import lp.boble.aubos.service.book.BookService;
+import lp.boble.aubos.service.book.dependencies.ContributorRoleService;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
 import lp.boble.aubos.service.book.dependencies.DependenciesService;
 import org.springframework.stereotype.Service;
@@ -20,9 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-// TODO: GetSpecificsContributors
-// TODO: Add Contributor to Book, Single or Batch
-// TODO: Remove Contributor from Book, Single or Batch
 @Service
 @RequiredArgsConstructor
 public class BookContributorService {
@@ -31,7 +30,7 @@ public class BookContributorService {
     private final BookContributorMapper bookContributorMapper;
     private final BookService bookService;
     private final ContributorService contributorService;
-    private final DependenciesService dependenciesService;
+    private final ContributorRoleService contributorRoleService;
 
     public List<BookContributorResponse> findContributorsByRole(UUID bookId, int role) {
         List<BookContributorModel> bookContributors = this.findContributorsByBookAndRoleOrThrow(bookId, role);
@@ -57,7 +56,7 @@ public class BookContributorService {
         return bookContributorMapper.fromModelToResponse(bookContributors);
     }
 
-    private List<BookContributorModel> findContributorsByBookOrThrow(UUID bookId) {
+    public List<BookContributorModel> findContributorsByBookOrThrow(UUID bookId) {
         List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBookId(bookId);
 
         if(bookContributors.isEmpty()){
@@ -68,22 +67,36 @@ public class BookContributorService {
     }
 
     public void addContributorToBook(UUID bookId, BookAddContributor request){
+
+        this.validateAddContributorDoesNotExist(bookId, request);
+
         BookContributorModel bookContributor = this.generateBookContributor(bookId, request);
 
         bookContributorRepository.save(bookContributor);
     }
 
+    private void validateAddContributorDoesNotExist(UUID bookId, BookAddContributor request){
+        boolean exists = bookContributorRepository.existsByBookIdAndContributorIdAndContributorRoleId(
+                bookId,
+                request.contributorId(),
+                request.contributorRoleId());
+
+        if(exists){
+            throw CustomDuplicateFieldException.bookFamily();
+        }
+    }
+
     private BookContributorModel generateBookContributor(UUID bookId, BookAddContributor request){
         BookModel book = bookService.findBookOrThrow(bookId);
         ContributorModel contributor = contributorService.findContributorOrThrow(request.contributorId());
-        ContributorRole contributorRole = dependenciesService.getContributorRole(request.contributorRoleId());
+        ContributorRole contributorRole = contributorRoleService.getContributorRole(request.contributorRoleId());
 
         return new BookContributorModel(book, contributor, contributorRole);
     }
 
     public void updateContributorOnBook(UUID id, BookContributorUpdateRequest request){
         BookContributorModel bookContributor = this.findBookContributorOrThrow(id);
-        ContributorRole role = dependenciesService.getContributorRole(request.contributorRoleId());
+        ContributorRole role = contributorRoleService.getContributorRole(request.contributorRoleId());
 
         bookContributorMapper.updateBookContributor(bookContributor, role);
 
@@ -112,7 +125,7 @@ public class BookContributorService {
     /*private BookContributorPayload getBookContributor(BookContributorUpdateRequest request){
 
         ContributorModel contributor = contributorService.findContributorOrThrow(request.contributorId());
-        ContributorRole contributorRole = dependenciesService.getContributorRole(request.contributorRoleId());
+        ContributorRole contributorRole = dependenciesService.getContributorRole(request.toRoleId());
 
         return new BookContributorPayload(contributor, contributorRole);
     }*/

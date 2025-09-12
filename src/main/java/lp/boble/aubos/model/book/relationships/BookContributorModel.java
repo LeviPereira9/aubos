@@ -43,28 +43,29 @@ public class BookContributorModel {
 
     public BookContributorModel(){}
 
+    public boolean hasSameContributor(UUID contributorId){
+        return this.contributor.getId().equals(contributorId);
+    }
+
+    public boolean hasSameRole(int roleId){
+        return this.contributorRole.getId() == roleId;
+    }
+
+    public UUID getContributorId(){
+        return this.contributor.getId();
+    }
+
+    public int getContributorRoleId(){
+        return this.contributorRole.getId();
+    }
+
+
     public boolean belongsToBook(UUID bookId){
         return this.getBookId().equals(bookId);
     }
 
     public UUID getBookId(){
         return this.book.getId();
-    }
-
-    public boolean isAuthor(){
-        return contributorRole != null && "autor".equals(contributorRole.getName());
-    }
-
-    public boolean isEditor(){
-        return contributorRole != null && "editor".equals(contributorRole.getName());
-    }
-
-    public boolean isIllustrator(){
-        return contributorRole != null && "ilustrador".equals(contributorRole.getName());
-    }
-
-    public boolean isPublisher(){
-        return contributorRole != null && "publicadora".equals(contributorRole.getName());
     }
 
     public static Map<String, List<BookContributorResponse>> arrangeContributors(List<BookContributorModel> rawContributors){

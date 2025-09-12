@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,4 +50,9 @@ public interface ContributorRepository extends JpaRepository<ContributorModel, U
     WHERE c.id = :id AND c.softDeleted = false
 """)
     Optional<ContributorModel> findContributorById(@Param("id") UUID id);
+
+    @Query("""
+    SELECT c.id FROM ContributorModel c WHERE c.id IN :ids
+""")
+    List<UUID> findAllByIdIn(@Param("ids") List<UUID> ids);
 }

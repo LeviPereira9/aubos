@@ -20,7 +20,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -117,6 +121,13 @@ public class ContributorService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
+    public Set<UUID> getAllContributorsId(List<UUID> ids){
+        return new HashSet<>(contributorRepository.findAllByIdIn(ids));
+    }
+
+    public List<ContributorModel> findAllContributorsById(Set<UUID> ids){
+        return contributorRepository.findAllById(ids);
+    }
 
 
 

@@ -1,6 +1,8 @@
 package lp.boble.aubos.util;
 
 import lombok.Data;
+import lp.boble.aubos.response.batch.BatchContent;
+import lp.boble.aubos.response.batch.BatchTransporter;
 
 import java.util.*;
 
@@ -19,13 +21,28 @@ public class ValidationResult<T> {
         pendentRequests.addAll(request);
     }
 
-    public void addSuccess(UUID bookId, String message){
-        success.put(bookId, message);
+    public void addSuccess(UUID id, String message){
+        success.put(id, message);
     }
 
-    public void addFailure(UUID bookId, String message) {
-        failures.put(bookId, message);
+    public void addFailure(UUID id, String message) {
+        failures.put(id, message);
     }
 
+    public <T> BatchTransporter<UUID> getSuccessesAndFailures(){
+
+        List<BatchContent<UUID>> successes = new ArrayList<>();
+        List<BatchContent<UUID>> falu = new ArrayList<>();
+
+        for(Map.Entry<UUID, String> success: success.entrySet()){
+            successes.add(BatchContent.success(success.getKey(), success.getValue()));
+        }
+
+        for(Map.Entry<UUID, String> failure: failures.entrySet()){
+            falu.add(BatchContent.failure(failure.getKey(), failure.getValue()));
+        }
+
+        return new BatchTransporter<>(successes, falu);
+    }
 
 }

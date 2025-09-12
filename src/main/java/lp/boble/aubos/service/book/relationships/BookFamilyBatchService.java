@@ -39,7 +39,7 @@ public class BookFamilyBatchService {
 
         bookFamilyRepository.saveAll(booksToAddInFamily);
 
-        return getSuccessesAndFailures(validationResult);
+        return validationResult.getSuccessesAndFailures();
     }
 
     private ValidationResult<BookFamilyCreateRequest> validateBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
@@ -101,7 +101,7 @@ public class BookFamilyBatchService {
 
         bookFamilyRepository.saveAll(booksToUpdate);
 
-        return this.getSuccessesAndFailures(validationResult);
+        return validationResult.getSuccessesAndFailures();
     }
 
     public List<BookFamilyModel> prepareMembersToUpdate(ValidationResult<BookFamilyUpdateRequest> validationResult, List<BookFamilyModel> currentMembers){
@@ -249,7 +249,7 @@ public class BookFamilyBatchService {
 
         bookFamilyRepository.deleteAllById(booksToRemove);
 
-        return this.getSuccessesAndFailures(validationResult);
+        return validationResult.getSuccessesAndFailures();
     }
 
     private List<UUID> prepareBookIdsToRemove(ValidationResult<BookFamilyDeleteRequest> validationResult) {
@@ -285,22 +285,7 @@ public class BookFamilyBatchService {
         return validationResult;
     }
 
-    private <T> BatchTransporter<UUID> getSuccessesAndFailures(
-            ValidationResult<T> validationResult){
 
-        List<BatchContent<UUID>> successes = new ArrayList<>();
-        List<BatchContent<UUID>> failures = new ArrayList<>();
-
-        for(Map.Entry<UUID, String> success: validationResult.getSuccess().entrySet()){
-            successes.add(BatchContent.success(success.getKey(), success.getValue()));
-        }
-
-        for(Map.Entry<UUID, String> failure: validationResult.getFailures().entrySet()){
-            failures.add(BatchContent.failure(failure.getKey(), failure.getValue()));
-        }
-
-        return new BatchTransporter<>(successes, failures);
-    }
 
     private List<BookFamilyModel> findAllBooksInFamily(UUID familyId){
         return bookFamilyRepository.findAllByFamilyId(familyId);
