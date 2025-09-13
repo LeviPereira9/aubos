@@ -32,6 +32,10 @@ public class BookLanguage {
         this.language = language;
     }
 
+    public boolean belongsToBook(UUID bookId){
+        return this.getBook().getId().equals(bookId);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

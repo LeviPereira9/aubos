@@ -7,11 +7,18 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface BookLanguageRepository extends JpaRepository<BookLanguage, Integer> {
+import java.util.List;
+import java.util.UUID;
+
+public interface BookLanguageRepository extends JpaRepository<BookLanguage, UUID> {
 
     @Modifying
     @Query("""
     DELETE FROM BookLanguage b WHERE b.book = :book
 """)
     void deleteByBook(BookModel book);
+
+    List<BookLanguage> findAllByBookId(UUID bookId);
+
+    boolean existsByBookIdAndLanguageId(UUID bookId, int id);
 }
