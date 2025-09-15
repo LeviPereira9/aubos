@@ -26,10 +26,7 @@ public class DependenciesService {
     private final DependenciesMapper dependenciesMapper;
     private final LanguageService languageService;
 
-    public ContributorRole getContributorRole(Integer roleId){
-        return contributorRoleRepository.findById(roleId)
-                .orElseThrow(CustomNotFoundException::user);
-    }
+
 
     public TypeModel getBookType(Integer id){
         return typeRepository.findById(id)

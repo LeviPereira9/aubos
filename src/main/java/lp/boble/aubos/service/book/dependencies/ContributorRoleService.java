@@ -16,7 +16,7 @@ public class ContributorRoleService {
 
     private final ContributorRoleRepository contributorRoleRepository;
 
-    public ContributorRole getContributorRole(Integer roleId){
+    public ContributorRole getContributorRoleOrThrow(Integer roleId){
         return contributorRoleRepository.findById(roleId)
                 .orElseThrow(CustomNotFoundException::user);
     }

@@ -16,7 +16,6 @@ import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
 import lp.boble.aubos.service.book.BookService;
 import lp.boble.aubos.service.book.dependencies.ContributorRoleService;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
-import lp.boble.aubos.service.book.dependencies.DependenciesService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -89,14 +88,14 @@ public class BookContributorService {
     private BookContributorModel generateBookContributor(UUID bookId, BookAddContributor request){
         BookModel book = bookService.findBookOrThrow(bookId);
         ContributorModel contributor = contributorService.findContributorOrThrow(request.contributorId());
-        ContributorRole contributorRole = contributorRoleService.getContributorRole(request.contributorRoleId());
+        ContributorRole contributorRole = contributorRoleService.getContributorRoleOrThrow(request.contributorRoleId());
 
         return new BookContributorModel(book, contributor, contributorRole);
     }
 
     public void updateContributorOnBook(UUID id, BookContributorUpdateRequest request){
         BookContributorModel bookContributor = this.findBookContributorOrThrow(id);
-        ContributorRole role = contributorRoleService.getContributorRole(request.contributorRoleId());
+        ContributorRole role = contributorRoleService.getContributorRoleOrThrow(request.contributorRoleId());
 
         bookContributorMapper.updateBookContributor(bookContributor, role);
 

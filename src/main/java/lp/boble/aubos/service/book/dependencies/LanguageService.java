@@ -11,6 +11,7 @@ import lp.boble.aubos.repository.book.depedencies.LanguageRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,5 +44,18 @@ public class LanguageService {
     public LanguageModel findLanguageOrThrow(int id){
         return languageRepository.findById(id)
                 .orElseThrow(CustomNotFoundException::language);
+    }
+
+    public List<LanguageModel> getAllLanguagesById(List<Integer> ids){
+        if(ids.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        List<LanguageModel> languages = languageRepository.findAllById(ids);
+        if(languages.isEmpty()){
+            throw CustomNotFoundException.language();
+        }
+
+        return languages;
     }
 }
