@@ -35,7 +35,7 @@ public class BookContributorBatchService {
     //ADD
     public BatchTransporter<UUID> addContributorsToBook(UUID bookId, List<BookAddContributor> requests){
         //Validate
-        ValidationResult<BookAddContributor> validationResult = this.validateContributor(bookId, requests);
+        ValidationResult<UUID, BookAddContributor> validationResult = this.validateContributor(bookId, requests);
 
         //Arrange
         List<BookContributorModel> contributorsToAdd = this.generateContributorModel(bookId, validationResult);
@@ -46,8 +46,8 @@ public class BookContributorBatchService {
         return validationResult.getSuccessesAndFailures();
     }
 
-    private ValidationResult<BookAddContributor> validateContributor(UUID bookId, List<BookAddContributor> requests) {
-        ValidationResult<BookAddContributor> validationResult = new ValidationResult<>();
+    private ValidationResult<UUID, BookAddContributor> validateContributor(UUID bookId, List<BookAddContributor> requests) {
+        ValidationResult<UUID, BookAddContributor> validationResult = new ValidationResult<>();
 
         //Vou ignorar as requisições duplicadas, como tentar adicionar 10x o mesmo autor. >:D
         List<BookAddContributor> uniqueRequests = requests.stream().distinct().toList();
@@ -96,7 +96,7 @@ public class BookContributorBatchService {
 
     public List<BookContributorModel> generateContributorModel(
         UUID bookId,
-        ValidationResult<BookAddContributor> validationResult) {
+        ValidationResult<UUID, BookAddContributor> validationResult) {
 
         List<BookContributorModel> toAdd = new ArrayList<>();
 
@@ -135,7 +135,7 @@ public class BookContributorBatchService {
 
         List<BookContributorModel> currentBookContributors = bookContributorService.findContributorsByBookOrThrow(bookId);
 
-        ValidationResult<BookContributorUpdateBatchRequest> validationResult = this.processBatchUpdate(requests, currentBookContributors);
+        ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult = this.processBatchUpdate(requests, currentBookContributors);
 
         bookContributorRepository.saveAll(currentBookContributors);
 
@@ -143,7 +143,7 @@ public class BookContributorBatchService {
     }
 
 
-    private ValidationResult<BookContributorUpdateBatchRequest> processBatchUpdate(
+    private ValidationResult<UUID, BookContributorUpdateBatchRequest> processBatchUpdate(
             List<BookContributorUpdateBatchRequest> requests, List<BookContributorModel> currentBookContributors
     ){
 
@@ -165,19 +165,19 @@ public class BookContributorBatchService {
                 Collectors.toMap(c -> new BookContributorKey(c.getContributorId(), c.getContributorRoleId()), Function.identity())
         );
 
-        ValidationResult<BookContributorUpdateBatchRequest> validationResult = validateRequests(uniqueRequests, existingContributors, existingRoles, currentAssociations);
+        ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult = validateRequests(uniqueRequests, existingContributors, existingRoles, currentAssociations);
 
         this.applyUpdates(validationResult, currentAssociations, mapRoles);
 
         return validationResult;
     }
 
-    private ValidationResult<BookContributorUpdateBatchRequest> validateRequests(
+    private ValidationResult<UUID, BookContributorUpdateBatchRequest> validateRequests(
             List<BookContributorUpdateBatchRequest> uniqueRequests,
             List<UUID> existingContributors,
             List<Integer> existingRoles,
             Map<BookContributorKey, BookContributorModel> currentAssociations) {
-        ValidationResult<BookContributorUpdateBatchRequest> validationResult = new ValidationResult<>();
+        ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult = new ValidationResult<>();
 
         for(BookContributorUpdateBatchRequest request : uniqueRequests){
             UUID contributorId = request.contributorId();
@@ -221,7 +221,7 @@ public class BookContributorBatchService {
     }
 
     private void applyUpdates(
-            ValidationResult<BookContributorUpdateBatchRequest> validationResult,
+            ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult,
             Map<BookContributorKey, BookContributorModel> currentAssociations,
             Map<Integer, ContributorRole> mapRoles) {
         for(BookContributorUpdateBatchRequest request: validationResult.getValidRequests()){
@@ -243,7 +243,7 @@ public class BookContributorBatchService {
     //DELETE
     public BatchTransporter<UUID> deleteBatch(UUID bookId, List<UUID> bookContributorIds) {
 
-        ValidationResult<UUID> validationResult = new ValidationResult<>();
+        ValidationResult<UUID, UUID> validationResult = new ValidationResult<>();
 
         List<UUID> uniqueRequests = bookContributorIds.stream().distinct().collect(Collectors.toList());
 

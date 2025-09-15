@@ -33,7 +33,7 @@ public class BookFamilyBatchService {
 
     @Transactional
     public BatchTransporter<UUID> addBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
-        ValidationResult<BookFamilyCreateRequest> validationResult = this.validateBooksToFamily(familyId, requests);
+        ValidationResult<UUID, BookFamilyCreateRequest> validationResult = this.validateBooksToFamily(familyId, requests);
 
         List<BookFamilyModel> booksToAddInFamily = this.createBooksToFamily(familyId, validationResult);
 
@@ -42,8 +42,8 @@ public class BookFamilyBatchService {
         return validationResult.getSuccessesAndFailures();
     }
 
-    private ValidationResult<BookFamilyCreateRequest> validateBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
-        ValidationResult<BookFamilyCreateRequest> validationResult = new ValidationResult<>();
+    private ValidationResult<UUID, BookFamilyCreateRequest> validateBooksToFamily(UUID familyId, List<BookFamilyCreateRequest> requests) {
+        ValidationResult<UUID, BookFamilyCreateRequest> validationResult = new ValidationResult<>();
 
         List<UUID> booksOnCurrentFamily = this.findBookIdsInFamily(familyId);
 
@@ -67,7 +67,7 @@ public class BookFamilyBatchService {
 
     private List<BookFamilyModel> createBooksToFamily(
             UUID familyId,
-            ValidationResult<BookFamilyCreateRequest> validationResult) {
+            ValidationResult<UUID, BookFamilyCreateRequest> validationResult) {
 
         List<BookFamilyModel> booksToAddInFamily = new ArrayList<>();
 
@@ -95,7 +95,7 @@ public class BookFamilyBatchService {
     public BatchTransporter<UUID> updateBooksBatch(UUID familyId, List<BookFamilyUpdateRequest> requests){
         List<BookFamilyModel> currentMembers = this.findAllBooksInFamily(familyId);
 
-        ValidationResult<BookFamilyUpdateRequest> validationResult = this.validateUpdateBookFamily(currentMembers, requests);
+        ValidationResult<UUID, BookFamilyUpdateRequest> validationResult = this.validateUpdateBookFamily(currentMembers, requests);
 
         List<BookFamilyModel> booksToUpdate = this.prepareMembersToUpdate(validationResult, currentMembers);
 
@@ -104,7 +104,7 @@ public class BookFamilyBatchService {
         return validationResult.getSuccessesAndFailures();
     }
 
-    public List<BookFamilyModel> prepareMembersToUpdate(ValidationResult<BookFamilyUpdateRequest> validationResult, List<BookFamilyModel> currentMembers){
+    public List<BookFamilyModel> prepareMembersToUpdate(ValidationResult<UUID, BookFamilyUpdateRequest> validationResult, List<BookFamilyModel> currentMembers){
         Map<UUID, BookFamilyModel> membersInFamilyByBookId = new HashMap<>();
 
         for(BookFamilyUpdateRequest request : validationResult.getValidRequests()) {
@@ -137,11 +137,11 @@ public class BookFamilyBatchService {
         bookFamilyRepository.flush();
     }
 
-    private ValidationResult<BookFamilyUpdateRequest> validateUpdateBookFamily(
+    private ValidationResult<UUID, BookFamilyUpdateRequest> validateUpdateBookFamily(
             List<BookFamilyModel> currentMembersInFamily,
             List<BookFamilyUpdateRequest> requests) {
 
-        ValidationResult<BookFamilyUpdateRequest> validationResult = new ValidationResult<>();
+        ValidationResult<UUID, BookFamilyUpdateRequest> validationResult = new ValidationResult<>();
 
         Set<UUID> currentBooksInFamily = currentMembersInFamily.stream()
                 .map(bf -> bf.getBook().getId())
@@ -179,7 +179,7 @@ public class BookFamilyBatchService {
     }
 
     private void validSwap(
-            ValidationResult<BookFamilyUpdateRequest> validationResult,
+            ValidationResult<UUID, BookFamilyUpdateRequest> validationResult,
             List<BookFamilyModel> currentBookFamilyMembers ) {
 
         List<BookFamilyUpdateRequest> requests = new ArrayList<>(validationResult.getPendentRequests());
@@ -243,7 +243,7 @@ public class BookFamilyBatchService {
 
     @Transactional
     public BatchTransporter<UUID> removeBooksFromFamily(UUID familyId, List<BookFamilyDeleteRequest> deleteRequests) {
-        ValidationResult<BookFamilyDeleteRequest> validationResult = this.validateDeleteBookBatch(familyId, deleteRequests);
+        ValidationResult<UUID, BookFamilyDeleteRequest> validationResult = this.validateDeleteBookBatch(familyId, deleteRequests);
 
         List<UUID> booksToRemove = this.prepareBookIdsToRemove(validationResult);
 
@@ -252,15 +252,15 @@ public class BookFamilyBatchService {
         return validationResult.getSuccessesAndFailures();
     }
 
-    private List<UUID> prepareBookIdsToRemove(ValidationResult<BookFamilyDeleteRequest> validationResult) {
+    private List<UUID> prepareBookIdsToRemove(ValidationResult<UUID, BookFamilyDeleteRequest> validationResult) {
 
         return validationResult.getValidRequests().stream().map(BookFamilyDeleteRequest::bookId).toList();
     }
 
-    private ValidationResult<BookFamilyDeleteRequest> validateDeleteBookBatch(
+    private ValidationResult<UUID, BookFamilyDeleteRequest> validateDeleteBookBatch(
             UUID familyId,
             List<BookFamilyDeleteRequest> deleteRequests){
-        ValidationResult<BookFamilyDeleteRequest> validationResult = new ValidationResult<>();
+        ValidationResult<UUID, BookFamilyDeleteRequest> validationResult = new ValidationResult<>();
 
         List<UUID> bookIdsInFamily = this.findBookIdsInFamily(familyId);
         Set<UUID> booksToRemoveFromFamily = new HashSet<>();
