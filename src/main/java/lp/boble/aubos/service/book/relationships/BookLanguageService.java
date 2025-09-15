@@ -93,4 +93,8 @@ public class BookLanguageService {
         );
     }
 
+    public List<Integer> findAllLanguagesInBook(UUID bookId) {
+        return bookLanguageRepository.findAllLanguageIdByBookId(bookId);
+    }
+
 }

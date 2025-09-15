@@ -7,11 +7,11 @@ import lp.boble.aubos.response.batch.BatchTransporter;
 import java.util.*;
 
 @Data
-public class ValidationResult<T> {
+public class ValidationResult<K, T> {
     private final List<T> validRequests = new ArrayList<>();
     private final List<T> pendentRequests = new ArrayList<>();
-    private final Map<UUID, String> failures = new HashMap<>();
-    private final Map<UUID, String> success = new HashMap<>();
+    private final Map<K, String> failures = new HashMap<>();
+    private final Map<K, String> success = new HashMap<>();
 
     public void addValid(T request) {
         validRequests.add(request);
@@ -21,28 +21,28 @@ public class ValidationResult<T> {
         pendentRequests.addAll(request);
     }
 
-    public void addSuccess(UUID id, String message){
+    public void addSuccess(K id, String message){
         success.put(id, message);
     }
 
-    public void addFailure(UUID id, String message) {
+    public void addFailure(K id, String message) {
         failures.put(id, message);
     }
 
-    public <T> BatchTransporter<UUID> getSuccessesAndFailures(){
+    public BatchTransporter<K> getSuccessesAndFailures(){
 
-        List<BatchContent<UUID>> successes = new ArrayList<>();
-        List<BatchContent<UUID>> falu = new ArrayList<>();
+        List<BatchContent<K>> successes = new ArrayList<>();
+        List<BatchContent<K>> failed = new ArrayList<>();
 
-        for(Map.Entry<UUID, String> success: success.entrySet()){
+        for(Map.Entry<K, String> success: success.entrySet()){
             successes.add(BatchContent.success(success.getKey(), success.getValue()));
         }
 
-        for(Map.Entry<UUID, String> failure: failures.entrySet()){
-            falu.add(BatchContent.failure(failure.getKey(), failure.getValue()));
+        for(Map.Entry<K, String> failure: failures.entrySet()){
+            failed.add(BatchContent.failure(failure.getKey(), failure.getValue()));
         }
 
-        return new BatchTransporter<>(successes, falu);
+        return new BatchTransporter<>(successes, failed);
     }
 
 }
