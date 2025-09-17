@@ -14,9 +14,11 @@ import lp.boble.aubos.service.book.BookService;
 import lp.boble.aubos.service.book.dependencies.LanguageService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +97,22 @@ public class BookLanguageService {
 
     public List<Integer> findAllLanguagesInBook(UUID bookId) {
         return bookLanguageRepository.findAllLanguageIdByBookId(bookId);
+    }
+
+    public Map<UUID, BookLanguage> findRequestedBookLanguages(UUID bookId, List<UUID> bookLanguageIds) {
+        List<BookLanguage> bookLanguages = this.findAllLanguagesInBook(bookId, bookLanguageIds);
+
+        return bookLanguages.stream().collect(Collectors.toMap(BookLanguage::getId, Function.identity()));
+    }
+
+    private List<BookLanguage> findAllLanguagesInBook(UUID bookId, List<UUID> bookLanguageIds){
+        List<BookLanguage> found = bookLanguageRepository.findAllByBookIdAndIdIn(bookId, bookLanguageIds);
+
+        if(found.isEmpty()){
+            throw CustomNotFoundException.language();
+        }
+
+        return found;
     }
 
 }

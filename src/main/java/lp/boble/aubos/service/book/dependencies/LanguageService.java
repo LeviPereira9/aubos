@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,5 +59,11 @@ public class LanguageService {
         }
 
         return languages;
+    }
+
+    public Map<Integer, LanguageModel> findRequestedLanguages(List<Integer> requestedLanguagesId) {
+        List<LanguageModel> requestedLanguages = this.getAllLanguagesById(requestedLanguagesId);
+
+        return requestedLanguages.stream().collect(Collectors.toMap(LanguageModel::getId, Function.identity()));
     }
 }
