@@ -27,6 +27,7 @@ public class BookLanguage {
     private LanguageModel language;
 
     public BookLanguage() {}
+
     public BookLanguage(BookModel book, LanguageModel language) {
         this.book = book;
         this.language = language;
@@ -34,6 +35,14 @@ public class BookLanguage {
 
     public boolean belongsToBook(UUID bookId){
         return this.getBook().getId().equals(bookId);
+    }
+
+    public UUID getBookId() {
+        return book.getId();
+    }
+
+    public Integer getLanguageId() {
+        return language.getId();
     }
 
     @Override

@@ -7,17 +7,16 @@ import org.springframework.http.HttpStatus;
 public class BatchResponse<T> {
 
     private String operation;
-    private HttpStatus code;
+    private int code;
     private String message;
     private BatchTransporter<T> content;
 
-    public BatchResponse(String operation, HttpStatus code, String message, BatchTransporter<T> content) {
+    public BatchResponse(String operation, int code, String message, BatchTransporter<T> content) {
         this.operation = operation;
         this.code = code;
         this.message = message;
         this.content = content;
     }
 
-    public BatchResponse() {}
 
 }

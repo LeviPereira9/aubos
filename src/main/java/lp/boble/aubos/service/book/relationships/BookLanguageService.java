@@ -2,6 +2,7 @@ package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageAddRequest;
+import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageCreatedResponse;
 import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageResponse;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
@@ -50,12 +51,14 @@ public class BookLanguageService {
     // Como? Book + Language -> Aqui [
     // Em um livro que existe. -> BookService [
     // Com uma linguagem que existe. -> LanguageService [
-    public void addLanguageToBook(UUID bookId, BookLanguageAddRequest request) {
+    public BookLanguageCreatedResponse addLanguageToBook(UUID bookId, BookLanguageAddRequest request) {
         this.validateLanguage(bookId, request);
 
         BookLanguage bookToAdd = this.generateBookLanguage(bookId, request);
 
-        bookLanguageRepository.save(bookToAdd);
+        BookLanguage created = bookLanguageRepository.save(bookToAdd);
+
+        return bookLanguageMapper.toCreatedResponse(created);
     }
 
     private void validateLanguage(UUID bookId, BookLanguageAddRequest request) {
