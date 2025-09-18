@@ -17,6 +17,10 @@ public class ValidationResult<K, T> {
         validRequests.add(request);
     }
 
+    public void addPendent(T request) {
+        pendentRequests.add(request);
+    }
+
     public void setPendentRequests(Set<T> request) {
         pendentRequests.addAll(request);
     }

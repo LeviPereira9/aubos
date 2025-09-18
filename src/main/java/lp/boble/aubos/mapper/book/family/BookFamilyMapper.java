@@ -15,7 +15,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface BookFamilyMapper {
 
-    @Mapping(target = "bookId", source = "book.id")
+    @Mapping(target = "id", source = "book.id")
     @Mapping(target = "order", source = "orderInFamily")
     @Mapping(target = "title", source = "book.title")
     BookFamilyResponse fromModelToResponse(BookFamilyModel model);

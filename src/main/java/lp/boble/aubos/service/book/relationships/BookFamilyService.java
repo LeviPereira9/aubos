@@ -18,6 +18,8 @@ import lp.boble.aubos.service.book.family.FamilyService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,34 +30,30 @@ public class BookFamilyService {
     private final BookFamilyMapper bookFamilyMapper;
 
     @Transactional
-    public BookFamilyResponse addBookToFamily(UUID familyId, BookFamilyCreateRequest request) {
+    public BookFamilyResponse addMemberToFamily(UUID familyId, BookFamilyCreateRequest request) {
 
-        this.validateBookConflict(familyId, request.bookId());
+        this.validateMemberConflict(familyId, request.bookId());
 
-        BookFamilyModel bookFamilyToAdd = this.createBookFamily(familyId, request);
+        BookFamilyModel memberToAdd = this.createMemberToFamily(familyId, request);
 
-        return bookFamilyMapper.fromModelToResponse(bookFamilyRepository.save(bookFamilyToAdd));
+        return bookFamilyMapper.fromModelToResponse(bookFamilyRepository.save(memberToAdd));
     }
 
-    private void validateBookConflict(UUID familyId, UUID bookId) {
+    private void validateMemberConflict(UUID familyId, UUID bookId) {
         boolean hasConflict = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, bookId);
         if(hasConflict) throw CustomDuplicateFieldException.bookFamily();
     }
 
-    private BookFamilyModel createBookFamily(UUID familyId, BookFamilyCreateRequest request){
+    private BookFamilyModel createMemberToFamily(UUID familyId, BookFamilyCreateRequest request){
         BookModel bookToAdd = bookService.findBookOrThrow(request.bookId());
         FamilyModel familyDestination = familyService.findFamilyOrThrow(familyId);
 
-        BookFamilyModel bookFamilyToAdd = bookFamilyMapper.fromCreateRequestToModel(request, bookToAdd, familyDestination);
+        BookFamilyModel memberToAdd = bookFamilyMapper.fromCreateRequestToModel(request, bookToAdd, familyDestination);
 
-        bookFamilyToAdd.setOrderInFamily(
-                this.calculateAvailableOrderForFamily(
-                        familyId,
-                        bookFamilyToAdd.getOrderInFamily()
-                )
-        );
+        memberToAdd.setOrderInFamily(
+                this.calculateAvailableOrderForFamily(familyId, memberToAdd.getOrderInFamily()));
 
-        return bookFamilyToAdd;
+        return memberToAdd;
     }
 
     private int calculateAvailableOrderForFamily(UUID familyId, int requestedOrder) {
@@ -69,25 +67,25 @@ public class BookFamilyService {
     }
 
     @Transactional
-    public BookFamilyResponse updateBookFamily(UUID familyId, BookFamilyUpdateRequest request) {
+    public BookFamilyResponse updateMemberFamily(UUID familyId, BookFamilyUpdateRequest request) {
 
-        this.validateUpdateBook(familyId, request);
+        this.validateUpdateMember(familyId, request);
 
-        BookFamilyModel bookFamilyToUpdate = this.prepareBookToUpdate(familyId, request);
+        BookFamilyModel bookFamilyToUpdate = this.prepareMemberToUpdate(familyId, request);
 
         return bookFamilyMapper.fromModelToResponse(bookFamilyRepository.save(bookFamilyToUpdate));
     }
 
-    private BookFamilyModel prepareBookToUpdate(UUID familyId, BookFamilyUpdateRequest request) {
-        BookFamilyModel toUpdate = this.findBookInFamily(familyId, request.bookId());
+    private BookFamilyModel prepareMemberToUpdate(UUID familyId, BookFamilyUpdateRequest request) {
+        BookFamilyModel memberToUpdate = this.findMemberInFamily(familyId, request.id());
 
-        bookFamilyMapper.toUpdateFromRequest(toUpdate, request);
+        bookFamilyMapper.toUpdateFromRequest(memberToUpdate, request);
 
-        return toUpdate;
+        return memberToUpdate;
     }
 
-    private void validateUpdateBook(UUID familyId, BookFamilyUpdateRequest request){
-        boolean bookConflict = !bookFamilyRepository.existsByFamilyIdAndBookId(familyId, request.bookId());
+    private void validateUpdateMember(UUID familyId, BookFamilyUpdateRequest request){
+        boolean bookConflict = !bookFamilyRepository.existsByFamilyIdAndBookId(familyId, request.id());
         boolean orderConflict = bookFamilyRepository.existsByFamilyIdAndOrderInFamily(familyId, request.order());
 
         if(orderConflict) throw CustomDuplicateFieldException.orderFamily();
@@ -95,15 +93,15 @@ public class BookFamilyService {
     }
 
     @Transactional
-    public void removeBookFromFamily(UUID familyId, BookFamilyDeleteRequest deleteRequest) {
-        UUID bookId = deleteRequest.bookId();
+    public void removeMemberFromFamily(UUID familyId, BookFamilyDeleteRequest deleteRequest) {
+        UUID bookId = deleteRequest.id();
 
-        this.validateBookToRemove(familyId, bookId);
+        this.validateMemberToRemove(familyId, bookId);
 
         bookFamilyRepository.deleteByFamilyIdAndBookId(familyId, bookId);
     }
 
-    private void validateBookToRemove(UUID familyId, UUID bookId){
+    private void validateMemberToRemove(UUID familyId, UUID bookId){
         boolean bookFamilyExists = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, bookId);
 
         if(!bookFamilyExists){
@@ -111,10 +109,27 @@ public class BookFamilyService {
         }
     }
 
-    public BookFamilyModel findBookInFamily(UUID familyId, UUID bookId){
+    protected BookFamilyModel findMemberInFamily(UUID familyId, UUID bookId){
 
         return bookFamilyRepository.findByFamilyIdAndBookId(familyId, bookId)
                 .orElseThrow(CustomNotFoundException::bookFamily);
     }
 
+    protected Map<UUID, BookFamilyModel> getRequestedMembers(UUID familyId, List<UUID> requestedMembersId) {
+        List<BookFamilyModel> requestedMembers = this.findRequestedMembersInFamily(familyId, requestedMembersId);
+
+        return requestedMembers.stream().collect(Collectors.toMap(BookFamilyModel::getId, Function.identity()));
+    }
+
+    protected List<BookFamilyModel> findAllMembersInFamily(UUID familyId){
+        return bookFamilyRepository.findAllByFamilyId(familyId);
+    }
+
+    private List<BookFamilyModel> findRequestedMembersInFamily(UUID familyId, List<UUID> requestedFamiliesId) {
+        List<BookFamilyModel> requested = bookFamilyRepository.findAllByFamilyIdAndIdIn(familyId, requestedFamiliesId);
+
+        if(requested.isEmpty()) throw CustomNotFoundException.book();
+
+        return requested;
+    }
 }

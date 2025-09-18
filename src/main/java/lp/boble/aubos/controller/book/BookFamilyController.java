@@ -31,7 +31,7 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyCreateRequest request){
 
-        BookFamilyResponse content = bookFamilyService.addBookToFamily(familyId, request);
+        BookFamilyResponse content = bookFamilyService.addMemberToFamily(familyId, request);
 
         SuccessResponse<BookFamilyResponse> response =
                 new SuccessResponseBuilder<BookFamilyResponse>()
@@ -68,7 +68,7 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyUpdateRequest request){
 
-        BookFamilyResponse content = bookFamilyService.updateBookFamily(familyId, request);
+        BookFamilyResponse content = bookFamilyService.updateMemberFamily(familyId, request);
 
         SuccessResponse<BookFamilyResponse> response =
                 new SuccessResponseBuilder<BookFamilyResponse>()
@@ -103,7 +103,7 @@ public class BookFamilyController {
     public ResponseEntity<SuccessResponse<Void>> removeBookFromFamily(
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyDeleteRequest deleteRequest){
-        bookFamilyService.removeBookFromFamily(familyId, deleteRequest);
+        bookFamilyService.removeMemberFromFamily(familyId, deleteRequest);
 
         SuccessResponse<Void> response = new SuccessResponseBuilder<Void>()
                 .operation("DELETE")
@@ -119,7 +119,7 @@ public class BookFamilyController {
             @PathVariable("familyId") UUID familyId,
             @RequestBody List<BookFamilyDeleteRequest> deleteRequests
     ){
-        BatchTransporter<UUID> result = bookFamilyBatchService.removeBooksFromFamily(familyId, deleteRequests);
+        BatchTransporter<UUID> result = bookFamilyBatchService.removeMembersFromFamily(familyId, deleteRequests);
         HttpStatus status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()

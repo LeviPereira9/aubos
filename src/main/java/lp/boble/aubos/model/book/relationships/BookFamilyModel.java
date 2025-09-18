@@ -45,6 +45,17 @@ public class BookFamilyModel {
     @JoinColumn(name = "updated_by")
     private UserModel updatedBy;
 
+    public UUID getBookId(){
+        return book.getId();
+    }
+
+    public void markAsTempOrder(){
+        this.orderInFamily *= -1;
+    }
+
+    public void restoreFinalOrder(){
+        this.orderInFamily *= -1;
+    }
 
     public void adjustOrderToAvoidConflict(List<Integer> ordersInUse){
         int orderToAdd = this.getOrderInFamily();

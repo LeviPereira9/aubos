@@ -22,6 +22,6 @@ public interface BookContributorRepository extends JpaRepository<BookContributor
     @Query("""
     SELECT bc FROM BookContributorModel bc WHERE bc.book.id = :bookId AND bc.id IN :ids
 """)
-    List<BookContributorModel> findAllByIdIn(@Param("bookId") UUID bookId, @Param("ids") List<UUID> ids);
+    List<BookContributorModel> findAllByIdIn(@Param("id") UUID bookId, @Param("ids") List<UUID> ids);
 
 }

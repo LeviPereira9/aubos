@@ -31,8 +31,5 @@ public interface BookFamilyRepository extends JpaRepository<BookFamilyModel, UUI
 """)
     List<Integer> findAllOrderInFamilyByFamilyId(@Param("familyId") UUID familyId);
 
-    @Query("""
-     SELECT bf.book.id FROM BookFamilyModel bf WHERE bf.family.id = :familyId
-""")
-    List<UUID> findAllBookIdsByFamilyId(@Param("familyId") UUID familyId);
+    List<BookFamilyModel> findAllByFamilyIdAndIdIn(UUID familyId, List<UUID> membersId);
 }

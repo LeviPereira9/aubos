@@ -24,6 +24,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -137,4 +139,13 @@ public class BookService {
         return bookRepository.existsById(bookId);
     }
 
+    private List<BookModel> findAllBooksById(List<UUID> requestedBookId) {
+        return bookRepository.findAllById(requestedBookId);
+    }
+
+    public Map<UUID, BookModel> getRequestedBooks(List<UUID> requestedBookId){
+        List<BookModel> books = this.findAllBooksById(requestedBookId);
+
+        return books.stream().collect(Collectors.toMap(BookModel::getId, Function.identity()));
+    }
 }

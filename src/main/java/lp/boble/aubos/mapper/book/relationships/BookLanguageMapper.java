@@ -14,6 +14,6 @@ public interface BookLanguageMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "languageId", source = "languageId")
-    @Mapping(target = "bookId", source = "bookId")
+    @Mapping(target = "id", source = "id")
     BookLanguageCreatedResponse toCreatedResponse(BookLanguage bookLanguage);
 }
