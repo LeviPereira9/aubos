@@ -20,10 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,5 +128,9 @@ public class ContributorService {
     }
 
 
+    public Map<UUID, ContributorModel> getRequestedContributors(List<UUID> requestContributorIds) {
+        List<ContributorModel> contributors = contributorRepository.findAllById(requestContributorIds);
 
+        return contributors.stream().collect(Collectors.toMap(ContributorModel::getId, Function.identity()));
+    }
 }

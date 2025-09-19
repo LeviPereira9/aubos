@@ -24,4 +24,5 @@ public interface BookContributorRepository extends JpaRepository<BookContributor
 """)
     List<BookContributorModel> findAllByIdIn(@Param("id") UUID bookId, @Param("ids") List<UUID> ids);
 
+    List<BookContributorModel> findAllByBookIdAndIdIn(UUID bookId, List<UUID> ids);
 }

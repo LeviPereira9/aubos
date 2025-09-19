@@ -2,6 +2,7 @@ package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorKey;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
@@ -19,7 +20,10 @@ import lp.boble.aubos.service.book.dependencies.ContributorService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,13 +123,17 @@ public class BookContributorService {
                 .orElseThrow(CustomNotFoundException::bookContributor);
     }
 
+    public Map<UUID, List<Integer>> getCurrentContributorRolesFromBook(UUID bookId) {
+        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBookId(bookId);
+
+        return bookContributors.stream()
+                .collect(Collectors.groupingBy(BookContributorModel::getContributorId, Collectors.mapping(BookContributorModel::getContributorRoleId, Collectors.toList())));
+    }
 
 
-    /*private BookContributorPayload getBookContributor(BookContributorUpdateRequest request){
+    public Map<UUID, BookContributorModel> getCurrentContributorsFromBook(UUID bookId, List<UUID> bookContributorsId) {
+        List<BookContributorModel> currentBookContributors = bookContributorRepository.findAllByBookIdAndIdIn(bookId, bookContributorsId);
 
-        ContributorModel contributor = contributorService.findContributorOrThrow(request.contributorId());
-        ContributorRole contributorRole = dependenciesService.getContributorRole(request.toRoleId());
-
-        return new BookContributorPayload(contributor, contributorRole);
-    }*/
+        return currentBookContributors.stream().collect(Collectors.toMap(BookContributorModel::getId, Function.identity()));
+    }
 }

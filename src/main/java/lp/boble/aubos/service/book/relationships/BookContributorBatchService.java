@@ -2,9 +2,8 @@ package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorKey;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateBatchRequest;
-import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
@@ -18,9 +17,7 @@ import lp.boble.aubos.util.ValidationResult;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -35,33 +32,29 @@ public class BookContributorBatchService {
     //ADD
     public BatchTransporter<UUID> addContributorsToBook(UUID bookId, List<BookAddContributor> requests){
         //Validate
-        ValidationResult<UUID, BookAddContributor> validationResult = this.validateContributor(bookId, requests);
-
-        //Arrange
-        List<BookContributorModel> contributorsToAdd = this.generateContributorModel(bookId, validationResult);
+        ValidationResult<UUID, BookContributorModel> validationResult = this.validateCreateBatch(bookId, requests);
 
         //Persist
-        bookContributorRepository.saveAll(contributorsToAdd);
+        this.persistBatch(validationResult.getValidRequests());
 
         return validationResult.getSuccessesAndFailures();
     }
 
-    private ValidationResult<UUID, BookAddContributor> validateContributor(UUID bookId, List<BookAddContributor> requests) {
-        ValidationResult<UUID, BookAddContributor> validationResult = new ValidationResult<>();
+    private ValidationResult<UUID, BookContributorModel> validateCreateBatch(UUID bookId, List<BookAddContributor> requests) {
+        ValidationResult<UUID, BookContributorModel> validationResult = new ValidationResult<>();
 
-        //Vou ignorar as requisições duplicadas, como tentar adicionar 10x o mesmo autor. >:D
+        //Vou ignorar as requisições duplicadas, como tentar adicionar 10x o mesmo autor.
         List<BookAddContributor> uniqueRequests = requests.stream().distinct().toList();
 
-        List<BookContributorModel> bookContributors = bookContributorService.findContributorsByBookOrThrow(bookId);
+        List<UUID> requestContributorIds = uniqueRequests.stream().distinct().map(BookAddContributor::contributorId).toList();
+        List<Integer> requestRoleIds = uniqueRequests.stream().distinct().map(BookAddContributor::contributorRoleId).toList();
 
-        Map<UUID, List<Integer>> mapByContributor = bookContributors.stream()
-                .collect(Collectors.groupingBy(BookContributorModel::getContributorId, Collectors.mapping(BookContributorModel::getContributorRoleId, Collectors.toList())));
+        BookModel book = bookService.findBookOrThrow(bookId);
 
-        Set<UUID> existingContributors = contributorService.getAllContributorsId(
-                uniqueRequests.stream().map(BookAddContributor::contributorId).toList());
+        Map<UUID, ContributorModel> mapRequestedContributors = contributorService.getRequestedContributors(requestContributorIds);
+        Map<Integer, ContributorRole> mapRequestedRoles = contributorRoleService.getRequestedRoles(requestRoleIds);
 
-        Set<Integer> existingRoles = contributorRoleService.getAllRolesId(
-                uniqueRequests.stream().map(BookAddContributor::contributorRoleId).toList());
+        Map<UUID, List<Integer>> mapByContributor = bookContributorService.getCurrentContributorRolesFromBook(bookId);
 
         for(BookAddContributor request : uniqueRequests){
             UUID contributorId = request.contributorId();
@@ -69,8 +62,8 @@ public class BookContributorBatchService {
 
             List<Integer> roles = mapByContributor.getOrDefault(contributorId, Collections.emptyList());
 
-            boolean contributorExists = existingContributors.contains(contributorId);
-            boolean roleExists = existingRoles.contains(roleId);
+            boolean contributorExists = mapRequestedContributors.containsKey(contributorId);
+            boolean roleExists = mapRequestedRoles.containsKey(roleId);
 
             if(!contributorExists){
                 validationResult.addFailure(contributorId, "Contribuidor não encontrado.");
@@ -87,199 +80,113 @@ public class BookContributorBatchService {
                 continue;
             }
 
-            validationResult.addValid(request);
+            BookContributorModel contributorToAdd = this.generateContributor(
+                    book,
+                    mapRequestedContributors.get(contributorId),
+                    mapRequestedRoles.get(roleId));
+
+            validationResult.addSuccess(request.contributorId(), "Contribuidor adicionado ao livro com sucesso.");
+            validationResult.addValid(contributorToAdd);
 
         }
 
         return validationResult;
     }
 
-    public List<BookContributorModel> generateContributorModel(
-        UUID bookId,
-        ValidationResult<UUID, BookAddContributor> validationResult) {
+    private BookContributorModel generateContributor(BookModel book, ContributorModel contributorModel, ContributorRole contributorRole) {
+        BookContributorModel contributor = new BookContributorModel();
 
-        List<BookContributorModel> toAdd = new ArrayList<>();
+        contributor.setBook(book);
+        contributor.setContributor(contributorModel);
+        contributor.setContributorRole(contributorRole);
 
-        List<BookAddContributor> requests = validationResult.getValidRequests();
-
-        BookModel book = bookService.findBookOrThrow(bookId);
-
-        Set<UUID> contributorsId = requests.stream().map(BookAddContributor::contributorId).collect(Collectors.toSet());
-        Set<Integer> rolesId = requests.stream().map(BookAddContributor::contributorRoleId).collect(Collectors.toSet());
-
-        List<ContributorModel> contributors = contributorService.findAllContributorsById(contributorsId);
-        List<ContributorRole> roles = contributorRoleService.findAllContributorRoles(rolesId);
-
-        Map<UUID, ContributorModel> mapContributors = contributors.stream()
-                .collect(Collectors.toMap(ContributorModel::getId, Function.identity()));
-
-        Map<Integer, ContributorRole> mapRoles = roles.stream()
-                .collect(Collectors.toMap(ContributorRole::getId, Function.identity()));
-
-        for(BookAddContributor request : requests){
-            BookContributorModel bookContributor = new BookContributorModel();
-            bookContributor.setBook(book);
-            bookContributor.setContributor(mapContributors.get(request.contributorId()));
-            bookContributor.setContributorRole(mapRoles.get(request.contributorRoleId()));
-
-            toAdd.add(bookContributor);
-            validationResult.addSuccess(request.contributorId(), "Contribuidor adicionado ao livro com sucesso.");
-        }
-
-        return toAdd;
+        return contributor;
     }
 
+    private void persistBatch(List<BookContributorModel> validRequests) {
+
+        if(!validRequests.isEmpty()){
+            bookContributorRepository.saveAll(validRequests);
+        }
+    }
 
     //UPDATE
     public BatchTransporter<UUID> updateBatch(UUID bookId, List<BookContributorUpdateBatchRequest> requests) {
 
-        List<BookContributorModel> currentBookContributors = bookContributorService.findContributorsByBookOrThrow(bookId);
+        ValidationResult<UUID, BookContributorModel> validationResult = this.validateBatchUpdate(bookId, requests);
 
-        ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult = this.processBatchUpdate(requests, currentBookContributors);
-
-        bookContributorRepository.saveAll(currentBookContributors);
+        this.persistBatch(validationResult.getValidRequests());
 
         return validationResult.getSuccessesAndFailures();
     }
 
+    private ValidationResult<UUID, BookContributorModel> validateBatchUpdate(
+            UUID bookId, List<BookContributorUpdateBatchRequest> requests) {
 
-    private ValidationResult<UUID, BookContributorUpdateBatchRequest> processBatchUpdate(
-            List<BookContributorUpdateBatchRequest> requests, List<BookContributorModel> currentBookContributors
-    ){
+        ValidationResult<UUID, BookContributorModel> validationResult = new ValidationResult<>();
 
         List<BookContributorUpdateBatchRequest> uniqueRequests = requests.stream().distinct().toList();
 
+        List<UUID> bookContributorsId = uniqueRequests.stream().map(BookContributorUpdateBatchRequest::bookContributorId).toList();
 
-        Set<UUID> requestContributorIds = uniqueRequests.stream().map(BookContributorUpdateBatchRequest::contributorId).collect(Collectors.toSet());
-        Set<Integer> requestRoleIds = uniqueRequests.stream().flatMap(r -> Stream.of(r.toRoleId(), r.fromRoleId())).collect(Collectors.toSet());
+        Map<UUID, BookContributorModel> currentAssociations = bookContributorService.getCurrentContributorsFromBook(bookId, bookContributorsId);
 
-        List<ContributorModel> contributors = contributorService.findAllContributorsById(requestContributorIds);
-        List<ContributorRole> roles = contributorRoleService.findAllContributorRoles(requestRoleIds);
+        for(BookContributorUpdateBatchRequest request: uniqueRequests){
+            UUID associationId = request.bookContributorId();
+            boolean hasAssociation = currentAssociations.containsKey(associationId);
 
-        List<Integer> existingRoles = roles.stream().map(ContributorRole::getId).toList();
-        List<UUID> existingContributors = contributors.stream().map(ContributorModel::getId).toList();
-
-        Map<Integer, ContributorRole> mapRoles = roles.stream().collect(Collectors.toMap(ContributorRole::getId, Function.identity()));
-
-        Map<BookContributorKey, BookContributorModel> currentAssociations = currentBookContributors.stream().collect(
-                Collectors.toMap(c -> new BookContributorKey(c.getContributorId(), c.getContributorRoleId()), Function.identity())
-        );
-
-        ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult = validateRequests(uniqueRequests, existingContributors, existingRoles, currentAssociations);
-
-        this.applyUpdates(validationResult, currentAssociations, mapRoles);
-
-        return validationResult;
-    }
-
-    private ValidationResult<UUID, BookContributorUpdateBatchRequest> validateRequests(
-            List<BookContributorUpdateBatchRequest> uniqueRequests,
-            List<UUID> existingContributors,
-            List<Integer> existingRoles,
-            Map<BookContributorKey, BookContributorModel> currentAssociations) {
-        ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult = new ValidationResult<>();
-
-        for(BookContributorUpdateBatchRequest request : uniqueRequests){
-            UUID contributorId = request.contributorId();
-            int fromRoleId = request.fromRoleId();
-            int toRoleId = request.toRoleId();
-
-            if(fromRoleId == toRoleId){
-                validationResult.addSuccess(contributorId, "Role não alterada.");
+            if(!hasAssociation){
+                validationResult.addFailure(associationId, "Associação não encontrada.");
                 continue;
             }
 
-            if(!existingContributors.contains(contributorId)){
-                validationResult.addFailure(contributorId, "Contribuidor não encontrado.");
-                continue;
-            }
+            BookContributorModel associated = currentAssociations.get(associationId);
+            //setters que não criei ainda. :(
 
-            if(!existingRoles.contains(toRoleId)){
-                validationResult.addFailure(contributorId, "Role de destino não encontrada.");
-                continue;
-            }
-
-            if(!existingRoles.contains(fromRoleId)){
-                validationResult.addFailure(contributorId, "Role de origem não encontrada.");
-                continue;
-            }
-
-            if(!currentAssociations.containsKey(new BookContributorKey(contributorId, fromRoleId))){
-                validationResult.addFailure(contributorId, "Esse contribuidor não está associado a essa role.");
-                continue;
-            }
-
-            if(currentAssociations.containsKey(new BookContributorKey(contributorId, toRoleId))){
-                validationResult.addFailure(contributorId, "Esse contribuidor já possui esta role.");
-                continue;
-            }
-
-            validationResult.addValid(request);
+            validationResult.addSuccess(associationId, "Associação atualizada com sucesso.");
+            validationResult.addValid(associated);
         }
 
         return validationResult;
-    }
-
-    private void applyUpdates(
-            ValidationResult<UUID, BookContributorUpdateBatchRequest> validationResult,
-            Map<BookContributorKey, BookContributorModel> currentAssociations,
-            Map<Integer, ContributorRole> mapRoles) {
-        for(BookContributorUpdateBatchRequest request: validationResult.getValidRequests()){
-            BookContributorKey contributorKey = new BookContributorKey(request.contributorId(), request.fromRoleId());
-
-            BookContributorModel original = currentAssociations.get(contributorKey);
-
-            if(original != null){
-                original.setContributorRole(mapRoles.get(request.toRoleId()));
-                validationResult.addSuccess(request.contributorId(), "Atualização realizada com sucesso.");
-            } else {
-                validationResult.addFailure(request.contributorId(), "Falha em localizar o contribuidor.");
-            }
-
-        }
-
     }
 
     //DELETE
-    public BatchTransporter<UUID> deleteBatch(UUID bookId, List<UUID> bookContributorIds) {
+    public BatchTransporter<UUID> deleteBatch(UUID bookId, List<BookContributorDeleteRequest> requests) {
 
-        ValidationResult<UUID, UUID> validationResult = new ValidationResult<>();
+        ValidationResult<UUID, BookContributorModel> validationResult = this.validateBatchDelete(bookId, requests);
 
-        List<UUID> uniqueRequests = bookContributorIds.stream().distinct().collect(Collectors.toList());
-
-        List<BookContributorModel> bookContributorsToDelete = this.findAllContributorsOnBook(bookId, uniqueRequests);
-
-        Set<UUID> existingIds = bookContributorsToDelete.stream().map(BookContributorModel::getId).collect(Collectors.toSet());
-
-        for(UUID request: uniqueRequests){
-            if(!existingIds.contains(request)){
-                validationResult.addFailure(request, "Esse contribuidor não está associado a este livro.");
-                continue;
-            }
-
-            validationResult.addValid(request);
-        }
-
-        if(!validationResult.getValidRequests().isEmpty()){
-            bookContributorRepository.deleteAll(bookContributorsToDelete);
-
-            for (UUID validId: validationResult.getValidRequests()){
-                validationResult.addSuccess(validId, "Contribuidor removido com sucesso.");
-            }
-        }
+        this.persistBatchDelete(validationResult.getValidRequests());
 
         return validationResult.getSuccessesAndFailures();
     }
 
-    private List<BookContributorModel> findAllContributorsOnBook(UUID bookId, List<UUID> uniqueRequests) {
-        List<BookContributorModel> contributors = bookContributorRepository.findAllByIdIn(bookId, uniqueRequests);
+    private ValidationResult<UUID, BookContributorModel> validateBatchDelete(UUID bookId, List<BookContributorDeleteRequest> requests) {
+        ValidationResult<UUID, BookContributorModel> validationResult = new ValidationResult<>();
 
-        if(contributors.isEmpty()){
-            throw CustomNotFoundException.bookContributor();
+        List<UUID> requestedAssociationIds = requests.stream().distinct().map(BookContributorDeleteRequest::bookContributorId).collect(Collectors.toList());
+
+        Map<UUID, BookContributorModel> mapRequestedAssociation = bookContributorService.getCurrentContributorsFromBook(bookId, requestedAssociationIds);
+
+        for(BookContributorDeleteRequest request: requests){
+            UUID associationId = request.bookContributorId();
+            boolean hasAssociation = mapRequestedAssociation.containsKey(associationId);
+
+            if(!hasAssociation){
+                validationResult.addFailure(associationId, "Associação não encontrada.");
+                continue;
+            }
+
+            validationResult.addSuccess(associationId, "Associação removida com sucesso.");
+            validationResult.addValid(mapRequestedAssociation.get(associationId));
         }
 
-        return contributors;
+        return validationResult;
     }
 
+    private void persistBatchDelete(List<BookContributorModel> validRequests) {
+        if(!validRequests.isEmpty()){
+            bookContributorRepository.deleteAll(validRequests);
+        }
+    }
 
 }

@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,5 +30,11 @@ public class ContributorRoleService {
 
     public List<ContributorRole> findAllContributorRoles(Set<Integer> rolesId){
         return contributorRoleRepository.findAllById(rolesId);
+    }
+
+    public Map<Integer, ContributorRole> getRequestedRoles(List<Integer> requestRoleIds) {
+        List<ContributorRole> roles = contributorRoleRepository.findAllById(requestRoleIds);
+
+        return roles.stream().collect(Collectors.toMap(ContributorRole::getId, Function.identity()));
     }
 }

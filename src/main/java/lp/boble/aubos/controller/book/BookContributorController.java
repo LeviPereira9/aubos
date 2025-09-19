@@ -3,10 +3,7 @@ package lp.boble.aubos.controller.book;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateBatchRequest;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
+import lp.boble.aubos.dto.book.relationships.BookContributor.*;
 import lp.boble.aubos.response.batch.BatchResponse;
 import lp.boble.aubos.response.batch.BatchResponseBuilder;
 import lp.boble.aubos.response.batch.BatchTransporter;
@@ -120,7 +117,7 @@ public class BookContributorController {
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> addBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookAddContributor> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.addContributorsToBook(bookId, requests);
-        HttpStatus code = result.getStatus();
+        int code = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("POST")
@@ -135,7 +132,7 @@ public class BookContributorController {
     @PatchMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> updateBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorUpdateBatchRequest> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.updateBatch(bookId, requests);
-        HttpStatus code = result.getStatus();
+        int code = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("PATCH")
@@ -148,9 +145,9 @@ public class BookContributorController {
     }
 
     @PatchMapping("/batch")
-    public ResponseEntity<BatchResponse<UUID>> deleteBatchContributors(@PathVariable UUID bookId, @RequestBody List<UUID> requests){
+    public ResponseEntity<BatchResponse<UUID>> deleteBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorDeleteRequest> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.deleteBatch(bookId, requests);
-        HttpStatus code = result.getStatus();
+        int code = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("DELETE")
