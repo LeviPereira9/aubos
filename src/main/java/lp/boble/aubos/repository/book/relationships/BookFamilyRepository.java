@@ -10,15 +10,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BookFamilyRepository extends JpaRepository<BookFamilyModel, UUID> {
-    List<BookFamilyModel> findAllByFamilyId(UUID familyId);
+    List<BookFamilyModel> findAllByFamily_Id(UUID familyId);
 
-    void deleteByFamilyIdAndBookId(UUID family, UUID book);
+    void deleteByFamily_IdAndBook_Id(UUID family, UUID book);
 
-    boolean existsByFamilyIdAndBookId(UUID family, UUID book);
+    boolean existsByFamily_IdAndBook_Id(UUID family, UUID book);
 
-    boolean existsByFamilyIdAndOrderInFamily(UUID family, int order);
+    boolean existsByFamily_IdAndOrderInFamily(UUID family, int order);
 
-    Optional<BookFamilyModel> findByFamilyIdAndBookId(UUID family, UUID book);
+    Optional<BookFamilyModel> findByFamily_IdAndBook_Id(UUID family, UUID book);
 
     @Query("""
     SELECT COALESCE(MAX(bf.orderInFamily), 0) FROM BookFamilyModel bf WHERE bf.family.id = :familyId
@@ -26,10 +26,7 @@ public interface BookFamilyRepository extends JpaRepository<BookFamilyModel, UUI
     Integer findMaxOrderInFamilyByFamilyId(@Param("familyId") UUID familyId);
 
 
-    @Query("""
-    SELECT bf.orderInFamily FROM BookFamilyModel bf WHERE bf.family.id = :familyId
-""")
-    List<Integer> findAllOrderInFamilyByFamilyId(@Param("familyId") UUID familyId);
 
-    List<BookFamilyModel> findAllByFamilyIdAndIdIn(UUID familyId, List<UUID> membersId);
+
+    List<BookFamilyModel> findAllByFamily_IdAndIdIn(UUID familyId, List<UUID> membersId);
 }

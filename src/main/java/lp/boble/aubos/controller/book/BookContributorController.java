@@ -144,7 +144,7 @@ public class BookContributorController {
         return ResponseEntity.status(code).body(response);
     }
 
-    @PatchMapping("/batch")
+    @DeleteMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> deleteBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorDeleteRequest> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.deleteBatch(bookId, requests);
         int code = result.getStatus();

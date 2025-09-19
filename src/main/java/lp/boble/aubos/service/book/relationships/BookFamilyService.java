@@ -40,7 +40,7 @@ public class BookFamilyService {
     }
 
     private void validateMemberConflict(UUID familyId, UUID bookId) {
-        boolean hasConflict = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, bookId);
+        boolean hasConflict = bookFamilyRepository.existsByFamily_IdAndBook_Id(familyId, bookId);
         if(hasConflict) throw CustomDuplicateFieldException.bookFamily();
     }
 
@@ -57,7 +57,7 @@ public class BookFamilyService {
     }
 
     private int calculateAvailableOrderForFamily(UUID familyId, int requestedOrder) {
-        boolean orderConflict = bookFamilyRepository.existsByFamilyIdAndOrderInFamily(familyId, requestedOrder);
+        boolean orderConflict = bookFamilyRepository.existsByFamily_IdAndOrderInFamily(familyId, requestedOrder);
 
         if(orderConflict){
             return bookFamilyRepository.findMaxOrderInFamilyByFamilyId(familyId) + 1;
@@ -85,8 +85,8 @@ public class BookFamilyService {
     }
 
     private void validateUpdateMember(UUID familyId, BookFamilyUpdateRequest request){
-        boolean bookConflict = !bookFamilyRepository.existsByFamilyIdAndBookId(familyId, request.id());
-        boolean orderConflict = bookFamilyRepository.existsByFamilyIdAndOrderInFamily(familyId, request.order());
+        boolean bookConflict = !bookFamilyRepository.existsByFamily_IdAndBook_Id(familyId, request.id());
+        boolean orderConflict = bookFamilyRepository.existsByFamily_IdAndOrderInFamily(familyId, request.order());
 
         if(orderConflict) throw CustomDuplicateFieldException.orderFamily();
         if(bookConflict) throw CustomNotFoundException.bookFamily();
@@ -98,11 +98,11 @@ public class BookFamilyService {
 
         this.validateMemberToRemove(familyId, bookId);
 
-        bookFamilyRepository.deleteByFamilyIdAndBookId(familyId, bookId);
+        bookFamilyRepository.deleteByFamily_IdAndBook_Id(familyId, bookId);
     }
 
     private void validateMemberToRemove(UUID familyId, UUID bookId){
-        boolean bookFamilyExists = bookFamilyRepository.existsByFamilyIdAndBookId(familyId, bookId);
+        boolean bookFamilyExists = bookFamilyRepository.existsByFamily_IdAndBook_Id(familyId, bookId);
 
         if(!bookFamilyExists){
             throw CustomNotFoundException.book();
@@ -111,7 +111,7 @@ public class BookFamilyService {
 
     protected BookFamilyModel findMemberInFamily(UUID familyId, UUID bookId){
 
-        return bookFamilyRepository.findByFamilyIdAndBookId(familyId, bookId)
+        return bookFamilyRepository.findByFamily_IdAndBook_Id(familyId, bookId)
                 .orElseThrow(CustomNotFoundException::bookFamily);
     }
 
@@ -122,11 +122,11 @@ public class BookFamilyService {
     }
 
     protected List<BookFamilyModel> findAllMembersInFamily(UUID familyId){
-        return bookFamilyRepository.findAllByFamilyId(familyId);
+        return bookFamilyRepository.findAllByFamily_Id(familyId);
     }
 
     private List<BookFamilyModel> findRequestedMembersInFamily(UUID familyId, List<UUID> requestedFamiliesId) {
-        List<BookFamilyModel> requested = bookFamilyRepository.findAllByFamilyIdAndIdIn(familyId, requestedFamiliesId);
+        List<BookFamilyModel> requested = bookFamilyRepository.findAllByFamily_IdAndIdIn(familyId, requestedFamiliesId);
 
         if(requested.isEmpty()) throw CustomNotFoundException.book();
 

@@ -5,7 +5,6 @@ import lp.boble.aubos.model.book.relationships.BookLanguage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,11 +17,11 @@ public interface BookLanguageRepository extends JpaRepository<BookLanguage, UUID
 """)
     void deleteByBook(BookModel book);
 
-    List<BookLanguage> findAllByBookId(UUID bookId);
+    List<BookLanguage> findAllByBook_Id(UUID bookId);
 
-    boolean existsByBookIdAndLanguageId(UUID bookId, int id);
+    boolean existsByBook_IdAndLanguage_Id(UUID bookId, int id);
 
-    List<Integer> findAllLanguageIdByBookId(UUID bookId);
+    List<Integer> findAllLanguage_IdByBook_Id(UUID bookId);
 
-    List<BookLanguage> findAllByBookIdAndIdIn(UUID bookId, List<UUID> bookLanguageIds);
+    List<BookLanguage> findAllByBook_IdAndIdIn(UUID bookId, List<UUID> bookLanguageIds);
 }

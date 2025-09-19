@@ -1,21 +1,22 @@
 package lp.boble.aubos.mapper.book;
 
 import lp.boble.aubos.dto.book.*;
-import lp.boble.aubos.dto.book.parts.BookContributorResponse;
 import lp.boble.aubos.dto.book.dependencies.DependencyData;
+import lp.boble.aubos.dto.book.parts.BookContributorPartResponse;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;
-import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.util.AuthUtil;
+import lp.boble.aubos.util.ContributorUtil;
 import org.mapstruct.*;
 
 import java.util.*;
 
 @Mapper(
         componentModel = "spring",
-        uses = {DependenciesMapper.class}
+        uses = {DependenciesMapper.class},
+        builder = @Builder(disableBuilder = false)
 )
 public interface BookMapper {
 
@@ -71,14 +72,13 @@ public interface BookMapper {
     BookResponse toResponse(BookModel book);
 
     @AfterMapping
-    default void mapContributors(BookModel book, @MappingTarget BookResponse.BookResponseBuilder builder){
-        Map<String, List<BookContributorResponse>> contributors = BookContributorModel.arrangeContributors(book.getContributors());
+    default void mapContributors(BookModel book, @MappingTarget BookResponse response){
+        Map<String, List<BookContributorPartResponse>> contributors = ContributorUtil.arrangeContributors(book.getContributors());
 
-        builder
-                .authors(contributors.get("autor"))
-                .editors(contributors.get("editor"))
-                .illustrators(contributors.get("ilustrador"))
-                .publishers(contributors.get("publicadora"));
+        response.setAuthors(contributors.get("autor"));
+        response.setEditors(contributors.get("editor"));
+        response.setIllustrators(contributors.get("ilustrador"));
+        response.setPublishers(contributors.get("publicadora"));
     }
 
     @Named("languageList")

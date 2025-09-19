@@ -2,7 +2,6 @@ package lp.boble.aubos.service.book.relationships;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorKey;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
@@ -19,9 +18,7 @@ import lp.boble.aubos.service.book.dependencies.ContributorRoleService;
 import lp.boble.aubos.service.book.dependencies.ContributorService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,7 +41,7 @@ public class BookContributorService {
     }
 
     private List<BookContributorModel> findContributorsByBookAndRoleOrThrow(UUID bookId, int role) {
-        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBookIdAndContributorRoleId(bookId, role);
+        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBook_IdAndContributorRole_Id(bookId, role);
 
         if(bookContributors.isEmpty()){
             throw CustomNotFoundException.bookContributor("" + role);
@@ -56,11 +53,11 @@ public class BookContributorService {
     public BookContributorsResponse findContributors(UUID bookId) {
         List<BookContributorModel> bookContributors = this.findContributorsByBookOrThrow(bookId);
 
-        return bookContributorMapper.fromModelToResponse(bookContributors);
+        return bookContributorMapper.toResponse(bookContributors);
     }
 
     public List<BookContributorModel> findContributorsByBookOrThrow(UUID bookId) {
-        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBookId(bookId);
+        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBook_Id(bookId);
 
         if(bookContributors.isEmpty()){
             throw CustomNotFoundException.bookContributor();
@@ -79,7 +76,7 @@ public class BookContributorService {
     }
 
     private void validateAddContributorDoesNotExist(UUID bookId, BookAddContributor request){
-        boolean exists = bookContributorRepository.existsByBookIdAndContributorIdAndContributorRoleId(
+        boolean exists = bookContributorRepository.existsByBook_IdAndContributor_IdAndContributorRole_Id(
                 bookId,
                 request.contributorId(),
                 request.contributorRoleId());
@@ -101,7 +98,7 @@ public class BookContributorService {
         BookContributorModel bookContributor = this.findBookContributorOrThrow(id);
         ContributorRole role = contributorRoleService.getContributorRoleOrThrow(request.contributorRoleId());
 
-        bookContributorMapper.updateBookContributor(bookContributor, role);
+        //bookContributorMapper.updateBookContributor(bookContributor, role);
 
         bookContributorRepository.save(bookContributor);
     }
@@ -124,7 +121,7 @@ public class BookContributorService {
     }
 
     public Map<UUID, List<Integer>> getCurrentContributorRolesFromBook(UUID bookId) {
-        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBookId(bookId);
+        List<BookContributorModel> bookContributors = bookContributorRepository.findAllByBook_Id(bookId);
 
         return bookContributors.stream()
                 .collect(Collectors.groupingBy(BookContributorModel::getContributorId, Collectors.mapping(BookContributorModel::getContributorRoleId, Collectors.toList())));
@@ -132,8 +129,9 @@ public class BookContributorService {
 
 
     public Map<UUID, BookContributorModel> getCurrentContributorsFromBook(UUID bookId, List<UUID> bookContributorsId) {
-        List<BookContributorModel> currentBookContributors = bookContributorRepository.findAllByBookIdAndIdIn(bookId, bookContributorsId);
+        List<BookContributorModel> currentBookContributors = bookContributorRepository.findAllByBook_IdAndIdIn(bookId, bookContributorsId);
 
         return currentBookContributors.stream().collect(Collectors.toMap(BookContributorModel::getId, Function.identity()));
     }
+
 }

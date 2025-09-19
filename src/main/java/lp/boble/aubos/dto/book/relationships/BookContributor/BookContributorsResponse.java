@@ -1,15 +1,17 @@
 package lp.boble.aubos.dto.book.relationships.BookContributor;
 
-import lombok.Builder;
-import lombok.Data;
-import lp.boble.aubos.dto.book.parts.BookContributorResponse;
+import lombok.*;
+import lp.boble.aubos.dto.book.parts.BookContributorPartResponse;
 
 import java.util.List;
 
-@Builder
 @Data
-public class BookContributorsResponse{
-        private List<BookContributorResponse> authors;
-        private List<BookContributorResponse> editors;
-        private List<BookContributorResponse> illustrators;
-        private List<BookContributorResponse> publishers; }
+@Builder
+@AllArgsConstructor(access = AccessLevel.PUBLIC) // garante que o construtor de todos os campos é público
+@NoArgsConstructor
+public class BookContributorsResponse {
+        private List<BookContributorPartResponse> authors;
+        private List<BookContributorPartResponse> editors;
+        private List<BookContributorPartResponse> illustrators;
+        private List<BookContributorPartResponse> publishers;
+}

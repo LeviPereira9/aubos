@@ -37,7 +37,7 @@ public class BookLanguageService {
     }
 
     private List<BookLanguage> findAllAvailableLanguages(UUID bookId) {
-        List<BookLanguage> availableLanguages = bookLanguageRepository.findAllByBookId(bookId);
+        List<BookLanguage> availableLanguages = bookLanguageRepository.findAllByBook_Id(bookId);
 
         if(availableLanguages.isEmpty()) {
             throw CustomNotFoundException.language();
@@ -62,7 +62,7 @@ public class BookLanguageService {
     }
 
     private void validateLanguage(UUID bookId, BookLanguageAddRequest request) {
-        boolean requestHasConflict = bookLanguageRepository.existsByBookIdAndLanguageId(bookId, request.languageId());
+        boolean requestHasConflict = bookLanguageRepository.existsByBook_IdAndLanguage_Id(bookId, request.languageId());
 
         if(requestHasConflict){
             throw new CustomDuplicateFieldException("Language");
@@ -99,7 +99,7 @@ public class BookLanguageService {
     }
 
     public List<Integer> findAllLanguagesInBook(UUID bookId) {
-        return bookLanguageRepository.findAllLanguageIdByBookId(bookId);
+        return bookLanguageRepository.findAllLanguage_IdByBook_Id(bookId);
     }
 
     public Map<UUID, BookLanguage> findRequestedBookLanguages(UUID bookId, List<UUID> bookLanguageIds) {
@@ -109,7 +109,7 @@ public class BookLanguageService {
     }
 
     private List<BookLanguage> findAllLanguagesInBook(UUID bookId, List<UUID> bookLanguageIds){
-        List<BookLanguage> found = bookLanguageRepository.findAllByBookIdAndIdIn(bookId, bookLanguageIds);
+        List<BookLanguage> found = bookLanguageRepository.findAllByBook_IdAndIdIn(bookId, bookLanguageIds);
 
         if(found.isEmpty()){
             throw CustomNotFoundException.language();

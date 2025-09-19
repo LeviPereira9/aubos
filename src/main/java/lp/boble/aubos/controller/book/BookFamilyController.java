@@ -51,7 +51,7 @@ public class BookFamilyController {
             ){
 
         BatchTransporter<UUID> content = bookFamilyBatchService.addBooksToFamily(familyId, requests);
-        HttpStatus status = content.getStatus();
+        int status = content.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("POST")
@@ -87,7 +87,7 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyUpdateRequest> requests
     ){
         BatchTransporter<UUID> result = bookFamilyBatchService.updateBooksBatch(familyId, requests);
-        HttpStatus status = result.getStatus();
+        int status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("PUT")
@@ -120,7 +120,7 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyDeleteRequest> deleteRequests
     ){
         BatchTransporter<UUID> result = bookFamilyBatchService.removeMembersFromFamily(familyId, deleteRequests);
-        HttpStatus status = result.getStatus();
+        int status = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("DELETE")

@@ -3,7 +3,6 @@ package lp.boble.aubos.model.book.relationships;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import lp.boble.aubos.dto.book.parts.BookContributorResponse;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
@@ -68,22 +67,9 @@ public class BookContributorModel {
         return this.book.getId();
     }
 
-    public static Map<String, List<BookContributorResponse>> arrangeContributors(List<BookContributorModel> rawContributors){
-        Map<String, List<BookContributorResponse>> contributors = new HashMap<>();
-        contributors.put("autor", new ArrayList<>());
-        contributors.put("editor", new ArrayList<>());
-        contributors.put("ilustrador", new ArrayList<>());
-        contributors.put("publicadora", new ArrayList<>());
+    public void a(){
+        List<Integer> b = new ArrayList<>();
 
-        rawContributors.forEach(c ->
-                contributors.get(c.getContributorRole().getName())
-                        .add(new BookContributorResponse(
-                                c.getContributor().getId(),
-                                c.getContributor().getName()
-                        ))
-        );
-
-        return contributors;
     }
 
     @Override
