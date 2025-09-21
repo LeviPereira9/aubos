@@ -55,20 +55,20 @@ public class BookFamilyBatchService {
         List<BookFamilyModel> currentBookFamily = bookFamilyService.findAllMembersInFamily(familyId);
 
         List<UUID> booksOnCurrentFamily = currentBookFamily.stream().map(BookFamilyModel::getBookId).toList();
-        List<Integer> ordersInUse = currentBookFamily.stream().map(BookFamilyModel::getOrderInFamily).toList();
+        List<Integer> ordersInUse = currentBookFamily.stream().map(BookFamilyModel::getOrderInFamily).collect(Collectors.toList());
 
 
         for (BookFamilyCreateRequest request : requests) {
             UUID bookId = request.bookId();
 
             boolean bookConflict = booksOnCurrentFamily.contains(bookId);
-            boolean bookDontExist = !mapRequestedBooks.containsKey(bookId);
+            boolean bookExist = mapRequestedBooks.containsKey(bookId);
 
             if(bookConflict) {
-                validationResult.addFailure(bookId, "Este livro já está na coleção.");
+                validationResult.addFailure(bookId, "Este livro já está na família.");
                 continue;
             };
-            if(bookDontExist){
+            if(!bookExist){
                 validationResult.addFailure(bookId, "Livro não encontrado.");
                 continue;
             };
@@ -79,6 +79,7 @@ public class BookFamilyBatchService {
                     familyDestination,
                     ordersInUse);
 
+            validationResult.addSuccess(bookId, "Livro adicionado a família com sucesso.");
             validationResult.addValid(bookFamilyToAdd);
         }
 
