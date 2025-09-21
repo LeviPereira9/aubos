@@ -132,4 +132,10 @@ public class BookFamilyService {
 
         return requested;
     }
+
+    public Map<UUID, BookFamilyModel> getCurrentMembers(UUID familyId) {
+        List<BookFamilyModel> currentMembers = this.findAllMembersInFamily(familyId);
+
+        return currentMembers.stream().collect(Collectors.toMap(BookFamilyModel::getId, Function.identity()));
+    }
 }

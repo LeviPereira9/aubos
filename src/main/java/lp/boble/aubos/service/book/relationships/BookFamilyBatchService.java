@@ -18,6 +18,7 @@ import lp.boble.aubos.util.ValidationResult;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -116,7 +117,9 @@ public class BookFamilyBatchService {
 
         Map<UUID, BookFamilyModel> mapRequestedMembers = bookFamilyService.getRequestedMembers(familyId, requestedMembersId);
 
-        List<BookFamilyModel> currentMembersInFamily = mapRequestedMembers.values().stream().toList();
+
+
+        List<BookFamilyUpdateRequest> pendentRequests = new ArrayList<>();
 
         Set<Integer> uniqueOrders = new HashSet<>();
 
@@ -134,33 +137,30 @@ public class BookFamilyBatchService {
                 validationResult.addFailure(memberId, "Ordem duplicada");
                 continue;
             }
-            BookFamilyModel memberToAdd = mapRequestedMembers.get(memberId);
-            memberToAdd.setOrderInFamily(request.order());
 
-            validationResult.addPendent(memberToAdd);
+            pendentRequests.add(request);
         }
 
-        this.validSwap(validationResult, currentMembersInFamily);
+        this.validSwap(validationResult, pendentRequests, familyId);
 
         return validationResult;
     }
 
     private void validSwap(
-            ValidationResult<UUID, BookFamilyModel> validationResult,
-            List<BookFamilyModel> currentBookFamilyMembers ) {
+            ValidationResult<UUID, BookFamilyModel> validationResult, List<BookFamilyUpdateRequest> pendentRequests, UUID familyId) {
 
-        List<BookFamilyModel> pendentRequests = new ArrayList<>(validationResult.getPendentRequests());
+        Map<UUID, BookFamilyModel> mapCurrentMembers = bookFamilyService.getCurrentMembers(familyId);
 
         Map<UUID, Integer> mapMemberIdByRequestedOrder = pendentRequests.stream()
-                .collect(Collectors.toMap(BookFamilyModel::getId, BookFamilyModel::getOrderInFamily));
+                .collect(Collectors.toMap(BookFamilyUpdateRequest::id, BookFamilyUpdateRequest::order));
 
-        Map<Integer, UUID> mapOrderToCurrentMemberId = currentBookFamilyMembers.stream()
-                .collect(Collectors.toMap(BookFamilyModel::getOrderInFamily, BookFamilyModel::getBookId));
+        Map<Integer, UUID> mapOrderToCurrentMemberId = mapCurrentMembers.values().stream()
+                .collect(Collectors.toMap(BookFamilyModel::getOrderInFamily, BookFamilyModel::getId));
 
         // LOOP #5
-        for(BookFamilyModel request : pendentRequests) {
-            UUID requestMemberId = request.getId();
-            int requestMemberOrder = request.getOrderInFamily();
+        for(BookFamilyUpdateRequest request : pendentRequests) {
+            UUID requestMemberId = request.id();
+            int requestMemberOrder = request.order();
 
             UUID currentMemberIdAtRequestOrder = mapOrderToCurrentMemberId.get(requestMemberOrder);
 
@@ -173,7 +173,10 @@ public class BookFamilyBatchService {
 
             if(hasValidSwapPath) {
                 validationResult.addSuccess(requestMemberId, "livro reordenado com sucesso.");
-                validationResult.addValid(request);
+                BookFamilyModel memberToUpdate = mapCurrentMembers.get(requestMemberId);
+                memberToUpdate.setOrderInFamily(requestMemberOrder);
+
+                validationResult.addValid(mapCurrentMembers.get(requestMemberId));
                 continue;
             }
 
@@ -194,7 +197,7 @@ public class BookFamilyBatchService {
         UUID memberAtRequestedOrder = orderToCurrentMemberId.get(requestedPosition);
 
         boolean positionIsFree = (memberAtRequestedOrder == null);
-        boolean memberAtRequestedPositionHasRequest =  memberAtRequestedOrder != null && memberIdByRequestedOrder.containsKey(memberAtRequestedOrder);
+        boolean memberAtRequestedPositionHasRequest = memberIdByRequestedOrder.containsKey(memberAtRequestedOrder);
 
         if(hasIntermediateMember){
             isTargetPositionOfOriginalMember = originalMemberId.equals(memberAtRequestedOrder);
