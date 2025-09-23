@@ -91,6 +91,7 @@ public class BookLanguageController {
         BatchResponse<Integer> response = new BatchResponseBuilder<Integer>()
                 .operation("POST")
                 .message("Requisição de POST concluída com sucesso.")
+                .content(content)
                 .code(code)
                 .build();
 

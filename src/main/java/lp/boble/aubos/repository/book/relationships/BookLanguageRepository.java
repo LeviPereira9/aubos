@@ -21,7 +21,10 @@ public interface BookLanguageRepository extends JpaRepository<BookLanguage, UUID
 
     boolean existsByBook_IdAndLanguage_Id(UUID bookId, int id);
 
-    List<Integer> findAllLanguage_IdByBook_Id(UUID bookId);
+    @Query("""
+    SELECT bl.language.id FROM BookLanguage bl WHERE bl.book.id = :bookId
+""")
+    List<Integer> findLanguageIdsByBookId(UUID bookId);
 
     List<BookLanguage> findAllByBook_IdAndIdIn(UUID bookId, List<UUID> bookLanguageIds);
 }

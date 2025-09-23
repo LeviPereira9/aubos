@@ -99,7 +99,7 @@ public class BookLanguageService {
     }
 
     public List<Integer> findAllLanguagesInBook(UUID bookId) {
-        return bookLanguageRepository.findAllLanguage_IdByBook_Id(bookId);
+        return bookLanguageRepository.findLanguageIdsByBookId(bookId);
     }
 
     public Map<UUID, BookLanguage> findRequestedBookLanguages(UUID bookId, List<UUID> bookLanguageIds) {
