@@ -66,24 +66,12 @@ public class BookContributorService {
         return bookContributors;
     }
 
+    //TODO: new Request and response
     public void addContributorToBook(UUID bookId, BookAddContributor request){
-
-        this.validateAddContributorDoesNotExist(bookId, request);
 
         BookContributorModel bookContributor = this.generateBookContributor(bookId, request);
 
         bookContributorRepository.save(bookContributor);
-    }
-
-    private void validateAddContributorDoesNotExist(UUID bookId, BookAddContributor request){
-        boolean exists = bookContributorRepository.existsByBook_IdAndContributor_IdAndContributorRole_Id(
-                bookId,
-                request.contributorId(),
-                request.contributorRoleId());
-
-        if(exists){
-            throw CustomDuplicateFieldException.bookFamily();
-        }
     }
 
     private BookContributorModel generateBookContributor(UUID bookId, BookAddContributor request){
