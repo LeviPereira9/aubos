@@ -44,23 +44,21 @@ public class BookContributorBatchService {
         ValidationResult<UUID, BookContributorModel> validationResult = new ValidationResult<>();
 
         //Vou ignorar as requisições duplicadas, como tentar adicionar 10x o mesmo autor.
-        List<BookAddContributor> uniqueRequests = requests.stream().distinct().toList();
+        //List<BookAddContributor> uniqueRequests = requests.stream().distinct().toList();
+        //Comentei, n teve como, e se alguém voltar e sair no mesmo? É um cenário que dificilmente ocorrerá
+        //Mas que ainda pode acontecer. :(
 
-        List<UUID> requestContributorIds = uniqueRequests.stream().distinct().map(BookAddContributor::contributorId).toList();
-        List<Integer> requestRoleIds = uniqueRequests.stream().distinct().map(BookAddContributor::contributorRoleId).toList();
+        List<UUID> requestContributorIds = requests.stream().distinct().map(BookAddContributor::contributorId).toList();
+        List<Integer> requestRoleIds = requests.stream().distinct().map(BookAddContributor::contributorRoleId).toList();
 
         BookModel book = bookService.findBookOrThrow(bookId);
 
         Map<UUID, ContributorModel> mapRequestedContributors = contributorService.getRequestedContributors(requestContributorIds);
         Map<Integer, ContributorRole> mapRequestedRoles = contributorRoleService.getRequestedRoles(requestRoleIds);
 
-        Map<UUID, List<Integer>> mapByContributor = bookContributorService.getCurrentContributorRolesFromBook(bookId);
-
-        for(BookAddContributor request : uniqueRequests){
+        for(BookAddContributor request : requests){
             UUID contributorId = request.contributorId();
             int roleId = request.contributorRoleId();
-
-            List<Integer> roles = mapByContributor.getOrDefault(contributorId, Collections.emptyList());
 
             boolean contributorExists = mapRequestedContributors.containsKey(contributorId);
             boolean roleExists = mapRequestedRoles.containsKey(roleId);
@@ -75,17 +73,12 @@ public class BookContributorBatchService {
                 continue;
             }
 
-            if(roles.contains(roleId)){
-                validationResult.addFailure(contributorId, "O contribuidor já possui essa role.");
-                continue;
-            }
-
             BookContributorModel contributorToAdd = this.generateContributor(
                     book,
                     mapRequestedContributors.get(contributorId),
                     mapRequestedRoles.get(roleId));
 
-            validationResult.addSuccess(request.contributorId(), "Contribuidor adicionado ao livro com sucesso.");
+            validationResult.addSuccess(contributorId, "Contribuidor "+ mapRequestedRoles.get(roleId).getName() +" adicionado ao livro com sucesso.");
             validationResult.addValid(contributorToAdd);
 
         }
