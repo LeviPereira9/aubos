@@ -58,6 +58,9 @@ public class BookContributorModel {
         return this.contributorRole.getId();
     }
 
+    public String getContributorName(){
+        return this.contributor.getName();
+    }
 
     public boolean belongsToBook(UUID bookId){
         return this.getBookId().equals(bookId);

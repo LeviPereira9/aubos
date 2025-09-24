@@ -3,6 +3,7 @@ package lp.boble.aubos.mapper.book.relationships;
 import lp.boble.aubos.dto.book.parts.BookContributorPartResponse;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
+import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
 import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import org.mapstruct.AfterMapping;
@@ -21,28 +22,26 @@ public interface BookContributorMapper {
     @Mapping(target = "role", source = "contributorRole.name")
     BookContributorResponse fromModelToResponse(BookContributorModel model);
 
-    /*@Mapping(target = "contributor", ignore = true)
-    @Mapping(target = "contributorRole", source = "role")
-    void updateBookContributor(@MappingTarget BookContributorModel model, ContributorRole role);*/
-
-    /*@Mapping(target = "authors", ignore = true )
-    @Mapping(target = "editors", ignore = true)
-    @Mapping(target = "illustrators", ignore = true)
-    @Mapping(target = "publishers", ignore = true)
-    BookContributorsResponse toResponse(List<BookContributorModel> models);*/
-
     // Mapeia um único BookContributorModel para a parte do response
-    BookContributorPartResponse toPartResponse(BookContributorModel model);
+    // Mapeia um ContributorModel direto para o PartResponse
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    BookContributorPartResponse toPartResponse(ContributorModel contributor);
 
-    // Default method para converter uma lista de BookContributorModel para BookContributorsResponse
+    // Método principal
     default BookContributorsResponse toResponse(List<BookContributorModel> models) {
         BookContributorsResponse response = new BookContributorsResponse();
 
-        // Agrupa contributors por role (case insensitive)
-        Map<String, List<BookContributorModel>> groupedByRole = models.stream()
-                .collect(Collectors.groupingBy(c -> c.getContributorRole().getName().toLowerCase()));
+        Map<String, List<ContributorModel>> groupedByRole = models.stream()
+                .collect(Collectors.groupingBy(
+                        c -> c.getContributorRole().getName().toLowerCase(),
+                        Collectors.mapping(
+                                BookContributorModel::getContributor, // Extrai o Contributor
+                                Collectors.toList()
+                        )
+                ));
 
-        // Preenche os campos no response
+        // Preenche os campos no response - agora com List<ContributorModel>
         response.setAuthors(toPartResponseList(groupedByRole.getOrDefault("autor", Collections.emptyList())));
         response.setEditors(toPartResponseList(groupedByRole.getOrDefault("editor", Collections.emptyList())));
         response.setIllustrators(toPartResponseList(groupedByRole.getOrDefault("ilustrador", Collections.emptyList())));
@@ -51,10 +50,10 @@ public interface BookContributorMapper {
         return response;
     }
 
-    // Helper para mapear uma lista de models para lista de response
-    default List<BookContributorPartResponse> toPartResponseList(List<BookContributorModel> models) {
-        return models.stream()
-                .map(this::toPartResponse)
+    // Helper para mapear uma lista de ContributorModel (AGORA CORRETO!)
+    default List<BookContributorPartResponse> toPartResponseList(List<ContributorModel> contributors) {
+        return contributors.stream()
+                .map(this::toPartResponse) // Mapeia ContributorModel → BookContributorPartResponse
                 .toList();
     }
 
