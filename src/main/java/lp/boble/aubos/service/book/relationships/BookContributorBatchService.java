@@ -30,9 +30,9 @@ public class BookContributorBatchService {
     private final BookService bookService;
 
     //ADD
-    public BatchTransporter<UUID> addContributorsToBook(UUID bookId, List<BookAddContributor> requests){
+    public BatchTransporter<String> addContributorsToBook(UUID bookId, List<BookAddContributor> requests){
         //Validate
-        ValidationResult<UUID, BookContributorModel> validationResult = this.validateCreateBatch(bookId, requests);
+        ValidationResult<String, BookContributorModel> validationResult = this.validateCreateBatch(bookId, requests);
 
         //Persist
         this.persistBatch(validationResult.getValidRequests());
@@ -40,36 +40,38 @@ public class BookContributorBatchService {
         return validationResult.getSuccessesAndFailures();
     }
 
-    private ValidationResult<UUID, BookContributorModel> validateCreateBatch(UUID bookId, List<BookAddContributor> requests) {
-        ValidationResult<UUID, BookContributorModel> validationResult = new ValidationResult<>();
+    private ValidationResult<String, BookContributorModel> validateCreateBatch(UUID bookId, List<BookAddContributor> requests) {
+        ValidationResult<String, BookContributorModel> validationResult = new ValidationResult<>();
 
         //Vou ignorar as requisições duplicadas, como tentar adicionar 10x o mesmo autor.
-        //List<BookAddContributor> uniqueRequests = requests.stream().distinct().toList();
+        Set<BookAddContributor> uniqueRequests = new HashSet<>(requests);
         //Comentei, n teve como, e se alguém voltar e sair no mesmo? É um cenário que dificilmente ocorrerá
         //Mas que ainda pode acontecer. :(
 
-        List<UUID> requestContributorIds = requests.stream().distinct().map(BookAddContributor::contributorId).toList();
-        List<Integer> requestRoleIds = requests.stream().distinct().map(BookAddContributor::contributorRoleId).toList();
+        List<UUID> requestContributorIds = uniqueRequests.stream().distinct().map(BookAddContributor::contributorId).toList();
+        List<Integer> requestRoleIds = uniqueRequests.stream().distinct().map(BookAddContributor::contributorRoleId).toList();
 
         BookModel book = bookService.findBookOrThrow(bookId);
 
         Map<UUID, ContributorModel> mapRequestedContributors = contributorService.getRequestedContributors(requestContributorIds);
         Map<Integer, ContributorRole> mapRequestedRoles = contributorRoleService.getRequestedRoles(requestRoleIds);
 
-        for(BookAddContributor request : requests){
+        for(BookAddContributor request : uniqueRequests){
             UUID contributorId = request.contributorId();
             int roleId = request.contributorRoleId();
+
+            String requestId = contributorId + ":" + request.hashCode();
 
             boolean contributorExists = mapRequestedContributors.containsKey(contributorId);
             boolean roleExists = mapRequestedRoles.containsKey(roleId);
 
             if(!contributorExists){
-                validationResult.addFailure(contributorId, "Contribuidor não encontrado.");
+                validationResult.addFailure(requestId, "Contribuidor não encontrado.");
                 continue;
             }
 
             if(!roleExists){
-                validationResult.addFailure(contributorId, "Role de  não encontrada.");
+                validationResult.addFailure(requestId, "Role de  não encontrada.");
                 continue;
             }
 
@@ -78,7 +80,7 @@ public class BookContributorBatchService {
                     mapRequestedContributors.get(contributorId),
                     mapRequestedRoles.get(roleId));
 
-            validationResult.addSuccess(contributorId, "Contribuidor "+ mapRequestedRoles.get(roleId).getName() +" adicionado ao livro com sucesso.");
+            validationResult.addSuccess(requestId, "Contribuidor "+ mapRequestedRoles.get(roleId).getName() +" adicionado ao livro com sucesso.");
             validationResult.addValid(contributorToAdd);
 
         }

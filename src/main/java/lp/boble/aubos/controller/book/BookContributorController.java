@@ -115,11 +115,11 @@ public class BookContributorController {
     }
 
     @PostMapping("/batch")
-    public ResponseEntity<BatchResponse<UUID>> addBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookAddContributor> requests){
-        BatchTransporter<UUID> result = bookContributorBatchService.addContributorsToBook(bookId, requests);
+    public ResponseEntity<BatchResponse<String>> addBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookAddContributor> requests){
+        BatchTransporter<String> result = bookContributorBatchService.addContributorsToBook(bookId, requests);
         int code = result.getStatus();
 
-        BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
+        BatchResponse<String> response = new BatchResponseBuilder<String>()
                 .operation("POST")
                 .code(code)
                 .message("Requisição de POST concluída com sucesso.")
