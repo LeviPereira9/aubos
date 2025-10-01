@@ -2,6 +2,7 @@ package lp.boble.aubos.model.book.relationships;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Data;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.TagModel;
 
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "tb_book_tag")
+@Data
 public class BookTagModel {
 
     @Id
