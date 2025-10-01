@@ -81,11 +81,10 @@ public class BookContributorService {
         return new BookContributorModel(book, contributor, contributorRole);
     }
 
-    public void updateContributorOnBook(UUID id, BookContributorUpdateRequest request){
-        BookContributorModel bookContributor = this.findBookContributorOrThrow(id);
-        ContributorRole role = contributorRoleService.getContributorRoleOrThrow(request.contributorRoleId());
+    public void updateContributorOnBook(UUID bookId, UUID booKContributorId, BookContributorUpdateRequest request){
+        BookContributorModel bookContributor = this.findBookContributorOrThrow(bookId, booKContributorId);
 
-        //bookContributorMapper.updateBookContributor(bookContributor, role);
+        bookContributorMapper.updateBookContributor(bookContributor, request);
 
         bookContributorRepository.save(bookContributor);
     }
@@ -93,18 +92,22 @@ public class BookContributorService {
 
     public void deleteContributorFromBook(UUID bookId, UUID bookContributorId){
 
-        BookContributorModel bookContributor = this.findBookContributorOrThrow(bookContributorId);
+        BookContributorModel bookContributor = this.findBookContributorOrThrow(bookId, bookContributorId);
+
+
+
+        bookContributorRepository.deleteById(bookContributorId);
+    }
+
+    private BookContributorModel findBookContributorOrThrow(UUID bookId, UUID bookContributorId) {
+        BookContributorModel bookContributor = bookContributorRepository.findById(bookContributorId)
+                .orElseThrow(CustomNotFoundException::bookContributor);
 
         if(!bookContributor.belongsToBook(bookId)){
             throw CustomNotFoundException.bookContributor();
         }
 
-        bookContributorRepository.deleteById(bookContributorId);
-    }
-
-    private BookContributorModel findBookContributorOrThrow(UUID bookContributorId) {
-        return bookContributorRepository.findById(bookContributorId)
-                .orElseThrow(CustomNotFoundException::bookContributor);
+        return bookContributor;
     }
 
     public Map<UUID, List<Integer>> getCurrentContributorRolesFromBook(UUID bookId) {

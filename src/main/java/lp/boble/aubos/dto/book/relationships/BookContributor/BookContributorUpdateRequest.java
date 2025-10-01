@@ -1,7 +1,9 @@
 package lp.boble.aubos.dto.book.relationships.BookContributor;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record BookContributorUpdateRequest(
-        int contributorRoleId
+        LocalDate startDate,
+        LocalDate endDate
 ) {}

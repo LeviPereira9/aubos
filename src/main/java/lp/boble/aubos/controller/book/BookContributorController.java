@@ -83,18 +83,19 @@ public class BookContributorController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PatchMapping
+    @PatchMapping("/{booKContributorId}")
     public ResponseEntity<SuccessResponse<Void>> updateBookContributor(
             @PathVariable UUID bookId,
+            @PathVariable UUID booKContributorId,
             @RequestBody BookContributorUpdateRequest request){
 
-        bookContributorService.updateContributorOnBook(bookId, request);
+        bookContributorService.updateContributorOnBook(bookId, booKContributorId, request);
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()
                         .operation("PATCH")
                         .code(HttpStatus.OK)
-                        .message("Contribuidor adicionado com sucesso.")
+                        .message("Contribuidor atualizado com sucesso.")
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

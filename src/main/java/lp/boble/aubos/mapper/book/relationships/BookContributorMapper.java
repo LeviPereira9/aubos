@@ -2,6 +2,7 @@ package lp.boble.aubos.mapper.book.relationships;
 
 import lp.boble.aubos.dto.book.parts.BookContributorPartResponse;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
+import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
@@ -21,6 +22,12 @@ public interface BookContributorMapper {
     @Mapping(target = "name", source = "contributor.name")
     @Mapping(target = "role", source = "contributorRole.name")
     BookContributorResponse fromModelToResponse(BookContributorModel model);
+
+    @Mapping(target = "startDate", source = "startDate")
+    @Mapping(target = "endDate", source = "endDate")
+    void updateBookContributor(
+            @MappingTarget BookContributorModel target,
+            BookContributorUpdateRequest request);
 
     // Mapeia um único BookContributorModel para a parte do response
     // Mapeia um ContributorModel direto para o PartResponse
