@@ -8,11 +8,9 @@ import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;
 import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.model.book.relationships.BookLanguage;
-import lp.boble.aubos.repository.book.depedencies.LanguageRepository;
-import lp.boble.aubos.service.book.dependencies.ContributorRoleService;
-import lp.boble.aubos.service.book.dependencies.ContributorService;
-import lp.boble.aubos.service.book.dependencies.DependenciesService;
-import lp.boble.aubos.service.book.dependencies.LanguageService;
+import lp.boble.aubos.service.book.dependencies.contributor.ContributorRoleService;
+import lp.boble.aubos.service.book.dependencies.contributor.ContributorService;
+import lp.boble.aubos.service.book.dependencies.language.LanguageService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

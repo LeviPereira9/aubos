@@ -5,7 +5,7 @@ import lp.boble.aubos.dto.book.dependencies.language.LanguageRequest;
 import lp.boble.aubos.dto.book.dependencies.language.LanguageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
-import lp.boble.aubos.service.book.dependencies.LanguageService;
+import lp.boble.aubos.service.book.dependencies.language.LanguageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -11,7 +11,7 @@ import lp.boble.aubos.repository.book.depedencies.ContributorRepository;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
-import lp.boble.aubos.service.book.dependencies.ContributorService;
+import lp.boble.aubos.service.book.dependencies.contributor.ContributorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;

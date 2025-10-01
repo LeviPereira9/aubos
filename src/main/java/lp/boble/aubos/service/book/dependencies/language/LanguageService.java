@@ -1,4 +1,4 @@
-package lp.boble.aubos.service.book.dependencies;
+package lp.boble.aubos.service.book.dependencies.language;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

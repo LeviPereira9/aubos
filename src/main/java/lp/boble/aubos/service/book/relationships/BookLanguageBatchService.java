@@ -9,7 +9,7 @@ import lp.boble.aubos.model.book.relationships.BookLanguage;
 import lp.boble.aubos.repository.book.relationships.BookLanguageRepository;
 import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.service.book.BookService;
-import lp.boble.aubos.service.book.dependencies.LanguageService;
+import lp.boble.aubos.service.book.dependencies.language.LanguageService;
 import lp.boble.aubos.util.ValidationResult;
 import org.springframework.boot.actuate.autoconfigure.metrics.data.RepositoryMetricsAutoConfiguration;
 import org.springframework.stereotype.Service;

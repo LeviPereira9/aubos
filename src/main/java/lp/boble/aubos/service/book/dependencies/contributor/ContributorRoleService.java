@@ -1,4 +1,4 @@
-package lp.boble.aubos.service.book.dependencies;
+package lp.boble.aubos.service.book.dependencies.contributor;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;

@@ -12,8 +12,8 @@ import lp.boble.aubos.model.book.relationships.BookContributorModel;
 import lp.boble.aubos.repository.book.relationships.BookContributorRepository;
 import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.service.book.BookService;
-import lp.boble.aubos.service.book.dependencies.ContributorRoleService;
-import lp.boble.aubos.service.book.dependencies.ContributorService;
+import lp.boble.aubos.service.book.dependencies.contributor.ContributorRoleService;
+import lp.boble.aubos.service.book.dependencies.contributor.ContributorService;
 import lp.boble.aubos.util.ValidationResult;
 import org.springframework.stereotype.Service;
 
