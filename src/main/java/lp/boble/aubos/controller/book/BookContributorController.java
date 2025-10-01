@@ -76,12 +76,12 @@ public class BookContributorController {
         SuccessResponse<BookContributorResponse> response =
                 new SuccessResponseBuilder<BookContributorResponse>()
                         .operation("POST")
-                        .code(HttpStatus.OK)
+                        .code(HttpStatus.CREATED)
                         .message("Contribuidor adicionado com sucesso.")
                         .content(content)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/{booKContributorId}")
