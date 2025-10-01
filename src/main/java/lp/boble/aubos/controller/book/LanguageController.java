@@ -1,8 +1,8 @@
 package lp.boble.aubos.controller.book;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.dependencies.LanguageRequest;
-import lp.boble.aubos.dto.book.dependencies.LanguageResponse;
+import lp.boble.aubos.dto.book.dependencies.language.LanguageRequest;
+import lp.boble.aubos.dto.book.dependencies.language.LanguageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.book.dependencies.LanguageService;

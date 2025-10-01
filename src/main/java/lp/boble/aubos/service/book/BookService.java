@@ -3,7 +3,7 @@ package lp.boble.aubos.service.book;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.*;
-import lp.boble.aubos.dto.book.dependencies.*;
+import lp.boble.aubos.dto.book.dependencies.dependecy.DependencyData;
 import lp.boble.aubos.dto.book.relationships.RelationshipsData;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.exception.custom.global.CustomFieldNotProvided;

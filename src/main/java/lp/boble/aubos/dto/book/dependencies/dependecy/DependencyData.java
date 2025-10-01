@@ -1,9 +1,6 @@
-package lp.boble.aubos.dto.book.dependencies;
+package lp.boble.aubos.dto.book.dependencies.dependecy;
 
 import lp.boble.aubos.model.book.dependencies.*;
-import lp.boble.aubos.model.book.relationships.BookLanguage;
-
-import java.util.List;
 
 public record DependencyData(
         LanguageModel language,

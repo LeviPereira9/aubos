@@ -2,8 +2,12 @@ package lp.boble.aubos.service.book.dependencies;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.BookContextRequest;
-import lp.boble.aubos.dto.book.BookCreateRequest;
-import lp.boble.aubos.dto.book.dependencies.*;
+import lp.boble.aubos.dto.book.dependencies.dependecy.DependencyData;
+import lp.boble.aubos.dto.book.dependencies.dependecy.DependencyResponse;
+import lp.boble.aubos.dto.book.dependencies.license.LicenseResponse;
+import lp.boble.aubos.dto.book.dependencies.restriction.RestrictionResponse;
+import lp.boble.aubos.dto.book.dependencies.status.StatusResponse;
+import lp.boble.aubos.dto.book.dependencies.type.TypeResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.dependencies.*;

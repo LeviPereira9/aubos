@@ -1,7 +1,7 @@
 package lp.boble.aubos.mapper.book;
 
 import lp.boble.aubos.dto.book.*;
-import lp.boble.aubos.dto.book.dependencies.DependencyData;
+import lp.boble.aubos.dto.book.dependencies.dependecy.DependencyData;
 import lp.boble.aubos.dto.book.parts.BookContributorPartResponse;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.BookModel;

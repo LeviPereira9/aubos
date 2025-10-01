@@ -2,8 +2,8 @@ package lp.boble.aubos.service.book.dependencies;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.dependencies.LanguageRequest;
-import lp.boble.aubos.dto.book.dependencies.LanguageResponse;
+import lp.boble.aubos.dto.book.dependencies.language.LanguageRequest;
+import lp.boble.aubos.dto.book.dependencies.language.LanguageResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;

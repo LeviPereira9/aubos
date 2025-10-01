@@ -1,4 +1,4 @@
-package lp.boble.aubos.dto.book.dependencies;
+package lp.boble.aubos.dto.book.dependencies.language;
 
 public record LanguageResponse(
     int id,
