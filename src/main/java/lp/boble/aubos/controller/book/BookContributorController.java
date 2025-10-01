@@ -67,17 +67,18 @@ public class BookContributorController {
     }
 
     @PostMapping
-    public ResponseEntity<SuccessResponse<Void>> addContributorToBook(
+    public ResponseEntity<SuccessResponse<BookContributorResponse>> addContributorToBook(
             @PathVariable UUID bookId,
             @RequestBody BookAddContributor request){
 
-        bookContributorService.addContributorToBook(bookId, request);
+        BookContributorResponse content = bookContributorService.addContributorToBook(bookId, request);
 
-        SuccessResponse<Void> response =
-                new SuccessResponseBuilder<Void>()
+        SuccessResponse<BookContributorResponse> response =
+                new SuccessResponseBuilder<BookContributorResponse>()
                         .operation("POST")
                         .code(HttpStatus.OK)
                         .message("Contribuidor adicionado com sucesso.")
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

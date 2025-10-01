@@ -65,12 +65,12 @@ public class BookContributorService {
         return bookContributors;
     }
 
-    //TODO: new Request and response
-    public void addContributorToBook(UUID bookId, BookAddContributor request){
+
+    public BookContributorResponse addContributorToBook(UUID bookId, BookAddContributor request){
 
         BookContributorModel bookContributor = this.generateBookContributor(bookId, request);
 
-        bookContributorRepository.save(bookContributor);
+        return bookContributorMapper.fromModelToResponse(bookContributorRepository.save(bookContributor));
     }
 
     private BookContributorModel generateBookContributor(UUID bookId, BookAddContributor request){
