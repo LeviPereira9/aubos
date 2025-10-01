@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateBatchRequest;
+import lp.boble.aubos.mapper.book.relationships.BookContributorMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class BookContributorBatchService {
 
     private final BookContributorRepository bookContributorRepository;
+    private final BookContributorMapper bookContributorMapper;
     private final BookContributorService bookContributorService;
     private final ContributorService contributorService;
     private final ContributorRoleService contributorRoleService;
@@ -122,7 +124,7 @@ public class BookContributorBatchService {
 
         ValidationResult<UUID, BookContributorModel> validationResult = new ValidationResult<>();
 
-        List<BookContributorUpdateBatchRequest> uniqueRequests = requests.stream().distinct().toList();
+        Set<BookContributorUpdateBatchRequest> uniqueRequests = new HashSet<>(requests);
 
         List<UUID> bookContributorsId = uniqueRequests.stream().map(BookContributorUpdateBatchRequest::bookContributorId).toList();
 
@@ -138,7 +140,8 @@ public class BookContributorBatchService {
             }
 
             BookContributorModel associated = currentAssociations.get(associationId);
-            //setters que não criei ainda. :(
+
+            bookContributorMapper.updateBookContributor(associated, request);
 
             validationResult.addSuccess(associationId, "Associação atualizada com sucesso.");
             validationResult.addValid(associated);
