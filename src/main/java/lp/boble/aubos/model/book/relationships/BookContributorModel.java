@@ -7,6 +7,7 @@ import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
 import lp.boble.aubos.model.book.dependencies.ContributorRole;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -30,6 +31,12 @@ public class BookContributorModel {
     @ManyToOne
     @JoinColumn(name = "contributor_role_id")
     private ContributorRole contributorRole;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     public BookContributorModel(
             BookModel book,

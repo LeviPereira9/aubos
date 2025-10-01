@@ -78,7 +78,7 @@ public class BookContributorBatchService {
             BookContributorModel contributorToAdd = this.generateContributor(
                     book,
                     mapRequestedContributors.get(contributorId),
-                    mapRequestedRoles.get(roleId));
+                    mapRequestedRoles.get(roleId), request);
 
             validationResult.addSuccess(requestId, "Contribuidor "+ mapRequestedRoles.get(roleId).getName() +" adicionado ao livro com sucesso.");
             validationResult.addValid(contributorToAdd);
@@ -88,12 +88,14 @@ public class BookContributorBatchService {
         return validationResult;
     }
 
-    private BookContributorModel generateContributor(BookModel book, ContributorModel contributorModel, ContributorRole contributorRole) {
+    private BookContributorModel generateContributor(BookModel book, ContributorModel contributorModel, ContributorRole contributorRole, BookAddContributor request) {
         BookContributorModel contributor = new BookContributorModel();
 
         contributor.setBook(book);
         contributor.setContributor(contributorModel);
         contributor.setContributorRole(contributorRole);
+        contributor.setStartDate(request.startDate());
+        contributor.setEndDate(request.endDate());
 
         return contributor;
     }
