@@ -11,13 +11,12 @@ import lp.boble.aubos.response.batch.BatchResponseBuilder;
 import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
-import lp.boble.aubos.service.book.relationships.BookLanguageBatchService;
-import lp.boble.aubos.service.book.relationships.BookLanguageService;
+import lp.boble.aubos.service.book.relationships.language.BookLanguageBatchService;
+import lp.boble.aubos.service.book.relationships.language.BookLanguageService;
 import lp.boble.aubos.util.ResourceLocationUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;

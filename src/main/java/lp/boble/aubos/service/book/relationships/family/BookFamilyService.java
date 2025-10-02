@@ -1,4 +1,4 @@
-package lp.boble.aubos.service.book.relationships;
+package lp.boble.aubos.service.book.relationships.family;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;
 import lp.boble.aubos.repository.book.relationships.BookFamilyRepository;
 import lp.boble.aubos.service.book.BookService;
-import lp.boble.aubos.service.book.family.FamilyService;
+import lp.boble.aubos.service.book.dependencies.family.FamilyService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

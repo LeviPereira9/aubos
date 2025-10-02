@@ -7,7 +7,7 @@ import lp.boble.aubos.dto.book.family.FamilyResponse;
 import lp.boble.aubos.dto.book.family.FamilyTypeResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
-import lp.boble.aubos.service.book.family.FamilyService;
+import lp.boble.aubos.service.book.dependencies.family.FamilyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
