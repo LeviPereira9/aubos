@@ -32,4 +32,7 @@ public class CustomDuplicateFieldException extends GlobalException {
         return new CustomDuplicateFieldException("Outro livro já ocupa está posição.");
     }
 
+    public static CustomDuplicateFieldException tag() {
+        return new CustomDuplicateFieldException("Essa tag já existe.");
+    }
 }
