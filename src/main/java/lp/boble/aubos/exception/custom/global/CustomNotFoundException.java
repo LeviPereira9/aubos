@@ -55,4 +55,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException bookContributor(){
         return new CustomNotFoundException("Este livro não possuí nenhum contribuidor.");
     }
+
+    public static CustomNotFoundException tag() {
+        return new CustomNotFoundException("Tag não encontrada.");
+    }
 }

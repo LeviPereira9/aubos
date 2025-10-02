@@ -1,9 +1,11 @@
 package lp.boble.aubos.service.book.dependencies.tag;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.tag.TagRequest;
 import lp.boble.aubos.dto.book.dependencies.tag.TagResponse;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
+import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.dependencies.TagMapper;
 import lp.boble.aubos.model.book.dependencies.TagModel;
 import lp.boble.aubos.repository.book.depedencies.tag.TagRepository;
@@ -37,20 +39,45 @@ public class TagService {
         return tags.map(tagMapper::toResponse);
     }
 
+    @Transactional
     public TagResponse createTag(TagRequest request){
-        if(tagRepository.existsByName(request.name())){
-            throw CustomDuplicateFieldException.tag();
-        }
+        this.validateTag(request);
 
         TagModel tag = tagMapper.toModel(request);
 
         return tagMapper.toResponse(tagRepository.save(tag));
     }
 
+    @Transactional
+    public TagResponse updateTag(int id, TagRequest request){
+
+        this.validateTag(request);
+
+        TagModel tag = this.findTagOrThrow(id);
+
+        tagMapper.update(tag, request);
+
+        return tagMapper.toResponse(tagRepository.save(tag));
+    }
+
+
+    @Transactional
     public void deleteTag(int id){
         if(tagRepository.existsById(id)){
             tagRepository.deleteById(id);
         }
+    }
+
+    private void validateTag(TagRequest request) {
+        if(tagRepository.existsByName(request.name())){
+            throw CustomDuplicateFieldException.tag();
+        }
+    }
+
+
+    private TagModel findTagOrThrow(int id) {
+        return tagRepository.findById(id)
+                .orElseThrow(CustomNotFoundException::tag);
     }
 
 }

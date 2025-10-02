@@ -4,6 +4,7 @@ import lp.boble.aubos.dto.book.dependencies.tag.TagRequest;
 import lp.boble.aubos.dto.book.dependencies.tag.TagResponse;
 import lp.boble.aubos.model.book.dependencies.TagModel;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface TagMapper {
@@ -12,4 +13,5 @@ public interface TagMapper {
 
     TagModel toModel(TagRequest source);
 
+    void update(@MappingTarget TagModel target, TagRequest source);
 }

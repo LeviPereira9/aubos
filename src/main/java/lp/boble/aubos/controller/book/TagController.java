@@ -57,6 +57,23 @@ public class TagController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<SuccessResponse<TagResponse>> updateTag(@PathVariable Integer id, @RequestBody TagRequest request){
+
+        TagResponse content = tagService.updateTag(id, request);
+        HttpStatus code = HttpStatus.OK;
+
+        SuccessResponse<TagResponse> response =
+                new SuccessResponseBuilder<TagResponse>()
+                        .operation("PUT")
+                        .message("Tag modificado com sucesso.")
+                        .code(code)
+                        .content(content)
+                        .build();
+
+        return ResponseEntity.status(code).body(response) ;
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<SuccessResponse<Void>> deleteTag(@PathVariable int id){
 
