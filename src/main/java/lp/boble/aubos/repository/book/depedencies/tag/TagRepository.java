@@ -6,6 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+import java.util.Set;
+
 public interface TagRepository extends JpaRepository<TagModel, Integer> {
 
     boolean existsByName(String name);
@@ -18,4 +21,6 @@ public interface TagRepository extends JpaRepository<TagModel, Integer> {
      ORDER BY t.name ASC
 """)
     Page<TagModel> findTagsBySearch(String query, Pageable pageRequest);
+
+    List<TagModel> findAllByNameIn(Set<String> names);
 }

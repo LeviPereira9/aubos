@@ -4,13 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.dependencies.tag.TagRequest;
 import lp.boble.aubos.dto.book.dependencies.tag.TagResponse;
+import lp.boble.aubos.response.batch.BatchResponse;
+import lp.boble.aubos.response.batch.BatchResponseBuilder;
+import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.pages.PageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.dependencies.tag.TagBatchService;
 import lp.boble.aubos.service.book.dependencies.tag.TagService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("${api.prefix}/tag")
@@ -18,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class TagController {
 
     private final TagService tagService;
+    private final TagBatchService tagBatchService;
 
     @GetMapping
     public ResponseEntity<PageResponse<TagResponse>> findAllTags(
@@ -86,6 +93,22 @@ public class TagController {
                         .operation("DELETE")
                         .message("Tag deletada com sucesso.")
                         .code(code)
+                        .build();
+
+        return ResponseEntity.status(code).body(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchResponse<String>> addBatchTag(@RequestBody List<TagRequest> requests){
+        BatchTransporter<String> content = tagBatchService.batchCreateTag(requests);
+        int code = content.getStatus();
+
+        BatchResponse<String> response =
+                new BatchResponseBuilder<String>()
+                        .operation("POST")
+                        .message("Requisição de criação concluída com sucesso..")
+                        .code(code)
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(code).body(response);

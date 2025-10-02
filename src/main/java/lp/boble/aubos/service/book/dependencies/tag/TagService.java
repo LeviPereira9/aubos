@@ -10,9 +10,12 @@ import lp.boble.aubos.mapper.book.dependencies.TagMapper;
 import lp.boble.aubos.model.book.dependencies.TagModel;
 import lp.boble.aubos.repository.book.depedencies.tag.TagRepository;
 import lp.boble.aubos.response.pages.PageResponse;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,4 +83,9 @@ public class TagService {
                 .orElseThrow(CustomNotFoundException::tag);
     }
 
+    public List<String> getRequestedNames(Set<TagRequest> uniqueRequests) {
+        List<TagModel> tags = tagRepository.findAllByNameIn(uniqueRequests.stream().map(TagRequest::name).collect(Collectors.toSet()));
+
+        return tags.stream().map(TagModel::getName).collect(Collectors.toList());
+    }
 }
