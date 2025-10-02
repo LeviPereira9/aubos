@@ -35,4 +35,8 @@ public class CustomDuplicateFieldException extends GlobalException {
     public static CustomDuplicateFieldException tag() {
         return new CustomDuplicateFieldException("Essa tag já existe.");
     }
+
+    public static CustomDuplicateFieldException bookTag() {
+        return new CustomDuplicateFieldException("Esse livro já possui esta tag.");
+    }
 }

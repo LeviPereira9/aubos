@@ -77,8 +77,7 @@ public class TagService {
         }
     }
 
-
-    private TagModel findTagOrThrow(int id) {
+    public TagModel findTagOrThrow(int id) {
         return tagRepository.findById(id)
                 .orElseThrow(CustomNotFoundException::tag);
     }

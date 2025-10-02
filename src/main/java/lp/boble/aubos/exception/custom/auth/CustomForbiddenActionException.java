@@ -16,4 +16,8 @@ public class CustomForbiddenActionException extends AuthException {
     public static CustomForbiddenActionException notTheRequester() {
         return new CustomForbiddenActionException("Apenas o próprio usuário pode realizar esta ação.");
     }
+
+    public static CustomForbiddenActionException bookTagNotAssociated() {
+        return new CustomForbiddenActionException("Essa tag não está associada a este livro.");
+    }
 }

@@ -26,4 +26,7 @@ public class BookTagModel {
     private TagModel tag;
 
 
+    public boolean belongsTo(UUID bookId) {
+        return this.book.getId().equals(bookId);
+    }
 }
