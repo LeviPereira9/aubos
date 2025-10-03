@@ -20,4 +20,8 @@ public class CustomForbiddenActionException extends AuthException {
     public static CustomForbiddenActionException bookTagNotAssociated() {
         return new CustomForbiddenActionException("Essa tag não está associada a este livro.");
     }
+
+    public static CustomForbiddenActionException alternativeTitleNotAssociated() {
+        return new CustomForbiddenActionException("Esse título não está associado a este livro.");
+    }
 }

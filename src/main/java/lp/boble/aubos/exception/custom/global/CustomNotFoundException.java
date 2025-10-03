@@ -63,4 +63,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException bookTag() {
         return new CustomNotFoundException("Nenhuma tag foi encontrada para este livro.");
     }
+
+    public static CustomNotFoundException alternativeTitle() {
+        return new CustomNotFoundException("Título alternativo não encontrado.");
+    }
 }
