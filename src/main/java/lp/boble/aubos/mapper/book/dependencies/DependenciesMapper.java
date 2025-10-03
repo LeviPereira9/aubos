@@ -28,8 +28,4 @@ public interface DependenciesMapper {
 
 
     TypeResponse fromTypeModelToResponse(TypeModel type);
-
-    StatusResponse fromStatusModelToResponse(StatusModel status);
-
-    RestrictionResponse fromRestrictionModelToResponse(RestrictionModel restriction);
 }

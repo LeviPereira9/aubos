@@ -70,4 +70,9 @@ public class LicenseService {
 
         return licenseRepository.findExistingLabels(requestedLabels);
     }
+
+    public LicenseModel getBookLicense(int id) {
+        return licenseRepository.findById(id)
+                .orElseThrow(CustomNotFoundException::license);
+    }
 }

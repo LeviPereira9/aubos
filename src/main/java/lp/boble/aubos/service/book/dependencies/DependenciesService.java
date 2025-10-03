@@ -13,6 +13,10 @@ import lp.boble.aubos.mapper.book.dependencies.DependenciesMapper;
 import lp.boble.aubos.model.book.dependencies.*;
 import lp.boble.aubos.repository.book.depedencies.*;
 import lp.boble.aubos.service.book.dependencies.language.LanguageService;
+import lp.boble.aubos.service.book.dependencies.license.LicenseService;
+import lp.boble.aubos.service.book.dependencies.restriction.RestrictionService;
+import lp.boble.aubos.service.book.dependencies.status.StatusService;
+import lp.boble.aubos.service.book.dependencies.type.TypeService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -22,63 +26,21 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class DependenciesService {
-    private final LanguageRepository languageRepository;
-    private final TypeRepository typeRepository;
-    private final StatusRepository statusRepository;
-    private final RestrictionRepository restrictionRepository;
-    private final LicenseRepository licenseRepository;
-    private final ContributorRoleRepository contributorRoleRepository;
-    private final DependenciesMapper dependenciesMapper;
+
     private final LanguageService languageService;
-
-    public TypeModel getBookType(Integer id){
-        return typeRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::type);
-    }
-
-    public List<TypeResponse> getAllTypes(){
-
-        return typeRepository.findAll().stream()
-                .map(dependenciesMapper::fromTypeModelToResponse)
-                .collect(Collectors.toList());
-    }
-
-    public StatusModel getBookStatus(Integer id){
-        return statusRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::status);
-    }
-
-    public List<StatusResponse> getAllStatus(){
-        return statusRepository.findAll().stream()
-                .map(dependenciesMapper::fromStatusModelToResponse)
-                .collect(Collectors.toList());
-    }
-
-    public RestrictionModel getBookRestriction(Integer id){
-        return restrictionRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::restriction);
-    }
-
-    public List<RestrictionResponse> getAllRestriction(){
-
-        return restrictionRepository.findAll().stream()
-                .map(dependenciesMapper::fromRestrictionModelToResponse)
-                .collect(Collectors.toList());
-    }
-
-    public LicenseModel getBookLicense(Integer id){
-        return licenseRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::license);
-    }
+    private final LicenseService licenseService;
+    private final RestrictionService restrictionService;
+    private final StatusService statusService;
+    private final TypeService typeService;
 
 
     public DependencyData loadBookDependencyData(BookContextRequest contextRequest){
 
         LanguageModel language = languageService.getBookLanguage(contextRequest.languageId());
-        TypeModel type = this.getBookType(contextRequest.typeId());
-        StatusModel status = this.getBookStatus(contextRequest.statusId());
-        RestrictionModel restriction = this.getBookRestriction(contextRequest.restrictionId());
-        LicenseModel license = this.getBookLicense(contextRequest.licenseId());
+        TypeModel type = typeService.getBookType(contextRequest.typeId());
+        StatusModel status = statusService.getBookStatus(contextRequest.statusId());
+        RestrictionModel restriction = restrictionService.getBookRestriction(contextRequest.restrictionId());
+        LicenseModel license = licenseService.getBookLicense(contextRequest.licenseId());
 
         return new DependencyData(language, type, status, restriction, license) ;
     }
