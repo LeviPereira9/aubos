@@ -47,4 +47,8 @@ public class CustomDuplicateFieldException extends GlobalException {
     public static CustomDuplicateFieldException license() {
         return new CustomDuplicateFieldException("Essa licença já existe.");
     }
+
+    public static CustomDuplicateFieldException type() {
+        return new CustomDuplicateFieldException("Esse tipo já existe.");
+    }
 }
