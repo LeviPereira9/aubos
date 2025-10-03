@@ -9,7 +9,6 @@ import lombok.Data;
 public class LicenseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //TODO: id de vdd. :P
     private int id;
 
     @Column(name = "label")
