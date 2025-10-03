@@ -3,8 +3,12 @@ package lp.boble.aubos.controller.book;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.bookAlternativeTitle.AlternativeTitleRequest;
 import lp.boble.aubos.dto.book.relationships.bookAlternativeTitle.AlternativeTitleResponse;
+import lp.boble.aubos.response.batch.BatchResponse;
+import lp.boble.aubos.response.batch.BatchResponseBuilder;
+import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.relationships.alternativetitle.AlternativeTitleBatchService;
 import lp.boble.aubos.service.book.relationships.alternativetitle.AlternativeTitleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class AlternativeTitleController {
 
     private final AlternativeTitleService alternativeTitleService;
+    private final AlternativeTitleBatchService alternativeTitleBatchService;
 
     @GetMapping
     public ResponseEntity<SuccessResponse<List<AlternativeTitleResponse>>>
@@ -85,6 +90,24 @@ public class AlternativeTitleController {
                         .message("Título alternativo removido com sucesso.")
                         .build()
                 ;
+
+        return ResponseEntity.status(code).body(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchResponse<String>>
+    addAlternativeTitleInBatch(@PathVariable UUID bookId, @RequestBody List<AlternativeTitleRequest> requests){
+
+        BatchTransporter<String> content = alternativeTitleBatchService.addAlternativeTitlesInBatch(bookId, requests);
+        int code = content.getStatus();
+
+        BatchResponse<String> response =
+                new BatchResponseBuilder<String>()
+                        .operation("POST")
+                        .code(code)
+                        .message("Requisição POST concluída com sucesso.")
+                        .content(content)
+                        .build();
 
         return ResponseEntity.status(code).body(response);
     }

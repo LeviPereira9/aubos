@@ -15,7 +15,9 @@ import lp.boble.aubos.service.book.BookService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +86,11 @@ public class AlternativeTitleService {
         }
 
         return alternativeTitle;
+    }
+
+    public List<String> findExistingTitles(UUID bookId, Set<AlternativeTitleRequest> uniqueRequests) {
+        Set<String> titles = uniqueRequests.stream().map(AlternativeTitleRequest::title).collect(Collectors.toSet());
+
+        return alternativeTitleRepository.findExistingTitles(bookId, titles);
     }
 }
