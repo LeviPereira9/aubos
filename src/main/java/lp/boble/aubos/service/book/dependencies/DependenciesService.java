@@ -31,11 +31,9 @@ public class DependenciesService {
     private final DependenciesMapper dependenciesMapper;
     private final LanguageService languageService;
 
-
-
     public TypeModel getBookType(Integer id){
         return typeRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
+                .orElseThrow(CustomNotFoundException::type);
     }
 
     public List<TypeResponse> getAllTypes(){
@@ -47,7 +45,7 @@ public class DependenciesService {
 
     public StatusModel getBookStatus(Integer id){
         return statusRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
+                .orElseThrow(CustomNotFoundException::status);
     }
 
     public List<StatusResponse> getAllStatus(){
@@ -58,7 +56,7 @@ public class DependenciesService {
 
     public RestrictionModel getBookRestriction(Integer id){
         return restrictionRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
+                .orElseThrow(CustomNotFoundException::restriction);
     }
 
     public List<RestrictionResponse> getAllRestriction(){
@@ -70,7 +68,7 @@ public class DependenciesService {
 
     public LicenseModel getBookLicense(Integer id){
         return licenseRepository.findById(id)
-                .orElseThrow(CustomNotFoundException::user);
+                .orElseThrow(CustomNotFoundException::license);
     }
 
 

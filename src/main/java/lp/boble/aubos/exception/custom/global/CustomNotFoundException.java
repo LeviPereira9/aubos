@@ -71,4 +71,16 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException license() {
         return new CustomNotFoundException("Licença não encontrada.");
     }
+
+    public static CustomNotFoundException restriction() {
+        return new CustomNotFoundException("Restrição não encontrada.");
+    }
+
+    public static CustomNotFoundException status() {
+        return new CustomNotFoundException("Status não encontrado.");
+    }
+
+    public static CustomNotFoundException type() {
+        return new CustomNotFoundException("Tipo não encontrado.");
+    }
 }
