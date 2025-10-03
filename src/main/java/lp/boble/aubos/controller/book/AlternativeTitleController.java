@@ -29,7 +29,7 @@ public class AlternativeTitleController {
     public ResponseEntity<SuccessResponse<List<AlternativeTitleResponse>>>
     findAllAlternativeTitlesAtBook(@PathVariable UUID bookId){
 
-        List<AlternativeTitleResponse> content = alternativeTitleService.findAllAlternativeTitleAtBook(bookId);
+        List<AlternativeTitleResponse> content = alternativeTitleService.getAlternativeTitlesByBook(bookId);
 
         SuccessResponse<List<AlternativeTitleResponse>> response =
                 new SuccessResponseBuilder<List<AlternativeTitleResponse>>()
@@ -46,7 +46,7 @@ public class AlternativeTitleController {
     public ResponseEntity<SuccessResponse<AlternativeTitleResponse>>
     addAlternativeTitle(@PathVariable UUID bookId, @RequestBody AlternativeTitleRequest request){
 
-        AlternativeTitleResponse content = alternativeTitleService.addAlternativeTitleToBook(bookId, request);
+        AlternativeTitleResponse content = alternativeTitleService.addAlternativeTitle(bookId, request);
         HttpStatus code = HttpStatus.CREATED;
 
         SuccessResponse<AlternativeTitleResponse> response =
@@ -79,7 +79,7 @@ public class AlternativeTitleController {
 
     @DeleteMapping("/{alternativeTitleId}")
     public ResponseEntity<SuccessResponse<Void>> deleteAlternativeTitleFromBook(@PathVariable UUID bookId, @PathVariable UUID alternativeTitleId){
-        alternativeTitleService.deleteAlternativeTitle(bookId, alternativeTitleId);
+        alternativeTitleService.removeAlternativeTitle(bookId, alternativeTitleId);
 
         HttpStatus code = HttpStatus.OK;
 

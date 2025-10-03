@@ -27,22 +27,22 @@ public class AlternativeTitleService {
     private final AlternativeTitleMapper alternativeTitleMapper;
     private final BookService bookService;
 
-    public List<AlternativeTitleResponse> findAllAlternativeTitleAtBook(UUID bookId){
-        List<AlternativeTitleModel> alternativeTitles = this.findAllByBookId(bookId);
+    public List<AlternativeTitleResponse> getAlternativeTitlesByBook(UUID bookId){
+        List<AlternativeTitleModel> alternativeTitles = this.findByBookId(bookId);
 
         return alternativeTitles.stream().map(alternativeTitleMapper::toResponse).toList();
     }
 
-    private List<AlternativeTitleModel> findAllByBookId(UUID bookId) {
+    private List<AlternativeTitleModel> findByBookId(UUID bookId) {
         return alternativeTitleRepository.findAllByBook_Id(bookId);
     }
 
     @Transactional
-    public AlternativeTitleResponse addAlternativeTitleToBook(UUID bookId, AlternativeTitleRequest request){
+    public AlternativeTitleResponse addAlternativeTitle(UUID bookId, AlternativeTitleRequest request){
 
         this.validateTitle(bookId, request);
 
-        AlternativeTitleModel bookAlternativeTitle = this.generateAlternativeTitle(bookId, request);
+        AlternativeTitleModel bookAlternativeTitle = this.createAlternativeTitle(bookId, request);
 
         return alternativeTitleMapper.toResponse(alternativeTitleRepository.save(bookAlternativeTitle));
     }
@@ -55,7 +55,7 @@ public class AlternativeTitleService {
         }
     }
 
-    private AlternativeTitleModel generateAlternativeTitle(UUID bookId, AlternativeTitleRequest request) {
+    private AlternativeTitleModel createAlternativeTitle(UUID bookId, AlternativeTitleRequest request) {
         BookModel book = bookService.findBookOrThrow(bookId);
 
         return alternativeTitleMapper.toModel(book, request);
@@ -63,7 +63,7 @@ public class AlternativeTitleService {
 
     @Transactional
     public AlternativeTitleResponse updateAlternativeTitle(UUID bookId, UUID alternativeTitleId, AlternativeTitleRequest request){
-        AlternativeTitleModel alternativeTitle = this.findAlternativeTitleOrThrow(bookId, alternativeTitleId);
+        AlternativeTitleModel alternativeTitle = this.findAlternativeTitleByIdAndBookOrThrow(bookId, alternativeTitleId);
 
         alternativeTitleMapper.update(alternativeTitle, request);
 
@@ -71,13 +71,13 @@ public class AlternativeTitleService {
     }
 
     @Transactional
-    public void deleteAlternativeTitle(UUID bookId, UUID alternativeTitleId){
-        AlternativeTitleModel alternativeTitle = this.findAlternativeTitleOrThrow(bookId, alternativeTitleId);
+    public void removeAlternativeTitle(UUID bookId, UUID alternativeTitleId){
+        AlternativeTitleModel alternativeTitle = this.findAlternativeTitleByIdAndBookOrThrow(bookId, alternativeTitleId);
 
         alternativeTitleRepository.delete(alternativeTitle);
     }
 
-    private AlternativeTitleModel findAlternativeTitleOrThrow(UUID bookId, UUID alternativeTitleId){
+    private AlternativeTitleModel findAlternativeTitleByIdAndBookOrThrow(UUID bookId, UUID alternativeTitleId){
         AlternativeTitleModel alternativeTitle = alternativeTitleRepository.findById(alternativeTitleId)
                 .orElseThrow(CustomNotFoundException::alternativeTitle);
 
