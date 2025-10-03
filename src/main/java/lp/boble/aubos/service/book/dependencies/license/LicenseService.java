@@ -12,6 +12,8 @@ import lp.boble.aubos.repository.book.depedencies.LicenseRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,5 +63,11 @@ public class LicenseService {
             throw CustomDuplicateFieldException.license();
         }
 
+    }
+
+    public List<String> findExistingLabels(Set<LicenseRequest> requests) {
+        Set<String> requestedLabels = requests.stream().map(LicenseRequest::label).collect(Collectors.toSet());
+
+        return licenseRepository.findExistingLabels(requestedLabels);
     }
 }

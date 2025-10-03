@@ -3,8 +3,12 @@ package lp.boble.aubos.controller.book.dependencies;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.license.LicenseRequest;
 import lp.boble.aubos.dto.book.dependencies.license.LicenseResponse;
+import lp.boble.aubos.response.batch.BatchResponse;
+import lp.boble.aubos.response.batch.BatchResponseBuilder;
+import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.dependencies.license.LicenseBatchService;
 import lp.boble.aubos.service.book.dependencies.license.LicenseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,7 @@ public class LicenseController {
 
 
     private final LicenseService licenseService;
+    private final LicenseBatchService licenseBatchService;
 
     @GetMapping
     public ResponseEntity<SuccessResponse<List<LicenseResponse>>> getAllLicenses() {
@@ -64,6 +69,24 @@ public class LicenseController {
                         .operation("PUT")
                         .code(code)
                         .message("Licença atualizada com sucesso.")
+                        .content(content)
+                        .build();
+
+        return ResponseEntity.status(code).body(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchResponse<String>> addLicensesBatch(
+            @RequestBody List<LicenseRequest> requests
+    ){
+        BatchTransporter<String> content = licenseBatchService.addLicensesInBatch(requests);
+        int code = content.getStatus();
+
+        BatchResponse<String> response =
+                new BatchResponseBuilder<String>()
+                        .operation("POST")
+                        .code(code)
+                        .message("Requisição POST concluída com sucesso.")
                         .content(content)
                         .build();
 
