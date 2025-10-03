@@ -2,6 +2,7 @@ package lp.boble.aubos.service.book.relationships.tag;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.dto.book.relationships.BookTag.BookTagDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.BookTag.BookTagRequest;
 import lp.boble.aubos.dto.book.relationships.BookTag.BookTagResponse;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
@@ -16,8 +17,9 @@ import lp.boble.aubos.service.book.BookService;
 import lp.boble.aubos.service.book.dependencies.tag.TagService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,4 +90,18 @@ public class BookTagService {
         return bookTagRepository.findAllByBook_id(bookId);
     }
 
+    protected List<Integer> findAlreadyAddedTags(UUID bookId, Set<BookTagRequest> requests){
+        Set<Integer> requestedTagIds = requests.stream().map(BookTagRequest::id).collect(Collectors.toSet());
+
+        return bookTagRepository.findExistingTagsId(bookId, requestedTagIds);
+    }
+
+    public Map<UUID, BookTagModel> findRequestedTagsInBook(UUID bookId, Set<BookTagDeleteRequest> requests) {
+
+        Set<UUID> bookTagIds = requests.stream().map(BookTagDeleteRequest::id).collect(Collectors.toSet());
+
+        List<BookTagModel> bookTags = bookTagRepository.findCurrentTagsInBook(bookId, bookTagIds);
+
+        return bookTags.stream().collect(Collectors.toMap(BookTagModel::getId, Function.identity()));
+    }
 }

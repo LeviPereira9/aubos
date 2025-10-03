@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.tag.TagRequest;
 import lp.boble.aubos.dto.book.dependencies.tag.TagResponse;
+import lp.boble.aubos.dto.book.relationships.BookTag.BookTagRequest;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.dependencies.TagMapper;
@@ -14,7 +15,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,5 +89,12 @@ public class TagService {
         List<TagModel> tags = tagRepository.findAllByNameIn(uniqueRequests.stream().map(TagRequest::name).collect(Collectors.toSet()));
 
         return tags.stream().map(TagModel::getName).collect(Collectors.toList());
+    }
+
+    public Map<Integer, TagModel> getRequestedTags(Set<BookTagRequest> uniqueRequests) {
+        Set<Integer> tagsId = uniqueRequests.stream().map(BookTagRequest::id).collect(Collectors.toSet());
+        List<TagModel> tags = tagRepository.findAllById(tagsId);
+
+        return tags.stream().collect(Collectors.toMap(TagModel::getId, Function.identity()));
     }
 }

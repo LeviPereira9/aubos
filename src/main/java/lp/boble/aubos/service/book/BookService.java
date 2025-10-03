@@ -135,8 +135,12 @@ public class BookService {
         return bookRepository.save(bookToSave);
     }
 
-    public boolean bookExistsById(UUID bookId){
-        return bookRepository.existsById(bookId);
+    public void bookExistsById(UUID bookId){
+        boolean exists = bookRepository.existsById(bookId);
+
+        if(!exists){
+            throw CustomNotFoundException.book();
+        }
     }
 
     private List<BookModel> findAllBooksById(List<UUID> requestedBookId) {
