@@ -1,9 +1,6 @@
 package lp.boble.aubos.model.book.dependencies;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -11,6 +8,8 @@ import lombok.Data;
 @Data
 public class LicenseModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //TODO: id de vdd. :P
     private int id;
 
     @Column(name = "label")
@@ -21,4 +20,8 @@ public class LicenseModel {
 
     @Column(name = "description")
     private String description;
+
+    public boolean hasSameLabel(String label) {
+        return this.label.equals(label);
+    }
 }

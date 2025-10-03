@@ -25,7 +25,7 @@ public interface DependenciesMapper {
 
     LanguageResponse fromLanguageModelToResponse(LanguageModel language);
 
-    LicenseResponse fromLicenseModelToResponse(LicenseModel license);
+
 
     TypeResponse fromTypeModelToResponse(TypeModel type);
 

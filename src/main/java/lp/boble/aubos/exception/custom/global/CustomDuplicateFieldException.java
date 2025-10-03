@@ -43,4 +43,8 @@ public class CustomDuplicateFieldException extends GlobalException {
     public static CustomDuplicateFieldException bookAlternativeTitle() {
         return new CustomDuplicateFieldException("Esse livro já possui este título alternativo.");
     }
+
+    public static CustomDuplicateFieldException license() {
+        return new CustomDuplicateFieldException("Essa licença já existe.");
+    }
 }

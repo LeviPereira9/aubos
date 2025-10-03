@@ -73,11 +73,6 @@ public class DependenciesService {
                 .orElseThrow(CustomNotFoundException::user);
     }
 
-    public List<LicenseResponse> getAllLicense(){
-        return licenseRepository.findAll().stream()
-                .map(dependenciesMapper::fromLicenseModelToResponse)
-                .collect(Collectors.toList());
-    }
 
     public DependencyData loadBookDependencyData(BookContextRequest contextRequest){
 
@@ -88,17 +83,6 @@ public class DependenciesService {
         LicenseModel license = this.getBookLicense(contextRequest.licenseId());
 
         return new DependencyData(language, type, status, restriction, license) ;
-    }
-
-    @Cacheable(value = "dependencies", key = "'singleton'")
-    public DependencyResponse loadBookDependencyResponse(){
-        return new DependencyResponse(
-                languageService.getAllLanguages(),
-                this.getAllLicense(),
-                this.getAllRestriction(),
-                this.getAllStatus(),
-                this.getAllTypes()
-        );
     }
 
 

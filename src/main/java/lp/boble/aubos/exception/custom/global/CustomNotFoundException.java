@@ -67,4 +67,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException alternativeTitle() {
         return new CustomNotFoundException("Título alternativo não encontrado.");
     }
+
+    public static CustomNotFoundException license() {
+        return new CustomNotFoundException("Licença não encontrada.");
+    }
 }
