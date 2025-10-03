@@ -12,6 +12,7 @@ import lp.boble.aubos.repository.book.depedencies.TypeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,5 +74,9 @@ public class TypeService {
     }
 
 
+    public List<String> findExistingTypes(Set<TypeRequest> uniqueRequests) {
+        Set<String> requestTypes = uniqueRequests.stream().map(TypeRequest::name).collect(Collectors.toSet());
 
+        return typeRepository.findByName(requestTypes);
+    }
 }

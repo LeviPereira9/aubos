@@ -3,8 +3,12 @@ package lp.boble.aubos.controller.book.dependencies;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.type.TypeRequest;
 import lp.boble.aubos.dto.book.dependencies.type.TypeResponse;
+import lp.boble.aubos.response.batch.BatchResponse;
+import lp.boble.aubos.response.batch.BatchResponseBuilder;
+import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.dependencies.type.TypeBatchService;
 import lp.boble.aubos.service.book.dependencies.type.TypeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +22,7 @@ import java.util.List;
 public class TypeController {
 
     private final TypeService typeService;
+    private final TypeBatchService typeBatchService;
 
     @GetMapping
     public ResponseEntity<SuccessResponse<List<TypeResponse>>> getAllTypes() {
@@ -79,6 +84,24 @@ public class TypeController {
                         .operation("DELETE")
                         .code(code)
                         .message("Tipo removido com sucesso.")
+                        .build();
+
+        return ResponseEntity.status(code).body(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchResponse<String>> addTypesBatch(
+            @RequestBody List<TypeRequest> requests
+    ){
+        BatchTransporter<String> content = typeBatchService.addTypesInBatch(requests);
+        int code = content.getStatus();
+
+        BatchResponse<String> response =
+                new BatchResponseBuilder<String>()
+                        .operation("POST")
+                        .code(code)
+                        .message("Requisição POST concluída com sucesso.")
+                        .content(content)
                         .build();
 
         return ResponseEntity.status(code).body(response);
