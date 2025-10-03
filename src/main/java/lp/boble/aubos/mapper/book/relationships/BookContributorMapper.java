@@ -1,14 +1,12 @@
 package lp.boble.aubos.mapper.book.relationships;
 
 import lp.boble.aubos.dto.book.parts.BookContributorPartResponse;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateBatchRequest;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorResponse;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorUpdateBatchRequest;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorsResponse;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;
-import lp.boble.aubos.model.book.dependencies.ContributorRole;
 import lp.boble.aubos.model.book.relationships.BookContributorModel;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

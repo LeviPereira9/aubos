@@ -2,9 +2,9 @@ package lp.boble.aubos.service.book.relationships.contributor;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorResponse;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateRequest;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorsResponse;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorResponse;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorsResponse;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.relationships.BookContributorMapper;
 import lp.boble.aubos.model.book.BookModel;

@@ -2,8 +2,8 @@ package lp.boble.aubos.service.book.relationships.contributor;
 
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorDeleteRequest;
-import lp.boble.aubos.dto.book.relationships.BookContributor.BookContributorUpdateBatchRequest;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.bookContributor.BookContributorUpdateBatchRequest;
 import lp.boble.aubos.mapper.book.relationships.BookContributorMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.ContributorModel;

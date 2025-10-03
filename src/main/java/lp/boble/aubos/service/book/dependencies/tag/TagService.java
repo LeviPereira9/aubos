@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.tag.TagRequest;
 import lp.boble.aubos.dto.book.dependencies.tag.TagResponse;
-import lp.boble.aubos.dto.book.relationships.BookTag.BookTagRequest;
+import lp.boble.aubos.dto.book.relationships.bookTag.BookTagRequest;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.dependencies.TagMapper;

@@ -1,8 +1,8 @@
 package lp.boble.aubos.service.book.relationships.language;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageAddRequest;
-import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageDelRequest;
+import lp.boble.aubos.dto.book.relationships.bookLanguage.BookLanguageAddRequest;
+import lp.boble.aubos.dto.book.relationships.bookLanguage.BookLanguageDelRequest;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.LanguageModel;
 import lp.boble.aubos.model.book.relationships.BookLanguage;

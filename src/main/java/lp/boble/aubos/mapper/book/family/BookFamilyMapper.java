@@ -1,8 +1,8 @@
 package lp.boble.aubos.mapper.book.family;
 
-import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyCreateRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyResponse;
-import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyCreateRequest;
+import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyResponse;
+import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyUpdateRequest;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.family.FamilyModel;
 import lp.boble.aubos.model.book.relationships.BookFamilyModel;

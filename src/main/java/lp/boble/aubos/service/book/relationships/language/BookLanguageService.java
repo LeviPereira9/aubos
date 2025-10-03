@@ -1,9 +1,9 @@
 package lp.boble.aubos.service.book.relationships.language;
 
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageAddRequest;
-import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageCreatedResponse;
-import lp.boble.aubos.dto.book.relationships.BookLanguage.BookLanguageResponse;
+import lp.boble.aubos.dto.book.relationships.bookLanguage.BookLanguageAddRequest;
+import lp.boble.aubos.dto.book.relationships.bookLanguage.BookLanguageCreatedResponse;
+import lp.boble.aubos.dto.book.relationships.bookLanguage.BookLanguageResponse;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.relationships.BookLanguageMapper;

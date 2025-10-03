@@ -2,9 +2,9 @@ package lp.boble.aubos.service.book.relationships.tag;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookTag.BookTagDeleteRequest;
-import lp.boble.aubos.dto.book.relationships.BookTag.BookTagRequest;
-import lp.boble.aubos.dto.book.relationships.BookTag.BookTagResponse;
+import lp.boble.aubos.dto.book.relationships.bookTag.BookTagDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.bookTag.BookTagRequest;
+import lp.boble.aubos.dto.book.relationships.bookTag.BookTagResponse;
 import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;

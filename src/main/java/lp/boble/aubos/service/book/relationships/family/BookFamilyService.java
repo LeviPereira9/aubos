@@ -2,10 +2,10 @@ package lp.boble.aubos.service.book.relationships.family;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyCreateRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyDeleteRequest;
-import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyResponse;
-import lp.boble.aubos.dto.book.relationships.BookFamily.BookFamilyUpdateRequest;
+import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyCreateRequest;
+import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyResponse;
+import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyUpdateRequest;
 import lp.boble.aubos.exception.custom.global.CustomDuplicateFieldException;
 import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.book.family.BookFamilyMapper;

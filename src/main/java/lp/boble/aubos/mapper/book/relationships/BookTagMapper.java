@@ -1,6 +1,6 @@
 package lp.boble.aubos.mapper.book.relationships;
 
-import lp.boble.aubos.dto.book.relationships.BookTag.BookTagResponse;
+import lp.boble.aubos.dto.book.relationships.bookTag.BookTagResponse;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.TagModel;
 import lp.boble.aubos.model.book.relationships.BookTagModel;

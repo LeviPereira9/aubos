@@ -2,8 +2,8 @@ package lp.boble.aubos.service.book.relationships.tag;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lp.boble.aubos.dto.book.relationships.BookTag.BookTagDeleteRequest;
-import lp.boble.aubos.dto.book.relationships.BookTag.BookTagRequest;
+import lp.boble.aubos.dto.book.relationships.bookTag.BookTagDeleteRequest;
+import lp.boble.aubos.dto.book.relationships.bookTag.BookTagRequest;
 import lp.boble.aubos.mapper.book.relationships.BookTagMapper;
 import lp.boble.aubos.model.book.BookModel;
 import lp.boble.aubos.model.book.dependencies.TagModel;
