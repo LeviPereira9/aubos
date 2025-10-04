@@ -13,6 +13,7 @@ import lp.boble.aubos.repository.book.depedencies.RestrictionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,5 +78,10 @@ public class RestrictionService {
     }
 
 
+    public List<Integer> findExistingAges(Set<RestrictionCreateRequest> requests) {
 
+        Set<Integer> requestedAges = requests.stream().map(RestrictionCreateRequest::age).collect(Collectors.toSet());
+
+        return restrictionRepository.findAllByAge(requestedAges);
+    }
 }

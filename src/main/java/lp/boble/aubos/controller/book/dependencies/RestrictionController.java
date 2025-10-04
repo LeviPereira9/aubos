@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.restriction.RestrictionCreateRequest;
 import lp.boble.aubos.dto.book.dependencies.restriction.RestrictionResponse;
 import lp.boble.aubos.dto.book.dependencies.restriction.RestrictionUpdateRequest;
+import lp.boble.aubos.response.batch.BatchResponse;
+import lp.boble.aubos.response.batch.BatchResponseBuilder;
+import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.dependencies.restriction.RestrictionBatchService;
 import lp.boble.aubos.service.book.dependencies.restriction.RestrictionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RestrictionController {
     private final RestrictionService restrictionService;
+    private final RestrictionBatchService restrictionBatchService;
 
     @GetMapping
     public ResponseEntity<SuccessResponse<List<RestrictionResponse>>> getAllRestrictions(){
@@ -82,5 +87,23 @@ public class RestrictionController {
                         .build();
 
         return ResponseEntity.status(status).body(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchResponse<Integer>> addRestrictionBatch(
+            @RequestBody List<RestrictionCreateRequest> requests
+    ){
+        BatchTransporter<Integer> content = restrictionBatchService.addRestrictionsInBatch(requests);
+        int code = content.getStatus();
+
+        BatchResponse<Integer> response =
+                new BatchResponseBuilder<Integer>()
+                        .operation("POST")
+                        .code(code)
+                        .message("Requisição POST concluída com sucesso.")
+                        .content(content)
+                        .build();
+
+        return ResponseEntity.status(code).body(response);
     }
 }
