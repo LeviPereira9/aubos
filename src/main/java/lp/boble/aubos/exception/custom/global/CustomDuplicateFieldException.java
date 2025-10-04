@@ -51,4 +51,8 @@ public class CustomDuplicateFieldException extends GlobalException {
     public static CustomDuplicateFieldException type() {
         return new CustomDuplicateFieldException("Esse tipo já existe.");
     }
+
+    public static CustomDuplicateFieldException restriction() {
+        return new CustomDuplicateFieldException("Essa classificação indicativa já existe.");
+    }
 }
