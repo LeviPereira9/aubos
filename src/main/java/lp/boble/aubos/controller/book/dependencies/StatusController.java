@@ -3,8 +3,12 @@ package lp.boble.aubos.controller.book.dependencies;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.status.StatusRequest;
 import lp.boble.aubos.dto.book.dependencies.status.StatusResponse;
+import lp.boble.aubos.response.batch.BatchResponse;
+import lp.boble.aubos.response.batch.BatchResponseBuilder;
+import lp.boble.aubos.response.batch.BatchTransporter;
 import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
+import lp.boble.aubos.service.book.dependencies.status.StatusBatchService;
 import lp.boble.aubos.service.book.dependencies.status.StatusService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,7 @@ public class StatusController {
 
 
     private final StatusService statusService;
+    private final StatusBatchService statusBatchService;
 
     @GetMapping
     public ResponseEntity<SuccessResponse<List<StatusResponse>>> getAllStatus(){
@@ -88,5 +93,23 @@ public class StatusController {
                         .build();
 
         return ResponseEntity.status(status).body(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchResponse<String>> createStatusInBatch(
+            @RequestBody List<StatusRequest> requests
+    ){
+        BatchTransporter<String> content = statusBatchService.createStatusInBatch(requests);
+        int code = content.getStatus();
+
+        BatchResponse<String> response =
+                new BatchResponseBuilder<String>()
+                        .operation("POST")
+                        .code(code)
+                        .message("Requisição POST concluída com sucesso.")
+                        .content(content)
+                        .build();
+
+        return ResponseEntity.status(code).body(response);
     }
 }

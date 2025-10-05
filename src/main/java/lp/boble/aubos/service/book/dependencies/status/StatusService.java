@@ -12,6 +12,7 @@ import lp.boble.aubos.repository.book.depedencies.StatusRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,4 +74,10 @@ public class StatusService {
         statusRepository.deleteById(id);
     }
 
+    public List<String> findExistingLabels(Set<StatusRequest> uniqueRequests) {
+        Set<String> requestedLabels = uniqueRequests.stream().map(StatusRequest::label).collect(Collectors.toSet());
+
+
+        return statusRepository.findAllLabels(requestedLabels);
+    }
 }
