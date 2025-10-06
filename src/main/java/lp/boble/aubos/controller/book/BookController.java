@@ -1,5 +1,6 @@
 package lp.boble.aubos.controller.book;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
@@ -20,6 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
+@Tag(
+        name = "Book",
+        description = "Endpoint de gerenciamento de livro, incluindo buscas, criação, atualização e exclusão."
+)
 @RestController
 @RequestMapping("${api.prefix}/book")
 @RequiredArgsConstructor
