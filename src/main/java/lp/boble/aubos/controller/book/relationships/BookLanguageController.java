@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.relationships;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.relationships.bookLanguage.BookLanguageAddRequest;
@@ -22,6 +24,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(
+        name = "Idiomas do Livro",
+        description = "Operações para gerenciar os idiomas em que um livro está disponível"
+)
 @RestController
 @RequestMapping("${api.prefix}/book/{bookId}/languages")
 @RequiredArgsConstructor
@@ -29,6 +35,10 @@ public class BookLanguageController {
     private final BookLanguageService bookLanguageService;
     private final BookLanguageBatchService bookLanguageBatchService;
 
+    @Operation(
+            summary = "Listar idiomas disponíveis do livro",
+            description = "Retorna todos os idiomas em que o livro está disponível ou foi traduzido."
+    )
     @GetMapping
     public ResponseEntity<SuccessResponse<List<BookLanguageResponse>>>
     getAllAvailableLanguagesInBook(@PathVariable UUID bookId){
@@ -45,6 +55,10 @@ public class BookLanguageController {
         return ResponseEntity.ok().eTag("").cacheControl(CacheProfiles.bookPublic()).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar idioma ao livro",
+            description = "Adiciona um novo idioma à lista de disponibilidade do livro (tradução ou versão original)."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<BookLanguageCreatedResponse>> addBookLanguage(
             @PathVariable UUID bookId,
@@ -65,6 +79,10 @@ public class BookLanguageController {
         return ResponseEntity.created(location).body(response);
     }
 
+    @Operation(
+            summary = "Remover idioma do livro",
+            description = "Remove um idioma específico da lista de disponibilidade do livro."
+    )
     @DeleteMapping("/{bookLanguageId}")
     public ResponseEntity<SuccessResponse<Void>> deleteBookLanguage(@PathVariable UUID bookId, @PathVariable UUID bookLanguageId){
         bookLanguageService.deleteBookLanguage(bookId, bookLanguageId);
@@ -79,6 +97,10 @@ public class BookLanguageController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar idiomas em lote ao livro",
+            description = "Adiciona múltiplos idiomas à lista de disponibilidade do livro de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<Integer>> addLanguagesToBook(
             @PathVariable UUID bookId,
@@ -97,6 +119,10 @@ public class BookLanguageController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Remover idiomas em lote do livro",
+            description = "Remove múltiplos idiomas da lista de disponibilidade do livro de uma vez através de requisição em lote."
+    )
     @DeleteMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> deleteLanguagesFromBook(
             @PathVariable UUID bookId,
