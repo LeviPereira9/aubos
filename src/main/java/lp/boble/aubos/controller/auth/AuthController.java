@@ -145,6 +145,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @DocModifyUserRole
     @PutMapping("/{userId}/{roleName}")
     public ResponseEntity<SuccessResponse<Void>> modifyUserRole(
             @PathVariable UUID userId,

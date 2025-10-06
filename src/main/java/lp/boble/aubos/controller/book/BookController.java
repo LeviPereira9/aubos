@@ -3,6 +3,7 @@ package lp.boble.aubos.controller.book;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
+import lp.boble.aubos.config.documentation.book.*;
 import lp.boble.aubos.dto.book.*;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.repository.book.BookRepository;
@@ -26,6 +27,7 @@ public class BookController {
     private final BookRepository bookRepository;
     private final BookService bookService;
 
+    @DocPostBook
     @PostMapping
     public ResponseEntity<SuccessResponse<BookResponse>> postBook(@RequestBody BookCreateRequest book) {
 
@@ -43,6 +45,7 @@ public class BookController {
 
     };
 
+    @DocGetBook
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<BookResponse>> getBook(@PathVariable UUID id, HttpServletRequest request){
 
@@ -66,6 +69,7 @@ public class BookController {
         return ResponseEntity.ok().cacheControl(CacheProfiles.bookPublic()).eTag(eTag).body(response);
     }
 
+    @DocGetBookSuggestions
     @GetMapping("/suggestions")
     public ResponseEntity<PageResponse<BookPageResponse>> getBookSuggestions(
             @RequestParam String search,
@@ -79,6 +83,7 @@ public class BookController {
                 .body(response);
     }
 
+    @DocUpdateBook
     @PutMapping("/{id}")
     public ResponseEntity<SuccessResponse<BookResponse>>  updateBook(@PathVariable UUID id, @RequestBody BookUpdateRequest book){
         BookResponse content = bookService.updateBook(id, book);
@@ -94,6 +99,7 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @DocDeleteBook
     @DeleteMapping("/{id}")
     public ResponseEntity<SuccessResponse<Void>> deleteBook(@PathVariable UUID id){
         bookService.deleteBook(id);
