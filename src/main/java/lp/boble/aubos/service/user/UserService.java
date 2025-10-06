@@ -27,6 +27,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -227,5 +229,6 @@ public class UserService {
 
         return passwordEncoder.encode(changePasswordRequest.newPassword());
     }
+
 
 }

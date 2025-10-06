@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Tag(
         name = "Auth",
         description = "Endpoints para gerencimaneto de autenticação de usuários")
@@ -141,6 +143,24 @@ public class AuthController {
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/{userId}/{roleName}")
+    public ResponseEntity<SuccessResponse<Void>> modifyUserRole(
+            @PathVariable UUID userId,
+            @PathVariable String roleName
+            ){
+
+        authService.updateUserRole(userId, roleName);
+
+        SuccessResponse<Void> response =
+                new SuccessResponseBuilder<Void>()
+                        .operation("PUT")
+                        .message("Role atualizada com sucesso.")
+                        .code(HttpStatus.OK)
+                        .build();
+
+        return ResponseEntity.ok(response);
     }
 
 }

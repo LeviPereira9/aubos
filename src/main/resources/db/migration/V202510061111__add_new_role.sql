@@ -1,0 +1,1 @@
+INSERT INTO tb_roles (id, name) VALUE (6, 'SUPER_ADMIN');

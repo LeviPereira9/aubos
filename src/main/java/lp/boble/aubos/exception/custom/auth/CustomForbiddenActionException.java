@@ -24,4 +24,8 @@ public class CustomForbiddenActionException extends AuthException {
     public static CustomForbiddenActionException alternativeTitleNotAssociated() {
         return new CustomForbiddenActionException("Esse título não está associado a este livro.");
     }
+
+    public static CustomForbiddenActionException cantModify() {
+        return new CustomForbiddenActionException("Você não pode alterar para essa role.");
+    }
 }

@@ -87,13 +87,17 @@ public class UserModel implements UserDetails {
     @Column(name = "token_id")
     private UUID tokenId;
 
+    public String getRoleName(){
+        return this.role.getName();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = this.role.getName();
 
         return switch (role) {
-            case "OWNER" -> List.of(
-                    new SimpleGrantedAuthority("ROLE_OWNER"),
+            case "SUPER_ADMIN" -> List.of(
+                    new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_MOD"),
                     new SimpleGrantedAuthority("ROLE_READER"));

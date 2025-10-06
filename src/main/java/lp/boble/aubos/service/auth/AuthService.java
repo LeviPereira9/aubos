@@ -4,6 +4,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.auth.*;
+import lp.boble.aubos.enums.role.UserRoleEnum;
+import lp.boble.aubos.exception.custom.auth.CustomForbiddenActionException;
 import lp.boble.aubos.exception.custom.auth.CustomPasswordException;
 import lp.boble.aubos.exception.custom.auth.CustomTokenException;
 import lp.boble.aubos.exception.custom.email.CustomEmailException;
@@ -12,11 +14,15 @@ import lp.boble.aubos.exception.custom.global.CustomNotFoundException;
 import lp.boble.aubos.mapper.user.UserMapper;
 import lp.boble.aubos.model.auth.TokenModel;
 import lp.boble.aubos.model.auth.TokenTypeModel;
+import lp.boble.aubos.model.user.RoleModel;
 import lp.boble.aubos.model.user.UserModel;
 import lp.boble.aubos.repository.auth.TokenRepository;
 import lp.boble.aubos.repository.user.UserRepository;
+import lp.boble.aubos.service.book.dependencies.contributor.ContributorRoleService;
 import lp.boble.aubos.service.email.EmailService;
 import lp.boble.aubos.service.jwt.TokenService;
+import lp.boble.aubos.service.user.RoleService;
+import lp.boble.aubos.service.user.UserService;
 import lp.boble.aubos.util.AuthUtil;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,6 +48,7 @@ public class AuthService {
     private final UserMapper userMapper;
     private final TokenRepository tokenRepository;
     private final AuthUtil authUtil;
+    private final RoleService roleService;
 
 
     private TokenTypeModel resetTypeToken;
@@ -309,6 +316,34 @@ public class AuthService {
     @Scheduled(cron = "0 */15 * * * *")
     public void disableTokens(){
         tokenRepository.disableToken(Instant.now());
+    }
+
+    @Transactional
+    public void updateUserRole(UUID userId, String roleName){
+        UserModel requester = authUtil.getRequester();
+        UserModel target = this.findUserOrThrow(userId);
+
+        UserRoleEnum requesterRole = UserRoleEnum.getRoleByName(requester.getRoleName());
+        UserRoleEnum targetRole = UserRoleEnum.getRoleByName(roleName);
+
+        boolean canModify = requesterRole.canModify(targetRole);
+
+        if(!canModify){
+            throw CustomForbiddenActionException.cantModify();
+        }
+
+        RoleModel role = roleService.findRoleByNameOrThrow(roleName);
+
+        target.setRole(role);
+        target.setUpdatedAt(Instant.now());
+        //by?
+
+        userRepository.save(target);
+    }
+
+    public UserModel findUserOrThrow(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(CustomNotFoundException::user);
     }
 
 }

@@ -83,4 +83,8 @@ public class CustomNotFoundException extends GlobalException {
     public static CustomNotFoundException type() {
         return new CustomNotFoundException("Tipo não encontrado.");
     }
+
+    public static CustomNotFoundException role() {
+        return new CustomNotFoundException("Role não encontrada.");
+    }
 }
