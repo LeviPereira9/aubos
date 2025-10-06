@@ -91,22 +91,22 @@ public class UserModel implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = this.role.getName();
 
-        if(role.equals("ADMIN")) {
-            return List.of(
+        return switch (role) {
+            case "OWNER" -> List.of(
+                    new SimpleGrantedAuthority("ROLE_OWNER"),
                     new SimpleGrantedAuthority("ROLE_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_MOD"),
-                    new SimpleGrantedAuthority("ROLE_READER")
-            );
-        } else if(role.equals("MOD")) {
-            return List.of(
+                    new SimpleGrantedAuthority("ROLE_READER"));
+            case "ADMIN" -> List.of(
+                    new SimpleGrantedAuthority("ROLE_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_MOD"),
-                    new SimpleGrantedAuthority("ROLE_READER")
-            );
-        }else{
-            return List.of(
-                    new SimpleGrantedAuthority("ROLE_READER")
-            );
-        }
+                    new SimpleGrantedAuthority("ROLE_READER"));
+            case "MOD" -> List.of(
+                    new SimpleGrantedAuthority("ROLE_MOD"),
+                    new SimpleGrantedAuthority("ROLE_READER"));
+            default -> List.of(
+                    new SimpleGrantedAuthority("ROLE_READER"));
+        };
 
     }
 
