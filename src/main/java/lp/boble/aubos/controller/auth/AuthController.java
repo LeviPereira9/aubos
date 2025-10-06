@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Tag(
-        name = "Auth",
+        name = "Autenticação",
         description = "Endpoints para gerencimaneto de autenticação de usuários")
 @RestController
 @RequestMapping("${api.prefix}/auth")
