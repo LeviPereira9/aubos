@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.relationships;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.parts.BookAddContributor;
@@ -18,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(
+        name = "Contribuidores do Livro",
+        description = "Operações para gerenciar a relação entre livros e seus contribuidores (autores, tradutores, etc.)"
+)
 @RestController
 @RequestMapping("${api.prefix}/book/{bookId}/contributors")
 @RequiredArgsConstructor
@@ -27,6 +33,10 @@ public class BookContributorController {
     private final BookContributorService bookContributorService;
     private final BookContributorBatchService bookContributorBatchService;
 
+    @Operation(
+            summary = "Listar todos os contribuidores do livro",
+            description = "Retorna todos os contribuidores associados a um livro específico, organizados por função."
+    )
     @GetMapping
     public ResponseEntity<SuccessResponse<BookContributorsResponse>>
     getBookContributors(@PathVariable UUID bookId){
@@ -47,6 +57,10 @@ public class BookContributorController {
                 .body(response);
     }
 
+    @Operation(
+            summary = "Listar contribuidores por função",
+            description = "Retorna os contribuidores de um livro filtrados por uma função específica (autor, tradutor, etc.)."
+    )
     @GetMapping("/{roleId}")
     public ResponseEntity<SuccessResponse<List<BookContributorResponse>>>
     getBookContributorsByRole(@PathVariable UUID bookId, @PathVariable int roleId){
@@ -66,6 +80,10 @@ public class BookContributorController {
                 .body(response);
     }
 
+    @Operation(
+            summary = "Adicionar contribuidor ao livro",
+            description = "Associa um novo contribuidor a um livro com uma função específica."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<BookContributorResponse>> addContributorToBook(
             @PathVariable UUID bookId,
@@ -84,6 +102,10 @@ public class BookContributorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar contribuidor do livro",
+            description = "Atualiza as informações de um contribuidor específico em um livro (função, datas, etc.)."
+    )
     @PatchMapping("/{booKContributorId}")
     public ResponseEntity<SuccessResponse<Void>> updateBookContributor(
             @PathVariable UUID bookId,
@@ -102,6 +124,10 @@ public class BookContributorController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Remover contribuidor do livro",
+            description = "Remove a associação de um contribuidor específico com o livro."
+    )
     @DeleteMapping("/{bookContributorId}")
     public ResponseEntity<SuccessResponse<Void>> deleteBookContributor(@PathVariable UUID bookId, @PathVariable UUID bookContributorId){
         bookContributorService.deleteContributorFromBook(bookId, bookContributorId);
@@ -116,6 +142,10 @@ public class BookContributorController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar contribuidores em lote",
+            description = "Associa múltiplos contribuidores a um livro de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<String>> addBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookAddContributor> requests){
         BatchTransporter<String> result = bookContributorBatchService.addContributorsToBook(bookId, requests);
@@ -131,6 +161,10 @@ public class BookContributorController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar contribuidores em lote",
+            description = "Atualiza múltiplos contribuidores de um livro de uma vez através de requisição em lote."
+    )
     @PatchMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> updateBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorUpdateBatchRequest> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.updateBatch(bookId, requests);
@@ -146,6 +180,10 @@ public class BookContributorController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Remover contribuidores em lote",
+            description = "Remove múltiplas associações de contribuidores com o livro de uma vez através de requisição em lote."
+    )
     @DeleteMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> deleteBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorDeleteRequest> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.deleteBatch(bookId, requests);

@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
-@Tag(name = "Contribuidores", description = "Operações para gerenciar contribuidores (autores, tradutores, etc.) do sistema")
+@Tag(name = "Contribuidores", description = "Operações para gerenciar contribuidores do sistema")
 @RestController
 @RequestMapping("${api.prefix}/contributor")
 @RequiredArgsConstructor
