@@ -3,6 +3,7 @@ package lp.boble.aubos.controller.book.relationships;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.relationships.bookAlternativeTitle.AlternativeTitleRequest;
 import lp.boble.aubos.dto.book.relationships.bookAlternativeTitle.AlternativeTitleResponse;
 import lp.boble.aubos.response.batch.BatchResponse;
@@ -12,6 +13,7 @@ import lp.boble.aubos.response.success.SuccessResponse;
 import lp.boble.aubos.response.success.SuccessResponseBuilder;
 import lp.boble.aubos.service.book.relationships.alternativetitle.AlternativeTitleBatchService;
 import lp.boble.aubos.service.book.relationships.alternativetitle.AlternativeTitleService;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +51,7 @@ public class AlternativeTitleController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().eTag("").body(response);
+        return ResponseEntity.ok().eTag("").cacheControl(CacheProfiles.relationships()).body(response);
     }
 
     @Operation(

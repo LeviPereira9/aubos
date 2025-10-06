@@ -3,6 +3,7 @@ package lp.boble.aubos.controller.book.relationships;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.relationships.bookTag.BookTagDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.bookTag.BookTagRequest;
 import lp.boble.aubos.dto.book.relationships.bookTag.BookTagResponse;
@@ -51,7 +52,10 @@ public class BookTagController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().eTag("").body(response);
+        return ResponseEntity.ok()
+                .eTag("")
+                .cacheControl(CacheProfiles.relationships())
+                .body(response);
     }
 
     @Operation(

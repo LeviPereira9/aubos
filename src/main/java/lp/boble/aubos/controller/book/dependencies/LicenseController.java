@@ -3,6 +3,7 @@ package lp.boble.aubos.controller.book.dependencies;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.dependencies.license.LicenseRequest;
 import lp.boble.aubos.dto.book.dependencies.license.LicenseResponse;
 import lp.boble.aubos.response.batch.BatchResponse;
@@ -47,7 +48,7 @@ public class LicenseController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().cacheControl(CacheProfiles.staticData()).body(response);
     }
 
     @Operation(

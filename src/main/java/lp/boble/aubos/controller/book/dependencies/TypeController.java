@@ -3,6 +3,7 @@ package lp.boble.aubos.controller.book.dependencies;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.dependencies.type.TypeRequest;
 import lp.boble.aubos.dto.book.dependencies.type.TypeResponse;
 import lp.boble.aubos.response.batch.BatchResponse;
@@ -46,7 +47,7 @@ public class TypeController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().cacheControl(CacheProfiles.staticData()).body(response);
     }
 
     @Operation(

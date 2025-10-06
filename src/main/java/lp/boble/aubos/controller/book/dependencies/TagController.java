@@ -42,7 +42,7 @@ public class TagController {
         PageResponse<TagResponse> response = tagService.findAllTags(page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.searchFieldPublic())
+                .cacheControl(CacheProfiles.staticData())
                 .body(response);
     }
 
@@ -56,7 +56,7 @@ public class TagController {
         PageResponse<TagResponse> response = tagService.searchTag(page, query);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.searchFieldPublic())
+                .cacheControl(CacheProfiles.searchResults())
                 .body(response);
     }
 

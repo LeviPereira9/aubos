@@ -56,7 +56,7 @@ public class ContributorController {
 
         return ResponseEntity.ok()
                 .eTag(eTag)
-                .cacheControl(CacheProfiles.contributorPublic())
+                .cacheControl(CacheProfiles.staticData())
                 .body(response);
     }
 
@@ -70,7 +70,7 @@ public class ContributorController {
         PageResponse<ContributorPageResponse> content = contributorService.getContributorSuggestions(search, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.searchFieldPublic())
+                .cacheControl(CacheProfiles.searchResults())
                 .body(content);
     }
 

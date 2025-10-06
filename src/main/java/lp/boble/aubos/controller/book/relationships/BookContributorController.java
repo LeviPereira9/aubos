@@ -53,7 +53,7 @@ public class BookContributorController {
 
         return ResponseEntity.ok()
                 .eTag("Aham")
-                .cacheControl(CacheProfiles.bookPublic())
+                .cacheControl(CacheProfiles.relationships())
                 .body(response);
     }
 
@@ -76,7 +76,7 @@ public class BookContributorController {
 
         return ResponseEntity.ok()
                 .eTag("")
-                .cacheControl(CacheProfiles.bookPublic())
+                .cacheControl(CacheProfiles.relationships())
                 .body(response);
     }
 

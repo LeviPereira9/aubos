@@ -121,6 +121,16 @@ public class BookFamilyService {
         return requestedMembers.stream().collect(Collectors.toMap(BookFamilyModel::getId, Function.identity()));
     }
 
+    public List<BookFamilyResponse> findAllBooksInFamily(UUID familyId){
+        List<BookFamilyModel> books = this.findAllMembersInFamily(familyId);
+
+        if(books.isEmpty()){
+            throw CustomNotFoundException.booksInFamily();
+        }
+
+        return books.stream().map(bookFamilyMapper::fromModelToResponse).toList();
+    }
+
     protected List<BookFamilyModel> findAllMembersInFamily(UUID familyId){
         return bookFamilyRepository.findAllByFamily_Id(familyId);
     }

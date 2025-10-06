@@ -87,7 +87,7 @@ public class UserController {
                         .build();
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.userPublic())
+                .cacheControl(CacheProfiles.catalogData())
                 .eTag(eTag)
                 .body(response);
     }
@@ -102,7 +102,7 @@ public class UserController {
         PageResponse<UserAutocompletePageResponse> response = userService.getUserAutocomplete(query, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.searchFieldPublic())
+                .cacheControl(CacheProfiles.searchResults())
                 .body(response);
     }
 
@@ -118,7 +118,7 @@ public class UserController {
                 userService.getUserSuggestion(query, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.searchFieldPublic())
+                .cacheControl(CacheProfiles.searchResults())
                 .body(response);
     }
 

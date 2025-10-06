@@ -52,7 +52,10 @@ public class BookLanguageController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().eTag("").cacheControl(CacheProfiles.bookPublic()).body(response);
+        return ResponseEntity.ok()
+                .eTag("")
+                .cacheControl(CacheProfiles.relationships())
+                .body(response);
     }
 
     @Operation(

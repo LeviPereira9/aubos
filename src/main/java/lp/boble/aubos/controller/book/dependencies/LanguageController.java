@@ -3,6 +3,7 @@ package lp.boble.aubos.controller.book.dependencies;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.dependencies.language.LanguageRequest;
 import lp.boble.aubos.dto.book.dependencies.language.LanguageResponse;
 import lp.boble.aubos.response.success.SuccessResponse;
@@ -59,6 +60,6 @@ public class LanguageController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().cacheControl(CacheProfiles.staticData()).body(response);
     }
 }

@@ -3,6 +3,7 @@ package lp.boble.aubos.controller.book.relationships;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyCreateRequest;
 import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyResponse;
@@ -31,6 +32,25 @@ import java.util.UUID;
 public class BookFamilyController {
     private final BookFamilyService bookFamilyService;
     private final BookFamilyBatchService bookFamilyBatchService;
+
+
+    @GetMapping("/{familyId}")
+    public ResponseEntity<SuccessResponse<List<BookFamilyResponse>>> getAllBooksInFamily(
+            @PathVariable UUID familyId) {
+
+        List<BookFamilyResponse> content = bookFamilyService.findAllBooksInFamily(familyId);
+
+        SuccessResponse<List<BookFamilyResponse>> response =
+                new SuccessResponseBuilder<List<BookFamilyResponse>>()
+                        .operation("GET")
+                        .code(HttpStatus.OK)
+                        .message("Livros encontrados com sucesso.")
+                        .content(content)
+                        .build();
+
+        return ResponseEntity.ok().cacheControl(CacheProfiles.relationships()).body(response);
+    }
+
 
     @Operation(
             summary = "Adicionar livro à família",

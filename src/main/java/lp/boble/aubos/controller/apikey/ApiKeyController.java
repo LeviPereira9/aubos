@@ -81,7 +81,7 @@ public class ApiKeyController {
         return ResponseEntity
                 .ok()
                 .eTag(eTag)
-                .cacheControl(CacheProfiles.apiKeyPrivate())
+                .cacheControl(CacheProfiles.sessionData())
                 .body(response);
     }
 

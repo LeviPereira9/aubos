@@ -71,7 +71,7 @@ public class BookController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().cacheControl(CacheProfiles.bookPublic()).eTag(eTag).body(response);
+        return ResponseEntity.ok().cacheControl(CacheProfiles.contentData()).eTag(eTag).body(response);
     }
 
     @DocGetBookSuggestions
@@ -84,7 +84,7 @@ public class BookController {
         PageResponse<BookPageResponse> response = bookService.getBookBySearch(search, page);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheProfiles.searchFieldPublic())
+                .cacheControl(CacheProfiles.searchResults())
                 .body(response);
     }
 
@@ -101,7 +101,7 @@ public class BookController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(response);
     }
 
     @DocDeleteBook

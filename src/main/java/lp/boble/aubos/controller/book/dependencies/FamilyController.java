@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.family.FamilyRequest;
 import lp.boble.aubos.dto.book.family.FamilyResponse;
 import lp.boble.aubos.dto.book.family.FamilyTypeResponse;
@@ -44,7 +45,10 @@ public class FamilyController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().eTag("").body(response);
+        return ResponseEntity.ok()
+                .eTag("")
+                .cacheControl(CacheProfiles.staticData())
+                .body(response);
     }
 
     @Operation(
@@ -64,7 +68,7 @@ public class FamilyController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().eTag("").body(response);
+        return ResponseEntity.ok().eTag("").cacheControl(CacheProfiles.staticData()).body(response);
     }
 
     @Operation(
