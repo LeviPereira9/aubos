@@ -101,7 +101,7 @@ public class TagController {
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<String>> addBatchTag(@RequestBody List<TagRequest> requests){
         BatchTransporter<String> content = tagBatchService.batchCreateTag(requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<String> response =
                 new BatchResponseBuilder<String>()

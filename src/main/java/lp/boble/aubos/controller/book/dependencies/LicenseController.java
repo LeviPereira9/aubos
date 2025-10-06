@@ -80,7 +80,7 @@ public class LicenseController {
             @RequestBody List<LicenseRequest> requests
     ){
         BatchTransporter<String> content = licenseBatchService.addLicensesInBatch(requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<String> response =
                 new BatchResponseBuilder<String>()

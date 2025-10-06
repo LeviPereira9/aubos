@@ -21,10 +21,10 @@ import java.util.UUID;
 public class FamilyController {
     private final FamilyService familyService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<SuccessResponse<FamilyResponse>> getFamily(@PathVariable("id") UUID id) {
+    @GetMapping("/{languageId}")
+    public ResponseEntity<SuccessResponse<FamilyResponse>> getFamily(@PathVariable UUID languageId) {
 
-        FamilyResponse content = familyService.getFamily(id);
+        FamilyResponse content = familyService.getFamily(languageId);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
@@ -83,9 +83,9 @@ public class FamilyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SuccessResponse<FamilyResponse>> updateFamily(@PathVariable UUID id, @RequestBody FamilyRequest request) {
-        FamilyResponse content = familyService.updateFamily(id, request);
+    @PutMapping("/{languageId}")
+    public ResponseEntity<SuccessResponse<FamilyResponse>> updateFamily(@PathVariable UUID languageId, @RequestBody FamilyRequest request) {
+        FamilyResponse content = familyService.updateFamily(languageId, request);
 
         SuccessResponse<FamilyResponse> response =
                 new SuccessResponseBuilder<FamilyResponse>()
@@ -98,9 +98,9 @@ public class FamilyController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<SuccessResponse<Void>> deleteFamily(@PathVariable UUID id) {
-        familyService.deleteFamily(id);
+    @DeleteMapping("/{languageId}")
+    public ResponseEntity<SuccessResponse<Void>> deleteFamily(@PathVariable UUID languageId) {
+        familyService.deleteFamily(languageId);
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()

@@ -94,7 +94,7 @@ public class RestrictionController {
             @RequestBody List<RestrictionCreateRequest> requests
     ){
         BatchTransporter<Integer> content = restrictionBatchService.addRestrictionsInBatch(requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<Integer> response =
                 new BatchResponseBuilder<Integer>()

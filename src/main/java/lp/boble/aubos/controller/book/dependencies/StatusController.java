@@ -98,7 +98,7 @@ public class StatusController {
             @RequestBody List<StatusRequest> requests
     ){
         BatchTransporter<String> content = statusBatchService.createStatusInBatch(requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<String> response =
                 new BatchResponseBuilder<String>()

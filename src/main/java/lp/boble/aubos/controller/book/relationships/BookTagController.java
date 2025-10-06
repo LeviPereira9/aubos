@@ -84,7 +84,7 @@ public class BookTagController {
             @RequestBody List<BookTagRequest> requests
     ){
         BatchTransporter<Integer> content = bookTagBatchService.batchAddTagToBook(bookId, requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<Integer> response =
                 new BatchResponseBuilder<Integer>()
@@ -103,7 +103,7 @@ public class BookTagController {
             @RequestBody List<BookTagDeleteRequest> requests
     ){
         BatchTransporter<UUID> content = bookTagBatchService.batchRemoveTagsFromBook(bookId, requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<UUID> response =
                 new BatchResponseBuilder<UUID>()

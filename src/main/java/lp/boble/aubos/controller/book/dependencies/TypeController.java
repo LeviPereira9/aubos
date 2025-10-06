@@ -94,7 +94,7 @@ public class TypeController {
             @RequestBody List<TypeRequest> requests
     ){
         BatchTransporter<String> content = typeBatchService.addTypesInBatch(requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<String> response =
                 new BatchResponseBuilder<String>()

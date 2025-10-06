@@ -85,7 +85,7 @@ public class BookLanguageController {
             @RequestBody List<BookLanguageAddRequest> requests){
 
         BatchTransporter<Integer> content = bookLanguageBatchService.addLanguagesToBook(bookId, requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<Integer> response = new BatchResponseBuilder<Integer>()
                 .operation("POST")
@@ -103,7 +103,7 @@ public class BookLanguageController {
             @RequestBody List<BookLanguageDelRequest> requests
     ){
         BatchTransporter<UUID> content = bookLanguageBatchService.batchDeleteBookLanguages(bookId, requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("DELETE")

@@ -51,16 +51,16 @@ public class BookFamilyController {
             ){
 
         BatchTransporter<UUID> content = bookFamilyBatchService.addBooksToFamily(familyId, requests);
-        int status = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("POST")
-                .code(status)
+                .code(code)
                 .message("Requisição concluída com sucesso.")
                 .content(content)
                 .build();
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(code).body(response);
     }
 
     @PutMapping("/family/{familyId}/book")
@@ -87,16 +87,16 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyUpdateRequest> requests
     ){
         BatchTransporter<UUID> result = bookFamilyBatchService.updateBooksBatch(familyId, requests);
-        int status = result.getStatus();
+        HttpStatus code = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("PUT")
-                .code(status)
+                .code(code)
                 .message("Requisição concluída com sucesso.")
                 .content(result)
                 .build();
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(code).body(response);
     }
 
     @DeleteMapping("/family/{familyId}/books")
@@ -120,15 +120,15 @@ public class BookFamilyController {
             @RequestBody List<BookFamilyDeleteRequest> deleteRequests
     ){
         BatchTransporter<UUID> result = bookFamilyBatchService.removeMembersFromFamily(familyId, deleteRequests);
-        int status = result.getStatus();
+        HttpStatus code = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("DELETE")
-                .code(status)
+                .code(code)
                 .message("Requisição concluída com sucesso.")
                 .content(result)
                 .build();
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(code).body(response);
     }
 }

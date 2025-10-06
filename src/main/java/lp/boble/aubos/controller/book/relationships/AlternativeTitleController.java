@@ -99,7 +99,7 @@ public class AlternativeTitleController {
     addAlternativeTitleInBatch(@PathVariable UUID bookId, @RequestBody List<AlternativeTitleRequest> requests){
 
         BatchTransporter<String> content = alternativeTitleBatchService.addAlternativeTitlesInBatch(bookId, requests);
-        int code = content.getStatus();
+        HttpStatus code = content.getStatus();
 
         BatchResponse<String> response =
                 new BatchResponseBuilder<String>()

@@ -119,7 +119,7 @@ public class BookContributorController {
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<String>> addBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookAddContributor> requests){
         BatchTransporter<String> result = bookContributorBatchService.addContributorsToBook(bookId, requests);
-        int code = result.getStatus();
+        HttpStatus code = result.getStatus();
 
         BatchResponse<String> response = new BatchResponseBuilder<String>()
                 .operation("POST")
@@ -134,7 +134,7 @@ public class BookContributorController {
     @PatchMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> updateBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorUpdateBatchRequest> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.updateBatch(bookId, requests);
-        int code = result.getStatus();
+        HttpStatus code = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("PATCH")
@@ -149,7 +149,7 @@ public class BookContributorController {
     @DeleteMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> deleteBatchContributors(@PathVariable UUID bookId, @RequestBody List<BookContributorDeleteRequest> requests){
         BatchTransporter<UUID> result = bookContributorBatchService.deleteBatch(bookId, requests);
-        int code = result.getStatus();
+        HttpStatus code = result.getStatus();
 
         BatchResponse<UUID> response = new BatchResponseBuilder<UUID>()
                 .operation("DELETE")
