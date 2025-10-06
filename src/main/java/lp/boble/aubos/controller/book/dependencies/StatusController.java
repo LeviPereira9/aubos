@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.dependencies;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.status.StatusRequest;
 import lp.boble.aubos.dto.book.dependencies.status.StatusResponse;
@@ -16,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(
+        name = "Status dos Livros",
+        description = "Operações para gerenciar os status de publicação e disponibilidade dos livros"
+)
 @RestController
 @RequestMapping("${api.prefix}/status")
 @RequiredArgsConstructor
@@ -25,6 +31,10 @@ public class StatusController {
     private final StatusService statusService;
     private final StatusBatchService statusBatchService;
 
+    @Operation(
+            summary = "Listar todos os status",
+            description = "Retorna a lista completa de todos os status de publicação disponíveis (ex: Rascunho, Publicado, Arquivado)."
+    )
     @GetMapping
     public ResponseEntity<SuccessResponse<List<StatusResponse>>> getAllStatus(){
         List<StatusResponse> content = statusService.getAllStatus();
@@ -40,6 +50,10 @@ public class StatusController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Criar novo status",
+            description = "Cadastra um novo status de publicação no sistema para classificar o estado dos livros."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<StatusResponse>> createStatus(
             @RequestBody StatusRequest statusRequest
@@ -59,6 +73,10 @@ public class StatusController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar status",
+            description = "Atualiza completamente as informações de um status de publicação existente."
+    )
     @PutMapping("/{statusId}")
     public ResponseEntity<SuccessResponse<StatusResponse>> updateStatus(
             @PathVariable Integer statusId,
@@ -77,6 +95,10 @@ public class StatusController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Excluir status",
+            description = "Remove permanentemente um status de publicação do sistema."
+    )
     @DeleteMapping("/{statusId}")
     public ResponseEntity<SuccessResponse<Void>> deleteStatus(
             @PathVariable Integer statusId
@@ -93,6 +115,10 @@ public class StatusController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Criar status em lote",
+            description = "Cadastra múltiplos status de publicação de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<String>> createStatusInBatch(
             @RequestBody List<StatusRequest> requests
