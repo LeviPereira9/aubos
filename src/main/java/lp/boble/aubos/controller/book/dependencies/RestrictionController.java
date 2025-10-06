@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.dependencies;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.restriction.RestrictionCreateRequest;
 import lp.boble.aubos.dto.book.dependencies.restriction.RestrictionResponse;
@@ -17,6 +19,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(
+        name = "Restrições Etárias",
+        description = "Operações para gerenciar classificações indicativas e restrições etárias dos livros"
+)
 @RestController
 @RequestMapping("${api.prefix}/restriction")
 @RequiredArgsConstructor
@@ -24,6 +30,10 @@ public class RestrictionController {
     private final RestrictionService restrictionService;
     private final RestrictionBatchService restrictionBatchService;
 
+    @Operation(
+            summary = "Listar todas as restrições",
+            description = "Retorna a lista completa de todas as classificações indicativas e restrições etárias disponíveis."
+    )
     @GetMapping
     public ResponseEntity<SuccessResponse<List<RestrictionResponse>>> getAllRestrictions(){
         List<RestrictionResponse> content = restrictionService.getAllRestriction();
@@ -39,6 +49,10 @@ public class RestrictionController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(
+            summary = "Criar nova restrição",
+            description = "Cadastra uma nova classificação indicativa/restrição etária no sistema (ex: Livre, 12+, 16+, 18+)."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<RestrictionResponse>> createRestriction(@RequestBody RestrictionCreateRequest request){
         RestrictionResponse content = restrictionService.createRestriction(request);
@@ -55,6 +69,10 @@ public class RestrictionController {
         return ResponseEntity.status(status).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar restrição",
+            description = "Atualiza parcialmente as informações de uma restrição etária existente."
+    )
     @PatchMapping("/{restrictionId}")
     public ResponseEntity<SuccessResponse<RestrictionResponse>> updateRestriction(
             @PathVariable Integer restrictionId,
@@ -73,6 +91,10 @@ public class RestrictionController {
         return ResponseEntity.status(status).body(response);
     }
 
+    @Operation(
+            summary = "Excluir restrição",
+            description = "Remove permanentemente uma restrição etária do sistema."
+    )
     @DeleteMapping("/{restrictionId}")
     public ResponseEntity<SuccessResponse<RestrictionResponse>> updateRestriction(
             @PathVariable Integer restrictionId){
@@ -89,6 +111,10 @@ public class RestrictionController {
         return ResponseEntity.status(status).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar restrições em lote",
+            description = "Cadastra múltiplas restrições etárias de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<Integer>> addRestrictionBatch(
             @RequestBody List<RestrictionCreateRequest> requests
