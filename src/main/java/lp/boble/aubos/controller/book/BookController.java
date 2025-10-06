@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Tag(
-        name = "Book",
+        name = "Livro",
         description = "Endpoint de gerenciamento de livro, incluindo buscas, criação, atualização e exclusão."
 )
 @RestController
