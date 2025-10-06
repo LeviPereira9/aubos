@@ -20,6 +20,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -42,6 +45,27 @@ public class SecurityConfigurations {
             "/webjars/**",
             "/swagger-ui.html",
             "/api/v1/auth/**"
+    };
+
+    private static final String[] GREY_LIST_URLS = {
+            "/api/v1/book/**",
+            "/api/v1/book",
+            "/api/v1/contributor/**",
+            "/api/v1/contributor",
+            "/api/v1/family",
+            "/api/v1/family/**",
+            "/api/v1/language",
+            "/api/v1/language/**",
+            "/api/v1/license",
+            "/api/v1/license/**",
+            "/api/v1/restriction",
+            "/api/v1/restriction/**",
+            "/api/v1/status",
+            "/api/v1/status/**",
+            "/api/v1/tag",
+            "/api/v1/tag/**",
+            "/api/v1/type",
+            "/api/v1/type/**",
     };
 
     private final SecurityJwtFilter securityJwtFilter;
@@ -70,6 +94,11 @@ public class SecurityConfigurations {
                         authorize -> authorize
                                 .requestMatchers(WHITE_LIST_URLS).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/actuator/*").hasRole("SUPER_ADMIN")
+                                .requestMatchers(HttpMethod.GET, GREY_LIST_URLS).authenticated()
+                                .requestMatchers(request ->
+                                        !request.getMethod().equals("GET") && Arrays.stream(GREY_LIST_URLS)
+                                                .anyMatch(pattern -> new AntPathRequestMatcher(pattern).matches(request))
+                                ).hasRole("ADMIN")
                                 .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(filterExceptionHandler))
