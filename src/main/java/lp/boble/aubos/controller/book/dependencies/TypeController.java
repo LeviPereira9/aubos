@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.dependencies;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.dependencies.type.TypeRequest;
 import lp.boble.aubos.dto.book.dependencies.type.TypeResponse;
@@ -16,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(
+        name = "Tipos de Livro",
+        description = "Operações para gerenciar os tipos e formatos literários dos livros"
+)
 @RestController
 @RequestMapping("${api.prefix}/type")
 @RequiredArgsConstructor
@@ -24,6 +30,10 @@ public class TypeController {
     private final TypeService typeService;
     private final TypeBatchService typeBatchService;
 
+    @Operation(
+            summary = "Listar todos os tipos",
+            description = "Retorna a lista completa de todos os tipos de livro disponíveis (ex: Romance, Novela, Conto, etc.)."
+    )
     @GetMapping
     public ResponseEntity<SuccessResponse<List<TypeResponse>>> getAllTypes() {
         List<TypeResponse> content = typeService.getAllTypes();
@@ -39,6 +49,10 @@ public class TypeController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(
+            summary = "Criar novo tipo",
+            description = "Cadastra um novo tipo de livro no sistema para classificação literária dos livros."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<TypeResponse>> createType(
             @RequestBody TypeRequest typeRequest
@@ -57,6 +71,10 @@ public class TypeController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar tipo",
+            description = "Atualiza as informações de um tipo de livro existente no sistema."
+    )
     @PutMapping("/{typeId}")
     public ResponseEntity<SuccessResponse<TypeResponse>> updateType(@PathVariable Integer typeId, @RequestBody TypeRequest typeRequest ) {
         TypeResponse content = typeService.updateType(typeId, typeRequest);
@@ -64,15 +82,19 @@ public class TypeController {
 
         SuccessResponse<TypeResponse> response =
                 new SuccessResponseBuilder<TypeResponse>()
-                        .operation("POST")
+                        .operation("PUT")
                         .code(code)
-                        .message("Tipo criado com sucesso.")
+                        .message("Tipo atualizado com sucesso.")
                         .content(content)
                         .build();
 
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Excluir tipo",
+            description = "Remove permanentemente um tipo de livro do sistema."
+    )
     @DeleteMapping("/{typeId}")
     public ResponseEntity<SuccessResponse<Void>> deleteType(@PathVariable Integer typeId) {
         typeService.deleteType(typeId);
@@ -89,6 +111,10 @@ public class TypeController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar tipos em lote",
+            description = "Cadastra múltiplos tipos de livro de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<String>> addTypesBatch(
             @RequestBody List<TypeRequest> requests
