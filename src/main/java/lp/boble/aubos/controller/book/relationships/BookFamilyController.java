@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.relationships;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyCreateRequest;
 import lp.boble.aubos.dto.book.relationships.bookFamily.BookFamilyDeleteRequest;
@@ -19,6 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(
+        name = "Famílias de Livros",
+        description = "Operações para gerenciar a relação entre livros e famílias/séries literárias"
+)
 @RestController
 @RequestMapping("${api.prefix}/book-family")
 @RequiredArgsConstructor
@@ -26,6 +32,10 @@ public class BookFamilyController {
     private final BookFamilyService bookFamilyService;
     private final BookFamilyBatchService bookFamilyBatchService;
 
+    @Operation(
+            summary = "Adicionar livro à família",
+            description = "Associa um livro a uma família/série literária específica."
+    )
     @PostMapping("/family/{familyId}/books")
     public ResponseEntity<SuccessResponse<BookFamilyResponse>> addBookFamily(
             @PathVariable("familyId") UUID familyId,
@@ -44,6 +54,10 @@ public class BookFamilyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar livros em lote à família",
+            description = "Associa múltiplos livros a uma família/série literária de uma vez através de requisição em lote."
+    )
     @PostMapping("/family/{familyId}/books/batch")
     public ResponseEntity<BatchResponse<UUID>> addBookFamilyBatch(
             @PathVariable("familyId") UUID familyId,
@@ -63,6 +77,10 @@ public class BookFamilyController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar livro na família",
+            description = "Atualiza as informações de um livro específico dentro de uma família/série literária."
+    )
     @PutMapping("/family/{familyId}/book")
     public ResponseEntity<SuccessResponse<BookFamilyResponse>> updateBookFamily(
             @PathVariable("familyId") UUID familyId,
@@ -81,6 +99,10 @@ public class BookFamilyController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar livros em lote na família",
+            description = "Atualiza múltiplos livros dentro de uma família/série literária de uma vez através de requisição em lote."
+    )
     @PutMapping("/family/{familyId}/books/batch")
     public ResponseEntity<BatchResponse<UUID>> updateBookFamilyBatch(
             @PathVariable("familyId") UUID familyId,
@@ -99,6 +121,10 @@ public class BookFamilyController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Remover livro da família",
+            description = "Remove a associação de um livro específico com uma família/série literária."
+    )
     @DeleteMapping("/family/{familyId}/books")
     public ResponseEntity<SuccessResponse<Void>> removeBookFromFamily(
             @PathVariable("familyId") UUID familyId,
@@ -114,6 +140,10 @@ public class BookFamilyController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+            summary = "Remover livros em lote da família",
+            description = "Remove a associação de múltiplos livros com uma família/série literária de uma vez através de requisição em lote."
+    )
     @DeleteMapping("/family/{familyId}/books/batch")
     public ResponseEntity<BatchResponse<UUID>> removeBooksFromFamily(
             @PathVariable("familyId") UUID familyId,
