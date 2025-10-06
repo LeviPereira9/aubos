@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.config.documentation.book.*;
+import lp.boble.aubos.config.rateLimit.RateLimit;
 import lp.boble.aubos.dto.book.*;
 import lp.boble.aubos.exception.custom.global.CustomNotModifiedException;
 import lp.boble.aubos.repository.book.BookRepository;
@@ -51,6 +52,7 @@ public class BookController {
     };
 
     @DocGetBook
+    @RateLimit
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<BookResponse>> getBook(@PathVariable UUID id, HttpServletRequest request){
 
