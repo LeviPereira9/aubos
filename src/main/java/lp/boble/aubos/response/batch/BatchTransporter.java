@@ -18,9 +18,9 @@ public class BatchTransporter<T> {
     }
 
     @JsonIgnore
-    public Integer getStatus(){
+    public HttpStatus getStatus(){
         boolean hasFailure = !failures.isEmpty();
         boolean hasSuccess = !successes.isEmpty();
-        return hasFailure && hasSuccess ? HttpStatus.MULTI_STATUS.value() : hasFailure ? HttpStatus.BAD_REQUEST.value() : HttpStatus.OK.value();
+        return hasFailure && hasSuccess ? HttpStatus.MULTI_STATUS : hasFailure ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
     }
 }
