@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.relationships;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.bookAlternativeTitle.AlternativeTitleRequest;
 import lp.boble.aubos.dto.book.relationships.bookAlternativeTitle.AlternativeTitleResponse;
@@ -17,6 +19,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(
+        name = "Títulos Alternativos",
+        description = "Operações para gerenciar títulos alternativos de um livro específico"
+)
 @RestController
 @RequestMapping("${api.prefix}/{bookId}/alternative-title")
 @RequiredArgsConstructor
@@ -25,6 +31,10 @@ public class AlternativeTitleController {
     private final AlternativeTitleService alternativeTitleService;
     private final AlternativeTitleBatchService alternativeTitleBatchService;
 
+    @Operation(
+            summary = "Listar títulos alternativos do livro",
+            description = "Retorna todos os títulos alternativos associados a um livro específico."
+    )
     @GetMapping
     public ResponseEntity<SuccessResponse<List<AlternativeTitleResponse>>>
     findAllAlternativeTitlesAtBook(@PathVariable UUID bookId){
@@ -42,6 +52,10 @@ public class AlternativeTitleController {
         return ResponseEntity.ok().eTag("").body(response);
     }
 
+    @Operation(
+            summary = "Adicionar título alternativo",
+            description = "Adiciona um novo título alternativo a um livro específico."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<AlternativeTitleResponse>>
     addAlternativeTitle(@PathVariable UUID bookId, @RequestBody AlternativeTitleRequest request){
@@ -60,6 +74,10 @@ public class AlternativeTitleController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar título alternativo",
+            description = "Atualiza um título alternativo específico de um livro."
+    )
     @PutMapping("/{alternativeTitleId}")
     public ResponseEntity<SuccessResponse<AlternativeTitleResponse>>
     updateAlternativeTitle(@PathVariable UUID bookId, @PathVariable UUID alternativeTitleId,  @RequestBody AlternativeTitleRequest request){
@@ -77,6 +95,10 @@ public class AlternativeTitleController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Remover título alternativo",
+            description = "Remove um título alternativo específico de um livro."
+    )
     @DeleteMapping("/{alternativeTitleId}")
     public ResponseEntity<SuccessResponse<Void>> deleteAlternativeTitleFromBook(@PathVariable UUID bookId, @PathVariable UUID alternativeTitleId){
         alternativeTitleService.removeAlternativeTitle(bookId, alternativeTitleId);
@@ -94,6 +116,10 @@ public class AlternativeTitleController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar títulos alternativos em lote",
+            description = "Adiciona múltiplos títulos alternativos a um livro de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<String>>
     addAlternativeTitleInBatch(@PathVariable UUID bookId, @RequestBody List<AlternativeTitleRequest> requests){
