@@ -61,9 +61,11 @@ public class BookContributorController {
             summary = "Listar contribuidores por função",
             description = "Retorna os contribuidores de um livro filtrados por uma função específica (autor, tradutor, etc.)."
     )
-    @GetMapping("/{roleId}")
+    @GetMapping("/role")
     public ResponseEntity<SuccessResponse<List<BookContributorResponse>>>
-    getBookContributorsByRole(@PathVariable UUID bookId, @PathVariable int roleId){
+    getBookContributorsByRole(
+            @PathVariable UUID bookId,
+            @RequestParam(defaultValue = "1") int roleId){
         List<BookContributorResponse> content = bookContributorService.findContributorsByRole(bookId, roleId);
 
         SuccessResponse<List<BookContributorResponse>> response =

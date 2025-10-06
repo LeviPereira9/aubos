@@ -27,7 +27,7 @@ import java.util.UUID;
         description = "Operações para gerenciar a relação entre livros e famílias/séries literárias"
 )
 @RestController
-@RequestMapping("${api.prefix}/book-family")
+@RequestMapping("${api.prefix}/book/family")
 @RequiredArgsConstructor
 public class BookFamilyController {
     private final BookFamilyService bookFamilyService;
@@ -56,7 +56,7 @@ public class BookFamilyController {
             summary = "Adicionar livro à família",
             description = "Associa um livro a uma família/série literária específica."
     )
-    @PostMapping("/family/{familyId}/books")
+    @PostMapping("/{familyId}")
     public ResponseEntity<SuccessResponse<BookFamilyResponse>> addBookFamily(
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyCreateRequest request){
@@ -78,7 +78,7 @@ public class BookFamilyController {
             summary = "Adicionar livros em lote à família",
             description = "Associa múltiplos livros a uma família/série literária de uma vez através de requisição em lote."
     )
-    @PostMapping("/family/{familyId}/books/batch")
+    @PostMapping("/{familyId}/batch")
     public ResponseEntity<BatchResponse<UUID>> addBookFamilyBatch(
             @PathVariable("familyId") UUID familyId,
             @RequestBody List<BookFamilyCreateRequest> requests
@@ -101,7 +101,7 @@ public class BookFamilyController {
             summary = "Atualizar livro na família",
             description = "Atualiza as informações de um livro específico dentro de uma família/série literária."
     )
-    @PutMapping("/family/{familyId}/book")
+    @PutMapping("/{familyId}")
     public ResponseEntity<SuccessResponse<BookFamilyResponse>> updateBookFamily(
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyUpdateRequest request){
@@ -123,7 +123,7 @@ public class BookFamilyController {
             summary = "Atualizar livros em lote na família",
             description = "Atualiza múltiplos livros dentro de uma família/série literária de uma vez através de requisição em lote."
     )
-    @PutMapping("/family/{familyId}/books/batch")
+    @PutMapping("/{familyId}/batch")
     public ResponseEntity<BatchResponse<UUID>> updateBookFamilyBatch(
             @PathVariable("familyId") UUID familyId,
             @RequestBody List<BookFamilyUpdateRequest> requests
@@ -145,7 +145,7 @@ public class BookFamilyController {
             summary = "Remover livro da família",
             description = "Remove a associação de um livro específico com uma família/série literária."
     )
-    @DeleteMapping("/family/{familyId}/books")
+    @DeleteMapping("/{familyId}")
     public ResponseEntity<SuccessResponse<Void>> removeBookFromFamily(
             @PathVariable("familyId") UUID familyId,
             @RequestBody BookFamilyDeleteRequest deleteRequest){
@@ -164,7 +164,7 @@ public class BookFamilyController {
             summary = "Remover livros em lote da família",
             description = "Remove a associação de múltiplos livros com uma família/série literária de uma vez através de requisição em lote."
     )
-    @DeleteMapping("/family/{familyId}/books/batch")
+    @DeleteMapping("/{familyId}/batch")
     public ResponseEntity<BatchResponse<UUID>> removeBooksFromFamily(
             @PathVariable("familyId") UUID familyId,
             @RequestBody List<BookFamilyDeleteRequest> deleteRequests

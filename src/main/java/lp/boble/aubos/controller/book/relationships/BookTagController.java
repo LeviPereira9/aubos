@@ -26,7 +26,7 @@ import java.util.UUID;
         description = "Operações para gerenciar as tags e categorias associadas a um livro específico"
 )
 @RestController
-@RequestMapping("${api.prefix}/{bookId}/book-tag")
+@RequestMapping("${api.prefix}/book/{bookId}/tag")
 @RequiredArgsConstructor
 public class BookTagController {
 

@@ -26,7 +26,7 @@ import java.util.UUID;
         description = "Operações para gerenciar títulos alternativos de um livro específico"
 )
 @RestController
-@RequestMapping("${api.prefix}/{bookId}/alternative-title")
+@RequestMapping("${api.prefix}/book/{bookId}/alternative-title")
 @RequiredArgsConstructor
 public class AlternativeTitleController {
 

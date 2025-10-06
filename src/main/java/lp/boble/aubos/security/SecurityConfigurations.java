@@ -69,9 +69,7 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests(
                         authorize -> authorize
                                 .requestMatchers(WHITE_LIST_URLS).permitAll()
-                                .requestMatchers(HttpMethod.GET, "/actuator/*").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/v1/language").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/v1/family/official").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/actuator/*").hasRole("SUPER_ADMIN")
                                 .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(filterExceptionHandler))
