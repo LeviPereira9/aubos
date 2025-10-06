@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.relationships;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.dto.book.relationships.bookTag.BookTagDeleteRequest;
 import lp.boble.aubos.dto.book.relationships.bookTag.BookTagRequest;
@@ -18,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(
+        name = "Tags do Livro",
+        description = "Operações para gerenciar as tags e categorias associadas a um livro específico"
+)
 @RestController
 @RequestMapping("${api.prefix}/{bookId}/book-tag")
 @RequiredArgsConstructor
@@ -27,6 +33,10 @@ public class BookTagController {
     private final BookTagService bookTagService;
     private final BookTagBatchService bookTagBatchService;
 
+    @Operation(
+            summary = "Listar tags do livro",
+            description = "Retorna todas as tags e categorias associadas a um livro específico."
+    )
     @GetMapping
     public ResponseEntity<SuccessResponse<List<BookTagResponse>>>
     getAllBookTagsInBook(@PathVariable UUID bookId) {
@@ -44,6 +54,10 @@ public class BookTagController {
         return ResponseEntity.ok().eTag("").body(response);
     }
 
+    @Operation(
+            summary = "Adicionar tag ao livro",
+            description = "Associa uma nova tag ou categoria a um livro específico."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<BookTagResponse>> addTagOnBook(@PathVariable UUID bookId, @RequestBody BookTagRequest request){
 
@@ -61,6 +75,10 @@ public class BookTagController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Remover tag do livro",
+            description = "Remove uma tag específica da associação com o livro."
+    )
     @DeleteMapping("/{bookTagId}")
     public ResponseEntity<SuccessResponse<Void>> removeTagFromBook(
             @PathVariable UUID bookId,
@@ -78,6 +96,10 @@ public class BookTagController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Adicionar tags em lote ao livro",
+            description = "Associa múltiplas tags a um livro de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<Integer>> batchAddTagsInBook(
             @PathVariable UUID bookId,
@@ -97,6 +119,10 @@ public class BookTagController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Remover tags em lote do livro",
+            description = "Remove múltiplas tags da associação com o livro de uma vez através de requisição em lote."
+    )
     @DeleteMapping("/batch")
     public ResponseEntity<BatchResponse<UUID>> batchRemoveTagsInBook(
             @PathVariable UUID bookId,
