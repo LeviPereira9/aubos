@@ -1,8 +1,10 @@
 package lp.boble.aubos.controller.book.dependencies;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
+import lp.boble.aubos.config.documentation.book.dependencies.contributors.*;
 import lp.boble.aubos.dto.contributor.ContributorPageResponse;
 import lp.boble.aubos.dto.contributor.ContributorRequest;
 import lp.boble.aubos.dto.contributor.ContributorResponse;
@@ -21,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
+@Tag(name = "Contribuidores", description = "Operações para gerenciar contribuidores (autores, tradutores, etc.) do sistema")
 @RestController
 @RequestMapping("${api.prefix}/contributor")
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class ContributorController {
     private final ContributorService contributorService;
     private final ContributorRepository contributorRepository;
 
+    @DocGetContributor
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<ContributorResponse>>
     getContributor(@PathVariable UUID id, HttpServletRequest request
@@ -56,6 +60,7 @@ public class ContributorController {
                 .body(response);
     }
 
+    @DocGetContributorSuggestions
     @GetMapping("/suggestions")
     public ResponseEntity<PageResponse<ContributorPageResponse>>
     getContributorsSuggestions(
@@ -69,6 +74,7 @@ public class ContributorController {
                 .body(content);
     }
 
+    @DocCreateContributor
     @PostMapping
     public ResponseEntity<SuccessResponse<ContributorResponse>> createContributor(
             @RequestBody ContributorRequest contributorRequest
@@ -86,6 +92,7 @@ public class ContributorController {
        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @DocUpdateContributor
     @PutMapping("/{id}")
     public ResponseEntity<SuccessResponse<ContributorResponse>> updateContributor(
             @PathVariable UUID id, @RequestBody ContributorRequest contributorRequest
@@ -103,6 +110,7 @@ public class ContributorController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @DocDeleteContributor
     @DeleteMapping("/{id}")
     public ResponseEntity<SuccessResponse<Void>> deleteContributor(
             @PathVariable UUID id
