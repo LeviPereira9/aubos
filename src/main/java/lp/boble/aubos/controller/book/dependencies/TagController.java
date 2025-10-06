@@ -1,5 +1,7 @@
 package lp.boble.aubos.controller.book.dependencies;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.config.cache.CacheProfiles;
 import lp.boble.aubos.dto.book.dependencies.tag.TagRequest;
@@ -18,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(
+        name = "Tags",
+        description = "Operações para gerenciar tags e categorias dos livros"
+)
 @RestController
 @RequestMapping("${api.prefix}/tag")
 @RequiredArgsConstructor
@@ -26,6 +32,10 @@ public class TagController {
     private final TagService tagService;
     private final TagBatchService tagBatchService;
 
+    @Operation(
+            summary = "Listar tags paginadas",
+            description = "Retorna todas as tags disponíveis de forma paginada, ordenadas alfabeticamente."
+    )
     @GetMapping
     public ResponseEntity<PageResponse<TagResponse>> findAllTags(
             @RequestParam(defaultValue = "0") int page){
@@ -36,6 +46,10 @@ public class TagController {
                 .body(response);
     }
 
+    @Operation(
+            summary = "Buscar tags",
+            description = "Busca tags por termo de pesquisa, retornando resultados paginados para autocomplete e busca."
+    )
     @GetMapping("/search")
     public ResponseEntity<PageResponse<TagResponse>> searchTags(
             @RequestParam(defaultValue = "0") int page, @RequestParam String query ){
@@ -46,6 +60,10 @@ public class TagController {
                 .body(response);
     }
 
+    @Operation(
+            summary = "Criar nova tag",
+            description = "Cadastra uma nova tag no sistema para categorização e organização dos livros."
+    )
     @PostMapping
     public ResponseEntity<SuccessResponse<TagResponse>> addTag(@RequestBody TagRequest request){
 
@@ -64,6 +82,10 @@ public class TagController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Atualizar tag",
+            description = "Atualiza as informações de uma tag existente no sistema."
+    )
     @PutMapping("/{id}")
     public ResponseEntity<SuccessResponse<TagResponse>> updateTag(@PathVariable Integer id, @RequestBody TagRequest request){
 
@@ -81,6 +103,10 @@ public class TagController {
         return ResponseEntity.status(code).body(response) ;
     }
 
+    @Operation(
+            summary = "Excluir tag",
+            description = "Remove permanentemente uma tag do sistema. Atenção: esta ação afeta a categorização dos livros."
+    )
     @DeleteMapping("/{id}")
     public ResponseEntity<SuccessResponse<Void>> deleteTag(@PathVariable int id){
 
@@ -98,6 +124,10 @@ public class TagController {
         return ResponseEntity.status(code).body(response);
     }
 
+    @Operation(
+            summary = "Criar tags em lote",
+            description = "Cadastra múltiplas tags de uma vez através de requisição em lote."
+    )
     @PostMapping("/batch")
     public ResponseEntity<BatchResponse<String>> addBatchTag(@RequestBody List<TagRequest> requests){
         BatchTransporter<String> content = tagBatchService.batchCreateTag(requests);
