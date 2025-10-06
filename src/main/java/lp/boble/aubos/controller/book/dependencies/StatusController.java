@@ -37,7 +37,7 @@ public class StatusController {
                         .content(content)
                         .build();
 
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -46,17 +46,17 @@ public class StatusController {
     ){
 
         StatusResponse content = statusService.createStatus(statusRequest);
-        HttpStatus status = HttpStatus.CREATED;
+        HttpStatus code = HttpStatus.CREATED;
 
         SuccessResponse<StatusResponse> response =
                 new SuccessResponseBuilder<StatusResponse>()
                         .operation("POST")
-                        .code(status)
+                        .code(code)
                         .message("Status criado com sucesso.")
                         .content(content)
                         .build();
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(code).body(response);
     }
 
     @PutMapping("/{statusId}")
@@ -65,17 +65,16 @@ public class StatusController {
             @RequestBody StatusRequest statusRequest
     ){
         StatusResponse content = statusService.updateStatus(statusId, statusRequest);
-        HttpStatus status = HttpStatus.OK;
 
         SuccessResponse<StatusResponse> response =
                 new SuccessResponseBuilder<StatusResponse>()
                         .operation("PUT")
-                        .code(status)
+                        .code(HttpStatus.OK)
                         .message("Status atualizado com sucesso.")
                         .content(content)
                         .build();
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{statusId}")
@@ -83,16 +82,15 @@ public class StatusController {
             @PathVariable Integer statusId
     ){
         statusService.deleteStatus(statusId);
-        HttpStatus status = HttpStatus.OK;
 
         SuccessResponse<Void> response =
                 new SuccessResponseBuilder<Void>()
                         .operation("DELETE")
-                        .code(status)
+                        .code(HttpStatus.OK)
                         .message("Status excluído com sucesso.")
                         .build();
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/batch")
