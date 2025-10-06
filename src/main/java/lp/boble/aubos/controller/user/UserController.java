@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 @Tag(
-        name = "User",
+        name = "Usuário",
         description = "Endpoint de gerenciamento do usuário, incluindo registro, login, atualização, exclusão e busca de usuários."
 )
 @RestController
