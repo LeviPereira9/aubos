@@ -1,8 +1,5 @@
 package lp.boble.aubos.service.email;
 
-import com.resend.Resend;
-import com.resend.core.exception.ResendException;
-import com.resend.services.emails.model.CreateEmailOptions;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lp.boble.aubos.exception.custom.email.CustomEmailException;
