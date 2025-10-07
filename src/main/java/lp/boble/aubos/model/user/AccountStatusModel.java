@@ -14,7 +14,7 @@ import java.util.Set;
 @Data
 public class AccountStatusModel {
     @Id
-    @Column(name = "id", columnDefinition = "tinyint UNSIGNED not null")
+    @Column(name = "id")
     private Short id;
 
     @Column(name = "name", length = 20)
