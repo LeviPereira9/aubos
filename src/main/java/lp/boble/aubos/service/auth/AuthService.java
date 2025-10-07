@@ -127,7 +127,7 @@ public class AuthService {
         userToRegister.setTokenId(UUID.randomUUID());
         UserModel createdUser = userRepository.save(userToRegister);
 
-        this.sendConfirmationEmail(createdUser);
+        //this.sendConfirmationEmail(createdUser);
 
         return new AuthResponse("Bearer " + tokenService.generateToken(createdUser));
     }
