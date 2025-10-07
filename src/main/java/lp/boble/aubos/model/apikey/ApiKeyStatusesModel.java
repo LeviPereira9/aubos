@@ -15,7 +15,7 @@ import java.util.Set;
 public class ApiKeyStatusesModel {
     @Id
     @Column(name = "id", columnDefinition = "tinyint UNSIGNED not null")
-    private Short id;
+    private Byte id;
 
     @Size(max = 20)
     @NotNull

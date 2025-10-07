@@ -83,7 +83,7 @@ public class ApiKeyModel {
     public void prePersist(){
         if(this.status == null){
             ApiKeyStatusesModel defaultStatus = new ApiKeyStatusesModel();
-            defaultStatus.setId((short) 1);
+            defaultStatus.setId((byte) 1);
             this.status = defaultStatus;
         }
         if(this.softDelete == null){
