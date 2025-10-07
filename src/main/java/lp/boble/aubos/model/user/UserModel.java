@@ -151,7 +151,7 @@ public class UserModel implements UserDetails {
     public void prePersist(){
         if(this.status == null){
             AccountStatusModel defaultStatus = new AccountStatusModel();
-            defaultStatus.setId((short)1);
+            defaultStatus.setId((byte) 1);
             this.status = defaultStatus;
         }
         if(this.role == null){

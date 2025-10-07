@@ -15,7 +15,7 @@ import java.util.Set;
 public class AccountStatusModel {
     @Id
     @Column(name = "id")
-    private Short id;
+    private Byte id;
 
     @Column(name = "name", length = 20)
     private String name;
